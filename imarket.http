@@ -1,0 +1,6 @@
+@imarket_HostAddress = http://localhost:5129
+
+GET {{imarket_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
