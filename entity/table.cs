@@ -1,10 +1,5 @@
 ﻿namespace imarket.entity 
 {
-    public class LoginModel
-    {
-        public string email { get; set; }
-        public string password { get; set; }
-    }
     public class User
     {
         public int id { get; set; }

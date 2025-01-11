@@ -1,3 +1,7 @@
+using imarket.lib;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 namespace imarket
 {
     class Program
@@ -23,15 +27,33 @@ namespace imarket
             }
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.ListenLocalhost(port); // ¼àÌý¶Ë¿Ú
+                options.ListenLocalhost(port);
             });
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidAudience = jwtSettings["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
+                };
+            });
+            builder.Services.AddAuthorization();
             builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
-
             var app = builder.Build();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.MapControllers();
-
+            Database.getInstance();
             app.Run();
         }
     }

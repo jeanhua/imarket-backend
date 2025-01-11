@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Text.Json;
 using Microsoft.Data.SqlClient;
 
 /*
@@ -48,7 +49,8 @@ namespace imarket.lib
 
         private Database()
         {
-            connectionString = "";
+            JsonDocument config = JsonDocument.Parse(File.ReadAllText("appsettings.json"));
+            connectionString = config.RootElement.GetProperty("ConnectionStrings").GetProperty("DefaultConnection").GetString();
         }
 
         // 数据库连接
