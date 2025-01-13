@@ -31,20 +31,20 @@ int rowsAffected = Database.getInstance().ExecuteNonQuery(query, CommandType.Tex
 
  */
 
-namespace imarket.lib
+namespace imarket.utils
 {
     public class Database
     {
-        private static Database instance;
+        private static Database _instance;
         private readonly string connectionString;
 
         public static Database getInstance()
         {
-            if (instance == null)
+            if (_instance == null)
             {
-                instance = new Database();
+                _instance = new Database();
             }
-            return instance;
+            return _instance;
         }
 
         private Database()
@@ -62,7 +62,7 @@ namespace imarket.lib
         }
 
         // 查询
-        public DataTable ExecuteQuery(string query, CommandType commandType, SqlParameter[] parameters = null)
+        public async Task<DataTable> ExecuteQuery(string query, CommandType commandType, SqlParameter[] parameters = null)
         {
             using (var connection = GetConnection())
             {
@@ -73,7 +73,7 @@ namespace imarket.lib
                     {
                         command.Parameters.AddRange(parameters);
                     }
-                    using (var reader = command.ExecuteReader())
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
                         var dataTable = new DataTable();
                         dataTable.Load(reader);
@@ -84,7 +84,7 @@ namespace imarket.lib
         }
 
         // 执行非查询命令
-        public int ExecuteNonQuery(string query, CommandType commandType, SqlParameter[] parameters = null)
+        public async Task<int> ExecuteNonQuery(string query, CommandType commandType, SqlParameter[] parameters = null)
         {
             using (var connection = GetConnection())
             {
@@ -95,13 +95,13 @@ namespace imarket.lib
                     {
                         command.Parameters.AddRange(parameters);
                     }
-                    return command.ExecuteNonQuery();
+                    return await command.ExecuteNonQueryAsync();
                 }
             }
         }
 
         // 执行事务
-        public void ExecuteTransaction(Action<SqlConnection> action)
+        public async Task ExecuteTransaction(Action<SqlConnection> action)
         {
             using (var connection = GetConnection())
             {
@@ -110,7 +110,7 @@ namespace imarket.lib
                     try
                     {
                         action(connection);
-                        transaction.Commit(); // 提交事务
+                        await transaction.CommitAsync(); // 提交事务
                     }
                     catch (Exception ex)
                     {
@@ -122,7 +122,7 @@ namespace imarket.lib
         }
 
         // 获取单个值
-        public object ExecuteScalar(string query, CommandType commandType, SqlParameter[] parameters = null)
+        public async Task<object?> ExecuteScalar(string query, CommandType commandType, SqlParameter[] parameters = null)
         {
             using (var connection = GetConnection())
             {
@@ -133,8 +133,14 @@ namespace imarket.lib
                     {
                         command.Parameters.AddRange(parameters);
                     }
-
-                    return command.ExecuteScalar();
+                    try
+                    {
+                        return await command.ExecuteScalarAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception("ExecuteScalar failed", ex);
+                    }
                 }
             }
         }

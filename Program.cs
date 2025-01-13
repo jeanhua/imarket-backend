@@ -1,4 +1,4 @@
-using imarket.lib;
+using imarket.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -52,6 +52,8 @@ namespace imarket
             var app = builder.Build();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.MapControllers();
             Database.getInstance();
             app.Run();
