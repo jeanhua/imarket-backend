@@ -3,72 +3,82 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using imarket.models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace imarket.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class AccountController : ControllerBase
     {
-        [HttpGet("info")]
-        public IActionResult getinfo()
+        [HttpGet("info")] // api/account/info
+        public async Task<IActionResult> getinfo()
         {
-            var username = User.Identity?.Name;
-            if (username == null)
+            try
             {
-                return Unauthorized();
+                if (User.Identity.IsAuthenticated == false)
+                {
+                    return Unauthorized();
+                }
+                var user = await service.Service.getInstance().GetUserByUsernameAsync(User.Identity.Name!);
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+                return Ok(new
+                {
+                    success = true,
+                    account = new
+                    {
+                        username = user.Username,
+                        nickname = user.Nickname,
+                        avatar = user.Avatar,
+                        email = user.Email,
+                        status = user.Status
+                    }
+                });
             }
-            // 查询用户信息
-            var query = "SELECT * FROM Users WHERE Username = @Username";
-            var parameters = new SqlParameter[]
+            catch (Exception e)
             {
-                new SqlParameter("@Username", SqlDbType.NVarChar) { Value = username }
-            };
-            var user = Database.getInstance().ExecuteQuery(query, CommandType.Text, parameters);
-            if (user.Rows.Count == 0)
-            {
-                return NotFound();
+                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
+                return StatusCode(500, e.Message);
             }
-            DataRow row = user.Rows[0];
-            return Ok(new
-            {
-                Username = row["Username"].ToString(),
-                Nickname = row["Nickname"].ToString(),
-                Avatar = row["Avatar"].ToString(),
-                Email = row["Email"].ToString()
-            });
         }
 
         [HttpPost("edit")]
-        public IActionResult edit([FromBody] Usermodel user)
+        public async Task<IActionResult> edit([FromBody] UserModels user)
         {
-            var username = User.Identity?.Name;
-            if (username == null)
+            try
             {
-                return Unauthorized();
+                if (User.Identity.IsAuthenticated == false)
+                {
+                    return Unauthorized();
+                }
+                var userCheck = await service.Service.getInstance().GetUserByUsernameAsync(User.Identity.Name!);
+                if (userCheck == null)
+                {
+                    return Unauthorized();
+                }
+                userCheck.Nickname = user.Nickname;
+                userCheck.Avatar = user.Avatar;
+                userCheck.Email = user.Email;
+                await service.Service.getInstance().UpdateUserAsync(userCheck.Id, userCheck);
+                return Ok(new { success = true });
             }
-            // 更新用户信息
-            var query = "UPDATE Users SET Nickname = @Nickname, Email = @Email, Avatar = @Avatar WHERE Username = @Username";
-            var parameters = new SqlParameter[]
+            catch (Exception e)
             {
-                new SqlParameter("@Username", SqlDbType.NVarChar) { Value = username },
-                new SqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
-                new SqlParameter("@Email", SqlDbType.NVarChar) { Value = user.Email },
-                new SqlParameter("@Avatar", SqlDbType.NVarChar) { Value = user.Avatar }
-            };
-            int rowsAffected = Database.getInstance().ExecuteNonQuery(query, CommandType.Text, parameters);
-            if (rowsAffected == 0)
-            {
-                return NotFound();
+                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
+                return StatusCode(500, e.Message);
             }
-            return Ok();
         }
+    }
 
-        public class Usermodel
-        {
-            public string Nickname { get; set; }
-            public string Email { get; set; }
-            public string Avatar { get; set; }
-        }
+    public class EditRequest
+    {
+        public string Nickname { get; set; }
+        public string Avatar { get; set; }
+        public string Email { get; set; }
     }
 }

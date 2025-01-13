@@ -34,12 +34,12 @@ namespace imarket.Controllers
                     return Unauthorized("Invalid username or password.");
                 }
                 // 生成 JWT Token
-                var token = _tokenGenerator.GenerateToken(userCheck.Nickname, userCheck.Id);
-                if (token == null)
+                var _token = _tokenGenerator.GenerateToken(userCheck.Nickname, userCheck.Id);
+                if (_token == null)
                 {
                     return StatusCode(500);
                 }
-                return Ok(new { Token = token });
+                return Ok(new { success=true,token = _token });
             }
             catch (Exception e)
             {
@@ -97,7 +97,7 @@ namespace imarket.Controllers
                     CreatedAt = DateTime.Now,
                 };
                 await imarketService.RegisterAsync(newUser);
-                return Ok();
+                return Ok(new {success=true});
             }
             catch (Exception e)
             {
@@ -132,7 +132,7 @@ namespace imarket.Controllers
                 }
                 user.PasswordHash = changePasswordRequest.NewPassword;
                 await service.Service.getInstance().UpdateUserAsync(user.Id, user);
-                return Ok();
+                return Ok(new {success=true});
             }
             catch (Exception e)
             {
@@ -144,7 +144,27 @@ namespace imarket.Controllers
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest forgotPasswordRequest)
         {
-            
+            // 忘记密码：发送重置密码邮件
+            try
+            {
+                var user = await service.Service.getInstance().GetUserByEmailAsync(forgotPasswordRequest.Email);
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+                // 发送重置密码邮件
+
+                var response = new
+                {
+                    success = true
+                };
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
+                return StatusCode(500, e.Message);
+            }
         }
 
         public class LoginRequest
