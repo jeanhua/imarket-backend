@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using imarket.models;
 using Microsoft.AspNetCore.Authorization;
+using imarket.service.IService;
 
 namespace imarket.Controllers
 {
@@ -10,10 +11,13 @@ namespace imarket.Controllers
     public class AuthController : ControllerBase
     {
         private readonly JwtTokenGenerator _tokenGenerator;
-
-        public AuthController(JwtTokenGenerator tokenGenerator)
+        private readonly IUserService userService;
+        private readonly ILoginService loginService;
+        public AuthController(JwtTokenGenerator tokenGenerator,IUserService userService,ILoginService loginService)
         {
             _tokenGenerator = tokenGenerator;
+            this.userService = userService;
+            this.loginService = loginService;
         }
 
         [HttpPost("login")] // api/auth/login
@@ -22,7 +26,7 @@ namespace imarket.Controllers
             // 登录认证：查找用户
             try
             {
-                var userCheck = await service.Service.getInstance().GetUserByUsernameAsync(loginRequest.Username);
+                var userCheck = await userService.GetUserByUsernameAsync(loginRequest.Username);
                 if (userCheck == null)
                 {
                     return Unauthorized("Invalid username or password.");
@@ -58,15 +62,14 @@ namespace imarket.Controllers
             // 注册新用户
             try
             {
-                var imarketService = service.Service.getInstance();
                 // 检查用户名是否已存在
-                var userCheck = await imarketService.GetUserByUsernameAsync(registerRequest.Username);
+                var userCheck = await userService.GetUserByUsernameAsync(registerRequest.Username);
                 if (userCheck != null)
                 {
                     return BadRequest("Username already exists.");
                 }
                 // 检查邮箱是否已存在
-                userCheck = await imarketService.GetUserByEmailAsync(registerRequest.Email);
+                userCheck = await userService.GetUserByEmailAsync(registerRequest.Email);
                 if (userCheck != null)
                 {
                     return BadRequest("Email already exists.");
@@ -94,7 +97,7 @@ namespace imarket.Controllers
                     Status = 0,
                     CreatedAt = DateTime.Now,
                 };
-                await imarketService.RegisterAsync(newUser);
+                await loginService.RegisterAsync(newUser);
                 return Ok(new {success=true});
             }
             catch (Exception e)
@@ -115,7 +118,7 @@ namespace imarket.Controllers
                 {
                     return Unauthorized();
                 }
-                var user = await service.Service.getInstance().GetUserByUsernameAsync(User.Identity.Name!);
+                var user = await userService.GetUserByUsernameAsync(User.Identity.Name!);
                 if (user == null)
                 {
                     return Unauthorized();
@@ -129,7 +132,7 @@ namespace imarket.Controllers
                     return BadRequest("Invalid new password.");
                 }
                 user.PasswordHash = changePasswordRequest.NewPassword;
-                await service.Service.getInstance().UpdateUserAsync(user.Id, user);
+                await userService.UpdateUserAsync(user.Id, user);
                 return Ok(new {success=true});
             }
             catch (Exception e)
@@ -145,7 +148,7 @@ namespace imarket.Controllers
             // 忘记密码：发送重置密码邮件
             try
             {
-                var user = await service.Service.getInstance().GetUserByEmailAsync(forgotPasswordRequest.Email);
+                var user = await userService.GetUserByEmailAsync(forgotPasswordRequest.Email);
                 if (user == null)
                 {
                     return BadRequest("User not found.");

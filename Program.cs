@@ -1,3 +1,5 @@
+using imarket.service.IService;
+using imarket.service.Service;
 using imarket.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -49,6 +51,16 @@ namespace imarket
             });
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
+            // “¿¿µ◊¢»Î
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IPostService, PostService>();
+            builder.Services.AddScoped<ILikeService, LikeService>();
+            builder.Services.AddScoped<IPostCategoriesService, PostCategoriesService>();
+            builder.Services.AddScoped<ILoginService, LoginService>();
+            builder.Services.AddScoped<ICommentService, CommentService>();
+            builder.Services.AddScoped<IImageService, ImageService>();
+            builder.Services.AddScoped<IFavoriteService,FavoriteService>();
+
             var app = builder.Build();
             app.UseAuthentication();
             app.UseAuthorization();

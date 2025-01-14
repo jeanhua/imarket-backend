@@ -37,7 +37,6 @@ namespace imarket.utils
     {
         private static Database _instance;
         private readonly string connectionString;
-
         public static Database getInstance()
         {
             if (_instance == null)
@@ -46,11 +45,25 @@ namespace imarket.utils
             }
             return _instance;
         }
-
         private Database()
         {
-            JsonDocument config = JsonDocument.Parse(File.ReadAllText("appsettings.json"));
-            connectionString = config.RootElement.GetProperty("ConnectionStrings").GetProperty("DefaultConnection").GetString();
+            try
+            {
+                JsonDocument config = JsonDocument.Parse(File.ReadAllText("appsettings.json"));
+                connectionString = config.RootElement.GetProperty("ConnectionStrings").GetProperty("DefaultConnection").GetString()!;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Database config error");
+                // 结束程序
+                Environment.Exit(1);
+            }
+            if(connectionString == null)
+            {
+                Console.WriteLine("Database config null");
+                // 结束程序
+                Environment.Exit(1);
+            }
         }
 
         // 数据库连接

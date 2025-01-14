@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using imarket.models;
 using Microsoft.AspNetCore.Authorization;
+using imarket.service.IService;
 
 namespace imarket.Controllers
 {
@@ -9,6 +9,11 @@ namespace imarket.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
+        private readonly IUserService userService;
+        public AccountController(IUserService userService)
+        {
+            this.userService = userService;
+        }
         [HttpGet("info")] // api/account/info
         public async Task<IActionResult> getinfo()
         {
@@ -18,7 +23,7 @@ namespace imarket.Controllers
                 {
                     return Unauthorized();
                 }
-                var user = await service.Service.getInstance().GetUserByUsernameAsync(User.Identity.Name!);
+                var user = await userService.GetUserByUsernameAsync(User.Identity.Name!);
                 if (user == null)
                 {
                     return Unauthorized();
@@ -38,13 +43,14 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                Console.WriteLine("/api/account/info: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return StatusCode(500, e.Message);
             }
         }
 
         [HttpPost("edit")]
-        public async Task<IActionResult> edit([FromBody] UserModels user)
+        public async Task<IActionResult> edit([FromBody] EditRequest user)
         {
             try
             {
@@ -52,7 +58,7 @@ namespace imarket.Controllers
                 {
                     return Unauthorized();
                 }
-                var userCheck = await service.Service.getInstance().GetUserByUsernameAsync(User.Identity.Name!);
+                var userCheck = await userService.GetUserByUsernameAsync(User.Identity.Name!);
                 if (userCheck == null)
                 {
                     return Unauthorized();
@@ -60,11 +66,12 @@ namespace imarket.Controllers
                 userCheck.Nickname = user.Nickname;
                 userCheck.Avatar = user.Avatar;
                 userCheck.Email = user.Email;
-                await service.Service.getInstance().UpdateUserAsync(userCheck.Id, userCheck);
+                await userService.UpdateUserAsync(userCheck.Id, userCheck);
                 return Ok(new { success = true });
             }
             catch (Exception e)
             {
+                Console.WriteLine("/api/account/edit: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return StatusCode(500, e.Message);
             }

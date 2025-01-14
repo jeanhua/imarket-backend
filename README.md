@@ -9,11 +9,26 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
 ### 1. 创建数据库
 
 1. 确保已安装 MySQL 数据库，并运行以下命令以创建项目所需的数据库和表。
+
+   连接数据库
+
+   ```bash
+   mysql -u root -p
+   ```
+
+   创建数据库
+
+   ```
+   CREATE DATABASE imarket;
+   ```
+
+   
+
 2. 导入数据库初始化脚本（`create_tables_script.sql`），该脚本包含完整的表结构和外键约束。
 
-```bash
-mysql -u root -p < create_tables_script.sql
-```
+   ```bash
+   mysql -u root -p < create_tables_script.sql
+   ```
 
 ### 2. 配置项目
 
