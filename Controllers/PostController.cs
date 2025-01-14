@@ -1,6 +1,8 @@
-﻿using imarket.service.IService;
+﻿using imarket.models;
+using imarket.service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace imarket.Controllers
 {
@@ -12,11 +14,15 @@ namespace imarket.Controllers
         private readonly IUserService userService;
         private readonly IPostService postService;
         private readonly IPostCategoriesService postCategoriesService;
-        public PostController(IUserService userService, IPostService postService,IPostCategoriesService postCategoriesService)
+        private readonly ICommentService commentService;
+        // 缓存
+        private readonly IMemoryCache _cache;
+        public PostController(IUserService userService, IPostService postService,IPostCategoriesService postCategoriesService,IMemoryCache cache)
         {
             this.userService = userService;
             this.postService = postService;
             this.postCategoriesService = postCategoriesService;
+            _cache = cache;
         }
 
         [HttpGet("Posts")] // api/post/Posts
@@ -24,7 +30,17 @@ namespace imarket.Controllers
         {
             try
             {
-                var posts = await postService.GetAllPostsAsync(page,pageSize);
+                IEnumerable<PostModels> posts;
+                if (_cache.TryGetValue($"Posts_cache{page},{pageSize}", out var post_cache))
+                {
+                    posts = post_cache as IEnumerable<PostModels>;
+                    return Ok(new { success = true, posts = posts });
+                }
+                posts = await postService.GetAllPostsAsync(page, pageSize);
+                _cache.Set("Posts_cache", posts, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
+                });
                 return Ok(new { success = true, posts = posts });
             }
             catch (Exception e)
@@ -39,7 +55,21 @@ namespace imarket.Controllers
         {
             try
             {
-                var posts = await postService.GetPostsByCategoryIdAsync(categoryId,page, pageSize);
+                if (categoryId <= 0)
+                {
+                    return BadRequest("Invalid category id.");
+                }
+                IEnumerable<PostModels> posts;
+                if (_cache.TryGetValue($"CategorisedPosts_cache{page},{pageSize},{categoryId}", out var post_cache))
+                {
+                    posts = post_cache as IEnumerable<PostModels>;
+                    return Ok(new { success = true, posts = posts });
+                }
+                posts = await postService.GetPostsByCategoryIdAsync(categoryId, page, pageSize);
+                _cache.Set($"CategorisedPosts_cache{page},{pageSize},{categoryId}", posts, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
+                });
                 return Ok(new { success = true, posts = posts });
             }
             catch (Exception e)
@@ -54,6 +84,16 @@ namespace imarket.Controllers
         {
             try
             {
+                if(id <= 0)
+                {
+                    return BadRequest("Invalid post id.");
+                }
+                if(_cache.TryGetValue($"Post_cache{id}", out var post_cache))
+                {
+                    // 缓存命中
+                    return Ok(post_cache);
+                }
+                // 缓存未命中
                 var postfind = await postService.GetPostByIdAsync(id);
                 if (postfind == null)
                 {
@@ -61,23 +101,28 @@ namespace imarket.Controllers
                 }
                 var categoryID = await postCategoriesService.GetPostCategoriesByPostIdAsync(postfind.Id);
                 var user = await userService.GetUserByIdAsync(postfind.UserId);
-                return Ok(new { 
-                    success = true, 
-                    post = new { 
-                        Id = postfind.Id,
-                        Title = postfind.Title,
-                        Content = postfind.Content,
-                        Status = postfind.Status,
-                        CategoryId = categoryID,
-                        CreateTime = postfind.CreatedAt,
-                        Nickname = user.Nickname,
-                        Avatar = user.Avatar
-                    },
-                    comments = new
+                var comments = await commentService.GetCommentsByPostIdAsync(postfind.Id);
+                var response = new
+                {
+                    success = true,
+                    post = new
                     {
-
-                    }
+                        postfind.Id,
+                        postfind.Title,
+                        postfind.Content,
+                        postfind.Status,
+                        categoryID,
+                        postfind.CreatedAt,
+                        user.Nickname,
+                        user.Avatar
+                    },
+                    comments
+                };
+                _cache.Set($"Post_cache{id}", response, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
                 });
+                return Ok(response);
             }
             catch (Exception e)
             {

@@ -95,6 +95,11 @@ namespace imarket.service.Service
                 Directory.CreateDirectory("wwwroot/images/" + DateTime.Now.ToString("yyyy/MM/dd"));
             }
             var path = "wwwroot/images/" + DateTime.Now.ToString("yyyy/MM/dd") + "/" + guid + ".png";
+            if (File.Exists(path))
+            {
+                guid = Guid.NewGuid().ToString("N");
+                path = "wwwroot/images/" + DateTime.Now.ToString("yyyy/MM/dd") + "/" + guid + ".png";
+            }
             File.WriteAllBytes(path, Convert.FromBase64String(base64));
             var query = "INSERT INTO Images (Url, PostId, CreatedAt) VALUES (@Url, @PostId, @CreatedAt)";
             var parameters = new SqlParameter[]

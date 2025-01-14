@@ -49,6 +49,7 @@ namespace imarket
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
                 };
             });
+            builder.Services.AddMemoryCache();
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
             // “¿¿µ◊¢»Î
