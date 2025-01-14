@@ -87,7 +87,7 @@ namespace imarket.Controllers
                 // 添加用户
                 var newUser = new UserModels
                 {
-                    Id = 0,// 无关
+                    Id = Guid.NewGuid().ToString(),
                     Username = registerRequest.Username,
                     PasswordHash = registerRequest.Password,
                     Email = registerRequest.Email,
@@ -114,7 +114,7 @@ namespace imarket.Controllers
         {
             try
             {
-                if (User.Identity.IsAuthenticated == false)
+                if (User.Identity!.IsAuthenticated == false)
                 {
                     return Unauthorized();
                 }

@@ -19,20 +19,20 @@ namespace imarket.service.Service
             {
                 categories.Add(new CategoryModels
                 {
-                    Id = Convert.ToInt32(row["Id"]!),
+                    Id = row["Id"].ToString()!,
                     Name = row["Name"].ToString()!,
                     Description = row["Description"].ToString()!,
                 });
             }
             return categories;
         }
-        public async Task<CategoryModels> GetCategoryByIdAsync(int id)
+        public async Task<CategoryModels> GetCategoryByIdAsync(string id)
         {
             var db = Database.getInstance();
             var query = "SELECT * FROM Categories WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = id }
+                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -42,7 +42,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new CategoryModels
             {
-                Id = Convert.ToInt32(row["Id"]!),
+                Id = row["Id"].ToString()!,
                 Name = row["Name"].ToString()!,
                 Description = row["Description"].ToString()!,
             };
@@ -50,31 +50,32 @@ namespace imarket.service.Service
         public async Task<int> CreateCategoryAsync(CategoryModels category)
         {
             var db = Database.getInstance();
-            var query = "INSERT INTO Categories (Name, Description) VALUES (@Name, @Description)";
+            var query = "INSERT INTO Categories (Id, Name, Description) VALUES (@Id, @Name, @Description)";
             var parameters = new SqlParameter[]
             {
+                new SqlParameter("@Id", SqlDbType.Char) { Value = category.Id },
                 new SqlParameter("@Name", SqlDbType.NVarChar) { Value = category.Name },
                 new SqlParameter("@Description", SqlDbType.NVarChar) { Value = category.Description },
             };
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
-        public async Task<int> DeleteCategoryAsync(int id)
+        public async Task<int> DeleteCategoryAsync(string id)
         {
             var db = Database.getInstance();
             var query = "DELETE FROM Categories WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = id }
+                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
-        public async Task<int> UpdateCategoryAsync(int categoryId, CategoryModels category)
+        public async Task<int> UpdateCategoryAsync(string categoryId, CategoryModels category)
         {
             var db = Database.getInstance();
             var query = "UPDATE Categories SET Name = @Name, Description = @Description WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = categoryId },
+                new SqlParameter("@Id", SqlDbType.Char) { Value = categoryId },
                 new SqlParameter("@Name", SqlDbType.NVarChar) { Value = category.Name },
                 new SqlParameter("@Description", SqlDbType.NVarChar) { Value = category.Description },
             };
@@ -82,19 +83,19 @@ namespace imarket.service.Service
         }
 
         // 帖子分类关联相关
-        public async Task<IEnumerable<int>> GetPostCategoriesByPostIdAsync(int postId)
+        public async Task<IEnumerable<string>> GetPostCategoriesByPostIdAsync(string postId)
         {
-            var categories = new List<int>();
+            var categories = new List<string>();
             var db = Database.getInstance();
             var query = "SELECT * FROM PostCategories WHERE PostId = @PostId";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@PostId", SqlDbType.Int) { Value = postId }
+                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
             {
-                categories.Add(Convert.ToInt32(row["CategoryId"]!));
+                categories.Add(row["CategoryId"].ToString()!);
             }
             return categories;
         }
@@ -104,8 +105,8 @@ namespace imarket.service.Service
             var query = "INSERT INTO PostCategories (PostId, CategoryId) VALUES (@PostId, @CategoryId)";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@PostId", SqlDbType.Int) { Value = postCategory.PostId },
-                new SqlParameter("@CategoryId", SqlDbType.Int) { Value = postCategory.CategoryId },
+                new SqlParameter("@PostId", SqlDbType.Char) { Value = postCategory.PostId },
+                new SqlParameter("@CategoryId", SqlDbType.Char) { Value = postCategory.CategoryId },
             };
             await db.ExecuteNonQuery(query, CommandType.Text, parameters);
             return postCategory;
@@ -116,8 +117,8 @@ namespace imarket.service.Service
             var query = "DELETE FROM PostCategories WHERE PostId = @PostId AND CategoryId = @CategoryId";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@PostId", SqlDbType.Int) { Value = postCategory.PostId },
-                new SqlParameter("@CategoryId", SqlDbType.Int) { Value = postCategory.CategoryId },
+                new SqlParameter("@PostId", SqlDbType.Char) { Value = postCategory.PostId },
+                new SqlParameter("@CategoryId", SqlDbType.Char) { Value = postCategory.CategoryId },
             };
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

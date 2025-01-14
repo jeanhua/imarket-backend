@@ -30,21 +30,21 @@ namespace imarket.service.Service
             {
                 images.Add(new ImageModels
                 {
-                    Id = Convert.ToInt32(row["Id"]!),
+                    Id = row["Id"].ToString()!,
                     Url = row["Url"].ToString()!,
-                    PostId = Convert.ToInt32(row["PostId"]!),
+                    PostId = row["PostId"].ToString()!,
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
             }
             return images;
         }
-        public async Task<ImageModels> GetImageByIdAsync(int id)
+        public async Task<ImageModels> GetImageByIdAsync(string id)
         {
             var db = Database.getInstance();
             var query = "SELECT * FROM Images WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = id }
+                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -54,29 +54,29 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new ImageModels
             {
-                Id = Convert.ToInt32(row["Id"]!),
+                Id = row["Id"].ToString()!,
                 Url = row["Url"].ToString()!,
-                PostId = Convert.ToInt32(row["PostId"]!),
+                PostId = row["PostId"].ToString()!,
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
             };
         }
-        public async Task<IEnumerable<ImageModels>> GetImagesByPostId(int postId)
+        public async Task<IEnumerable<ImageModels>> GetImagesByPostId(string postId)
         {
             var images = new List<ImageModels>();
             var db = Database.getInstance();
             var query = "SELECT * FROM Images WHERE PostId = @PostId";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@PostId", SqlDbType.Int) { Value = postId }
+                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
             {
                 images.Add(new ImageModels
                 {
-                    Id = Convert.ToInt32(row["Id"]!),
+                    Id = row["Id"].ToString()!,
                     Url = row["Url"].ToString()!,
-                    PostId = Convert.ToInt32(row["PostId"]!),
+                    PostId = row["PostId"].ToString()!,
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
             }
@@ -100,16 +100,22 @@ namespace imarket.service.Service
                 guid = Guid.NewGuid().ToString("N");
                 path = "wwwroot/images/" + DateTime.Now.ToString("yyyy/MM/dd") + "/" + guid + ".png";
             }
-            File.WriteAllBytes(path, Convert.FromBase64String(base64));
-            var query = "INSERT INTO Images (Url, PostId, CreatedAt) VALUES (@Url, @PostId, @CreatedAt)";
+            await File.WriteAllBytesAsync(path, Convert.FromBase64String(base64));
+            return path.Replace("wwwroot",string.Empty);
+        }
+
+        public async Task<int> SaveImageAsync(ImageModels image)
+        {
+            var db = Database.getInstance();
+            var query = "INSERT INTO Images (Id, Url, PostId, CreatedAt) VALUES (@Id, @Url, @PostId, @CreatedAt)";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@Url", SqlDbType.NVarChar) { Value = path.Replace("wwwroot",string.Empty) },
-                new SqlParameter("@PostId", SqlDbType.Int) { Value = 0 },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = DateTime.Now },
+                new SqlParameter("@Id", SqlDbType.Char) { Value = image.Id },
+                new SqlParameter("@Url", SqlDbType.NVarChar) { Value = image.Url },
+                new SqlParameter("@PostId", SqlDbType.Char) { Value = image.PostId },
+                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = image.CreatedAt },
             };
-            await db.ExecuteNonQuery(query, CommandType.Text, parameters);
-            return base64;
+            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
     }
 }

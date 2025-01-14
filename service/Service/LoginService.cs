@@ -25,7 +25,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new UserModels
             {
-                Id = Convert.ToInt32(row["Id"]!),
+                Id = row["Id"].ToString()!,
                 Username = row["Username"].ToString()!,
                 Nickname = row["Nickname"].ToString()!,
                 PasswordHash = row["PasswordHash"].ToString()!,
@@ -42,9 +42,10 @@ namespace imarket.service.Service
         public async Task<UserModels> RegisterAsync(UserModels user)
         {
             var db = Database.getInstance();
-            var query = "INSERT INTO Users (Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
+            var query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
             var parameters = new SqlParameter[]
             {
+                new SqlParameter("@Id", SqlDbType.Char) { Value = user.Id },
                 new SqlParameter("@Username", SqlDbType.NVarChar) { Value = user.Username },
                 new SqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
                 new SqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = user.PasswordHash },

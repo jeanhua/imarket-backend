@@ -6,10 +6,10 @@ namespace imarket.service.IService
     {
         Task<int> GetPostNums();
         Task<IEnumerable<PostModels>> GetAllPostsAsync(int page, int pageSize);
-        Task<IEnumerable<PostModels>> GetPostsByUserIdAsync(int userId);
-        Task<IEnumerable<PostModels>> GetPostsByCategoryIdAsync(int categoryId, int page, int pageSize);
-        Task<PostModels> GetPostByIdAsync(int id);
+        Task<IEnumerable<PostModels>> GetPostsByUserIdAsync(string userId);
+        Task<IEnumerable<PostModels>> GetPostsByCategoryIdAsync(string categoryId, int page, int pageSize);
+        Task<PostModels> GetPostByIdAsync(string id);
         Task<int> CreatePostAsync(PostModels post);
-        Task<int> DeletePostAsync(int id);
+        Task<int> DeletePostAsync(string id);
     }
 }

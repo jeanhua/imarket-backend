@@ -15,7 +15,7 @@ namespace imarket.utils
             _configuration = configuration;
         }
 
-        public string? GenerateToken(string username,int id)
+        public string? GenerateToken(string username,string id)
         {
             try
             {
@@ -25,10 +25,10 @@ namespace imarket.utils
 
                 var claims = new[]
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, id),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(ClaimTypes.Name, username),
-                    new Claim(ClaimTypes.NameIdentifier, id.ToString())
+                    new Claim(ClaimTypes.NameIdentifier, id)
                 };
 
                 var token = new JwtSecurityToken(

@@ -15,13 +15,15 @@ namespace imarket.Controllers
         private readonly IPostService postService;
         private readonly IPostCategoriesService postCategoriesService;
         private readonly ICommentService commentService;
+        private readonly IImageService imageService;
         // 缓存
         private readonly IMemoryCache _cache;
-        public PostController(IUserService userService, IPostService postService,IPostCategoriesService postCategoriesService,IMemoryCache cache)
+        public PostController(IUserService userService, IPostService postService,IPostCategoriesService postCategoriesService,IImageService imageService,IMemoryCache cache)
         {
             this.userService = userService;
             this.postService = postService;
             this.postCategoriesService = postCategoriesService;
+            this.imageService = imageService;
             _cache = cache;
         }
 
@@ -45,6 +47,7 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                Console.WriteLine("/api/post/Posts: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return StatusCode(500, e.Message);
             }
@@ -74,6 +77,7 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                Console.WriteLine("/api/post/CategorisedPosts: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return StatusCode(500, e.Message);
             }
@@ -102,6 +106,7 @@ namespace imarket.Controllers
                 var categoryID = await postCategoriesService.GetPostCategoriesByPostIdAsync(postfind.Id);
                 var user = await userService.GetUserByIdAsync(postfind.UserId);
                 var comments = await commentService.GetCommentsByPostIdAsync(postfind.Id);
+                var images = await imageService.GetImagesByPostId(postfind.Id);
                 var response = new
                 {
                     success = true,
@@ -110,6 +115,7 @@ namespace imarket.Controllers
                         postfind.Id,
                         postfind.Title,
                         postfind.Content,
+                        images,
                         postfind.Status,
                         categoryID,
                         postfind.CreatedAt,
@@ -126,9 +132,63 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                Console.WriteLine("/api/post/{id}: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return StatusCode(500, e.Message);
             }
         }
+
+        [HttpPost("create")] // api/post/create
+        public async Task<IActionResult> CreatePost([FromBody] CreatePostRequest postReq)
+        {
+            try
+            {
+                if (postReq.Title == "" || postReq.Content == "")
+                {
+                    return BadRequest("Invalid post.");
+                }
+                var categorys = await postCategoriesService.GetAllCategoriesAsync();
+                var categorysExist = false;
+                foreach (var category in categorys) {
+                    if (category.Id == postReq.CategoryId)
+                    {
+                        categorysExist = true;
+                        break;
+                    }
+                }
+                if (!categorysExist)
+                {
+                    return BadRequest("Invalid category.");
+                }
+                var post = new PostModels
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Title = postReq.Title,
+                    Content = postReq.Content,
+                    UserId = User.Identity!.Name!,
+                    Status = 0,
+                    CreatedAt = DateTime.Now
+                };
+                var result = await postService.CreatePostAsync(post);
+                if (result == 0)
+                {
+                    return StatusCode(500);
+                }
+                return Ok(new { success = true });
+            }
+            catch (Exception e)
+            {
+                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
+                return StatusCode(500, e.Message);
+            }
+        }
+    }
+
+    public class CreatePostRequest
+    {
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public string CategoryId { get; set; }
+        public string[] Images { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new UserModels
             {
-                Id = Convert.ToInt32(row["Id"]!),
+                Id = row["Id"].ToString()!,
                 Username = row["Username"].ToString()!,
                 Nickname = row["Nickname"].ToString()!,
                 PasswordHash = row["PasswordHash"].ToString()!,
@@ -57,7 +57,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new UserModels
             {
-                Id = Convert.ToInt32(row["Id"]!),
+                Id = row["Id"].ToString()!,
                 Username = row["Username"].ToString()!,
                 Nickname = row["Nickname"].ToString()!,
                 PasswordHash = row["PasswordHash"].ToString()!,
@@ -91,7 +91,7 @@ namespace imarket.service.Service
             {
                 users.Add(new UserModels
                 {
-                    Id = Convert.ToInt32(row["Id"]!),
+                    Id = row["Id"].ToString()!,
                     Username = row["Username"].ToString()!,
                     Nickname = row["Nickname"].ToString()!,
                     PasswordHash = row["PasswordHash"].ToString()!,
@@ -105,13 +105,13 @@ namespace imarket.service.Service
             return users;
         }
 
-        public async Task<UserModels> GetUserByIdAsync(int id)
+        public async Task<UserModels> GetUserByIdAsync(string id)
         {
             var db = Database.getInstance();
             var query = "SELECT * FROM Users WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = id }
+                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -121,7 +121,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new UserModels
             {
-                Id = Convert.ToInt32(row["Id"]!),
+                Id = row["Id"].ToString()!,
                 Username = row["Username"].ToString()!,
                 Nickname = row["Nickname"].ToString()!,
                 PasswordHash = row["PasswordHash"].ToString()!,
@@ -135,9 +135,10 @@ namespace imarket.service.Service
         public async Task<int> CreateUserAsync(UserModels user)
         {
             var db = Database.getInstance();
-            var query = "INSERT INTO Users (Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
+            var query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
             var parameters = new SqlParameter[]
             {
+                new SqlParameter("@Id", SqlDbType.Char) { Value = user.Id },
                 new SqlParameter("@Username", SqlDbType.NVarChar) { Value = user.Username },
                 new SqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
                 new SqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = user.PasswordHash },
@@ -150,24 +151,24 @@ namespace imarket.service.Service
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteUserAsync(int id)
+        public async Task<int> DeleteUserAsync(string id)
         {
             var db = Database.getInstance();
             var query = "DELETE FROM Users WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = id }
+                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> UpdateUserAsync(int userId, UserModels user)
+        public async Task<int> UpdateUserAsync(string userId, UserModels user)
         {
             var db = Database.getInstance();
             var query = "UPDATE Users SET Username = @Username, Nickname = @Nickname, PasswordHash = @PasswordHash, Avatar = @Avatar, Email = @Email, Role = @Role, CreatedAt = @CreatedAt, Status = @Status WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Int) { Value = userId },
+                new SqlParameter("@Id", SqlDbType.Char) { Value = userId },
                 new SqlParameter("@Username", SqlDbType.NVarChar) { Value = user.Username },
                 new SqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
                 new SqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = user.PasswordHash },

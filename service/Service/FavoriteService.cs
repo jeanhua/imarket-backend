@@ -6,14 +6,14 @@ namespace imarket.service.Service
 {
     public class FavoriteService:IFavoriteService
     {
-        public async Task<IEnumerable<int>> GetPostFavoriteByUserId(int userId, int page, int pagesize)
+        public async Task<IEnumerable<int>> GetPostFavoriteByUserId(string userId, int page, int pagesize)
         {
             var favorites = new List<int>();
             var db = Database.getInstance();
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@UserId", SqlDbType.Int) { Value = userId },
+                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
                 new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pagesize },
                 new SqlParameter("@PageSize", SqlDbType.Int) { Value = pagesize },
             };
@@ -24,15 +24,15 @@ namespace imarket.service.Service
             }
             return favorites;
         }
-        public async Task<int> CreatePostFavoriteAsync(int userId, int postId)
+        public async Task<int> CreatePostFavoriteAsync(string userId, string postId)
         {
             var db = Database.getInstance();
             // 检查是否已经收藏
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
             var parameters = new SqlParameter[]
             {
-                new SqlParameter("@UserId", SqlDbType.Int) { Value = userId },
-                new SqlParameter("@PostId", SqlDbType.Int) { Value = postId },
+                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId },
             };
             var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count > 0)
@@ -40,11 +40,13 @@ namespace imarket.service.Service
                 return 0;
             }
             // 添加收藏记录
-            query = "INSERT INTO Favorites (UserId, PostId) VALUES (@UserId, @PostId)";
+            query = "INSERT INTO Favorites (Id, UserId, PostId, CreatedAt) VALUES (@Id, @UserId, @PostId, @CreatedAt)";
             parameters = new SqlParameter[]
             {
-                new SqlParameter("@UserId", SqlDbType.Int) { Value = userId },
-                new SqlParameter("@PostId", SqlDbType.Int) { Value = postId },
+                new SqlParameter("@Id", SqlDbType.Char) { Value = Guid.NewGuid().ToString() },
+                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId },
+                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = DateTime.Now },
             };
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

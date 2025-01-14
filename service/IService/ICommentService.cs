@@ -4,9 +4,9 @@ namespace imarket.service.IService
 {
     public interface ICommentService
     {
-        Task<IEnumerable<CommentModels>> GetCommentsByPostIdAsync(int postId);
+        Task<IEnumerable<CommentModels>> GetCommentsByPostIdAsync(string postId);
         Task<int> CreateCommentAsync(CommentModels comment);
-        Task<int> DeleteCommentAsync(int id);
-        Task<CommentModels> GetCommentByIdAsync(int id);
+        Task<int> DeleteCommentAsync(string id);
+        Task<CommentModels> GetCommentByIdAsync(string id);
     }
 }

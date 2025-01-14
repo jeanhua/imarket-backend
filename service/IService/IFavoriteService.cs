@@ -2,7 +2,7 @@
 {
     public interface IFavoriteService
     {
-        Task<IEnumerable<int>> GetPostFavoriteByUserId(int userId, int page, int pagesize);
-        Task<int> CreatePostFavoriteAsync(int postId, int userId);
+        Task<IEnumerable<int>> GetPostFavoriteByUserId(string userId, int page, int pagesize);
+        Task<int> CreatePostFavoriteAsync(string postId, string userId);
     }
 }
