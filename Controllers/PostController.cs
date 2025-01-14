@@ -54,14 +54,10 @@ namespace imarket.Controllers
         }
 
         [HttpGet("CategorisedPosts")] // api/post/CategorisedPosts
-        public async Task<IActionResult> GetCategorisedPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] int categoryId)
+        public async Task<IActionResult> GetCategorisedPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string categoryId)
         {
             try
             {
-                if (categoryId <= 0)
-                {
-                    return BadRequest("Invalid category id.");
-                }
                 IEnumerable<PostModels> posts;
                 if (_cache.TryGetValue($"CategorisedPosts_cache{page},{pageSize},{categoryId}", out var post_cache))
                 {
@@ -84,14 +80,10 @@ namespace imarket.Controllers
         }
 
         [HttpGet("{id}")] // api/post/{id}
-        public async Task<IActionResult> GetPost([FromRoute] int id)
+        public async Task<IActionResult> GetPost([FromRoute] string id)
         {
             try
             {
-                if(id <= 0)
-                {
-                    return BadRequest("Invalid post id.");
-                }
                 if(_cache.TryGetValue($"Post_cache{id}", out var post_cache))
                 {
                     // 缓存命中
