@@ -49,7 +49,7 @@ namespace imarket.Controllers
             }
         }
 
-        [HttpPost("edit")]
+        [HttpPost("edit")] // api/account/edit
         public async Task<IActionResult> edit([FromBody] EditRequest user)
         {
             try

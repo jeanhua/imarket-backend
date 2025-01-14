@@ -20,7 +20,7 @@ namespace imarket.Controllers
         }
 
         [HttpGet("Posts")] // api/post/Posts
-        public async Task<IActionResult> GetPosts([FromHeader]int page, [FromHeader]int pageSize)
+        public async Task<IActionResult> GetPosts([FromQuery]int page, [FromQuery]int pageSize)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace imarket.Controllers
         }
 
         [HttpGet("CategorisedPosts")] // api/post/CategorisedPosts
-        public async Task<IActionResult> GetCategorisedPosts([FromHeader] int page, [FromHeader] int pageSize, [FromHeader] int categoryId)
+        public async Task<IActionResult> GetCategorisedPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] int categoryId)
         {
             try
             {
@@ -49,8 +49,8 @@ namespace imarket.Controllers
             }
         }
 
-        [HttpGet("Post")] // api/post/Post
-        public async Task<IActionResult> GetPost([FromHeader] int id)
+        [HttpGet("{id}")] // api/post/{id}
+        public async Task<IActionResult> GetPost([FromRoute] int id)
         {
             try
             {

@@ -108,7 +108,7 @@ namespace imarket.Controllers
         }
 
 
-        [HttpPost("change-password")]
+        [HttpPost("change-password")] // api/auth/change-password
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
         {
@@ -142,7 +142,7 @@ namespace imarket.Controllers
             }
         }
 
-        [HttpPost("forgot-password")]
+        [HttpPost("forgot-password")] // api/auth/forgot-password
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest forgotPasswordRequest)
         {
             // 忘记密码：发送重置密码邮件
