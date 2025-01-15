@@ -18,17 +18,18 @@ namespace imarket.Controllers
         private readonly IImageService imageService;
         // 缓存
         private readonly IMemoryCache _cache;
-        public PostController(IUserService userService, IPostService postService,IPostCategoriesService postCategoriesService,IImageService imageService,IMemoryCache cache)
+        public PostController(IUserService userService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache)
         {
             this.userService = userService;
             this.postService = postService;
+            this.commentService = commentService;
             this.postCategoriesService = postCategoriesService;
             this.imageService = imageService;
             _cache = cache;
         }
 
         [HttpGet("Posts")] // api/post/Posts
-        public async Task<IActionResult> GetPosts([FromQuery]int page, [FromQuery]int pageSize)
+        public async Task<IActionResult> GetPosts([FromQuery] int page, [FromQuery] int pageSize)
         {
             try
             {
@@ -84,7 +85,7 @@ namespace imarket.Controllers
         {
             try
             {
-                if(_cache.TryGetValue($"Post_cache{id}", out var post_cache))
+                if (_cache.TryGetValue($"Post_cache{id}", out var post_cache))
                 {
                     // 缓存命中
                     return Ok(post_cache);
@@ -114,7 +115,7 @@ namespace imarket.Controllers
                         user.Nickname,
                         user.Avatar
                     },
-                    comments
+                    comments,
                 };
                 _cache.Set($"Post_cache{id}", response, new MemoryCacheEntryOptions
                 {
@@ -131,6 +132,7 @@ namespace imarket.Controllers
         }
 
         [HttpPost("create")] // api/post/create
+        [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> CreatePost([FromBody] CreatePostRequest postReq)
         {
             try
@@ -139,9 +141,14 @@ namespace imarket.Controllers
                 {
                     return BadRequest("Invalid post.");
                 }
+                if (postReq.Content.Length > 3000)
+                {
+                    return BadRequest("Content is too long.");
+                }
                 var categorys = await postCategoriesService.GetAllCategoriesAsync();
                 var categorysExist = false;
-                foreach (var category in categorys) {
+                foreach (var category in categorys)
+                {
                     if (category.Id == postReq.CategoryId)
                     {
                         categorysExist = true;
@@ -152,16 +159,61 @@ namespace imarket.Controllers
                 {
                     return BadRequest("Invalid category.");
                 }
+                var postId = Guid.NewGuid().ToString();
                 var post = new PostModels
                 {
-                    Id = Guid.NewGuid().ToString(),
+                    Id = postId,
                     Title = postReq.Title,
                     Content = postReq.Content,
                     UserId = User.Identity!.Name!,
                     Status = 0,
                     CreatedAt = DateTime.Now
                 };
-                var result = await postService.CreatePostAsync(post);
+                var result1 = await postService.CreatePostAsync(post);
+                foreach (var image in postReq.Images)
+                {
+                    var resut2 = await imageService.SaveImageAsync(new ImageModels 
+                    { 
+                        Id = Guid.NewGuid().ToString(),
+                        Url = image,
+                        PostId = postId, 
+                        CreatedAt = DateTime.Now 
+                    });
+                    if(resut2 == 0)
+                    {
+                        return StatusCode(500);
+                    }
+                }
+                if (result1 == 0)
+                {
+                    return StatusCode(500);
+                }
+                return Ok(new { success = true });
+            }
+            catch (Exception e)
+            {
+                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
+                return StatusCode(500, e.Message);
+            }
+        }
+
+        [HttpPost("delete")] // api/post/delete
+        [Authorize(Roles = "admin,user")]
+        public async Task<IActionResult> DeletePost([FromBody] string postId)
+        {
+            try
+            {
+                var post = await postService.GetPostByIdAsync(postId);
+                if (post == null)
+                {
+                    return NotFound();
+                }
+                var author = await userService.GetUserByIdAsync(post.UserId);
+                if (author.Username != User.Identity!.Name!)
+                {
+                    return Unauthorized();
+                }
+                var result = await postService.DeletePostAsync(postId);
                 if (result == 0)
                 {
                     return StatusCode(500);

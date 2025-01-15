@@ -36,7 +36,23 @@ namespace imarket.Controllers
                     return Unauthorized("Invalid username or password.");
                 }
                 // 生成 JWT Token
-                var _token = _tokenGenerator.GenerateToken(userCheck.Nickname, userCheck.Id);
+                string _token;
+                if(userCheck.Status==0)
+                {
+                    _token = _tokenGenerator.GenerateToken(userCheck.Username,userCheck.Id, "unverified")!;
+                }
+                else if(userCheck.Status == 1)
+                {
+                    _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, userCheck.Role)!;
+                }
+                else if (userCheck.Status == 2)
+                {
+                    _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "banned")!;
+                }
+                else
+                {
+                    return Unauthorized("Invalid Role.");
+                }
                 if (_token == null)
                 {
                     return StatusCode(500);

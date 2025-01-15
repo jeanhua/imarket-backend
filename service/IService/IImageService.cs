@@ -9,5 +9,7 @@ namespace imarket.service.IService
         Task<IEnumerable<ImageModels>> GetAllImagesAsync(int page, int pageSize);
         Task<ImageModels> GetImageByIdAsync(string id);
         Task<IEnumerable<ImageModels>> GetImagesByPostId(string postId);
+        Task<int> DeleteImageByIdAsync(string id);
+        Task<int> DeleteImagesByPostIdAsync(string postId);
     }
 }

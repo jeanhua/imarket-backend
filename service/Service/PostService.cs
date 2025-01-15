@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 namespace imarket.service.Service
 {
-    public class PostService:IPostService
+    public class PostService : IPostService
     {
         public async Task<int> GetPostNums()
         {
@@ -138,7 +138,7 @@ namespace imarket.service.Service
                 new SqlParameter("@Id", SqlDbType.Char) { Value = post.Id },
                 new SqlParameter("@Title", SqlDbType.NVarChar) { Value = post.Title },
                 new SqlParameter("@Content", SqlDbType.NVarChar) { Value = post.Content },
-                new SqlParameter("@UserId", SqlDbType.Int) { Value = post.UserId },
+                new SqlParameter("@UserId", SqlDbType.Char) { Value = post.UserId },
                 new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = post.CreatedAt },
                 new SqlParameter("@Status", SqlDbType.Int) { Value = post.Status },
             };
@@ -152,6 +152,22 @@ namespace imarket.service.Service
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+            };
+            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
+        public async Task<int> UpdatePostAsync(PostModels post)
+        {
+            var db = Database.getInstance();
+            var query = "UPDATE Posts SET Title = @Title, Content = @Content, UserId = @UserId , CreatedAt = @CreatedAt , Status = @Status WHERE Id = @Id";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Id", SqlDbType.Char) { Value = post.Id },
+                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = post.Title },
+                new SqlParameter("@Content", SqlDbType.NVarChar) { Value = post.Content },
+                new SqlParameter("@UserId", SqlDbType.Char) { Value = post.UserId },
+                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = post.CreatedAt },
+                new SqlParameter("@Status", SqlDbType.Int) { Value = post.Status },
             };
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

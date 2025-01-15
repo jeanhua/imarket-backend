@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 namespace imarket.service.Service
 {
-    public class ImageService:IImageService
+    public class ImageService : IImageService
     {
         public async Task<IEnumerable<ImageModels>> GetAllImagesAsync(int page, int pageSize)
         {
@@ -101,7 +101,7 @@ namespace imarket.service.Service
                 path = "wwwroot/images/" + DateTime.Now.ToString("yyyy/MM/dd") + "/" + guid + ".png";
             }
             await File.WriteAllBytesAsync(path, Convert.FromBase64String(base64));
-            return path.Replace("wwwroot",string.Empty);
+            return path.Replace("wwwroot", string.Empty);
         }
 
         public async Task<int> SaveImageAsync(ImageModels image)
@@ -114,6 +114,27 @@ namespace imarket.service.Service
                 new SqlParameter("@Url", SqlDbType.NVarChar) { Value = image.Url },
                 new SqlParameter("@PostId", SqlDbType.Char) { Value = image.PostId },
                 new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = image.CreatedAt },
+            };
+            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
+        public async Task<int> DeleteImageByIdAsync(string id)
+        {
+            var db = Database.getInstance();
+            var query = "DELETE FROM Images WHERE Id = @Id";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+            };
+            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+        public async Task<int> DeleteImagesByPostIdAsync(string postId)
+        {
+            var db = Database.getInstance();
+            var query = "DELETE FROM Images WHERE PostId = @PostId";
+            var parameters = new SqlParameter[]
+            {
+            new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using imarket.service.IService;
 using Microsoft.Extensions.Caching.Memory;
 using imarket.models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace imarket.Controllers
 {
@@ -12,11 +13,13 @@ namespace imarket.Controllers
     {
         private readonly ICommentService commentService;
         private readonly IUserService userService;
+        private readonly IPostService postService;
         private readonly IMemoryCache _cache;
-        public CommentsController(ICommentService commentService, IUserService userService, IMemoryCache cache)
+        public CommentsController(ICommentService commentService,IPostService postService ,IUserService userService, IMemoryCache cache)
         {
             this.commentService = commentService;
             this.userService = userService;
+            this.postService = postService;
             _cache = cache;
         }
         [HttpGet("{postid}")] // api/Comments/{postid}
@@ -44,5 +47,51 @@ namespace imarket.Controllers
                 return StatusCode(500, e.Message);
             }
         }
+        [HttpPost("Create")] // api/Comments/Create
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> CreateCommentAsync([FromBody] CommentPostRequest comment)
+        {
+            try
+            {
+
+                var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+                var post = await postService.GetPostByIdAsync(comment.PostId);
+                if (post == null)
+                {
+                    return NotFound("Post not found.");
+                }
+                if (user == null)
+                {
+                    return Unauthorized("Invalid user.");
+                }
+                var result = await commentService.CreateCommentAsync(
+                    new CommentModels
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        PostId = comment.PostId,
+                        Content = comment.Content,
+                        UserId = user.Id,
+                        CreatedAt = DateTime.Now
+                    }
+                    );
+                if (result == 0)
+                {
+                    return StatusCode(500);
+                }
+                return Ok(new { success = true, commentId = result });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("/api/Comments/Create: " + e.ToString());
+                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
+                return StatusCode(500, e.Message);
+            }
+        }
+    }
+
+    public class CommentPostRequest
+    {
+        public string PostId { get; set; }
+        public string Content { get; set; }
     }
 }
