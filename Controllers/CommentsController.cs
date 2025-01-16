@@ -64,6 +64,21 @@ namespace imarket.Controllers
                 {
                     return Unauthorized("Invalid user.");
                 }
+                if(comment.Content == null)
+                {
+                    return BadRequest("Content is required.");
+                }
+                if (comment.Content.Length == 0)
+                {
+                    return BadRequest("Content is required.");
+                }
+                if (post == null) {
+                    return NotFound("Post not found.");
+                }
+                if (post.Status == 1)
+                {
+                    return BadRequest("Post is finished");
+                }
                 var result = await commentService.CreateCommentAsync(
                     new CommentModels
                     {

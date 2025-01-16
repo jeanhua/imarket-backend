@@ -1,6 +1,5 @@
 using imarket.service.IService;
 using imarket.service.Service;
-using imarket.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -19,6 +18,10 @@ namespace imarket
                     try
                     {
                         port = int.Parse(arg.Substring(7));
+                        if (port < 1 || port > 65535)
+                        {
+                            throw new Exception();
+                        }
                     }
                     catch (Exception)
                     {
@@ -52,6 +55,8 @@ namespace imarket
             builder.Services.AddMemoryCache();
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
             // “¿¿µ◊¢»Î
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IPostService, PostService>();
@@ -63,12 +68,16 @@ namespace imarket
             builder.Services.AddScoped<IFavoriteService,FavoriteService>();
 
             var app = builder.Build();
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.MapControllers();
-            Database.getInstance();
             app.Run();
         }
     }

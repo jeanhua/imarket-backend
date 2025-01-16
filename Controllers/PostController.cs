@@ -7,7 +7,6 @@ using Microsoft.Extensions.Caching.Memory;
 namespace imarket.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     [ApiController]
     public class PostController : ControllerBase
     {
@@ -199,7 +198,7 @@ namespace imarket.Controllers
 
         [HttpPost("delete")] // api/post/delete
         [Authorize(Roles = "admin,user")]
-        public async Task<IActionResult> DeletePost([FromBody] string postId)
+        public async Task<IActionResult> DeletePost([FromQuery] string postId)
         {
             try
             {
@@ -209,11 +208,12 @@ namespace imarket.Controllers
                     return NotFound();
                 }
                 var author = await userService.GetUserByIdAsync(post.UserId);
-                if (author.Username != User.Identity!.Name!)
+                if (author.Username != User.Identity!.Name! && User.IsInRole("admin") == false)
                 {
-                    return Unauthorized();
+                    return BadRequest("You are not the author of this post.");
                 }
                 var result = await postService.DeletePostAsync(postId);
+                await imageService.DeleteImagesByPostIdAsync(postId);
                 if (result == 0)
                 {
                     return StatusCode(500);

@@ -87,6 +87,16 @@
 | PostId    | CHAR(36) | 否       | 否   | 外键(Posts) | 无       | 收藏的帖子 ID |
 | CreatedAt | DATETIME | 否       | 否   | 否          | 当前时间 | 收藏时间      |
 
+## 9.消息表（Messages）
+
+| 字段名     | 数据类型      | 是否为空 | 主键 | 外键        | 默认值   | 说明         |
+| ---------- | ------------- | -------- | ---- | ----------- | -------- | ------------ |
+| Id         | CHAR(36)      | 否       | 是   | 否          | 无       | 消息唯一标识 |
+| SenderId   | CHAR(36)      | 否       | 否   | 外键(Users) | 无       | 发送者id     |
+| ReceiverId | CHAR(36)      | 否       | 否   | 外键(Users) | 无       | 接收者id     |
+| Content    | NVARCHAR(MAX) | 否       | 否   | 否          | 无       | 消息内容     |
+| CreatedAt  | DATETIME      | 否       | 否   | 否          | 当前时间 | 发送时间     |
+
 ---
 
 ## 外键约束
@@ -101,3 +111,5 @@
 - `PostCategories.CategoryId` → `Categories.Id`
 - `Favorites.UserId` → `Users.Id`
 - `Favorites.PostId` → `Posts.Id`
+- `Messages.SenderId` → `Users.Id`
+- `Messages.ReceiveId` → `Users.Id`

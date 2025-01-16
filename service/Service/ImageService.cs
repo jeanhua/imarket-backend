@@ -126,6 +126,16 @@ namespace imarket.service.Service
             {
                 new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
+            var image = await GetImageByIdAsync(id);
+            try
+            {
+                File.Delete($"wwwroot{image.Url}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DeleteImageByIdAsync {image.Url} error");
+                System.IO.File.AppendAllText("log.txt", $"DeleteImageByIdAsync {image.Url} error");
+            }
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
         public async Task<int> DeleteImagesByPostIdAsync(string postId)
@@ -136,6 +146,19 @@ namespace imarket.service.Service
             {
             new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
+            var images = await GetImagesByPostId(postId);
+            foreach (var image in images)
+            {
+                try
+                {
+                    File.Delete($"wwwroot{image.Url}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"DeleteImageByIdAsync {image.Url} error");
+                    System.IO.File.AppendAllText("log.txt", $"DeleteImageByIdAsync {image.Url} error");
+                }
+            }
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
     }
