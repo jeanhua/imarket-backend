@@ -14,12 +14,14 @@ namespace imarket.Controllers
         private readonly IUserService userService;
         private readonly IPostService postService;
         private readonly IMemoryCache _cache;
+        private readonly ILikeService likeService;
         private readonly ILogger<CommentsController> _logger;
-        public CommentsController(ICommentService commentService,IPostService postService ,IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
+        public CommentsController(ILikeService likeService, ICommentService commentService,IPostService postService ,IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
         {
             this.commentService = commentService;
             this.userService = userService;
             this.postService = postService;
+            this.likeService = likeService;
             this._logger = _logger;
             _cache = cache;
         }
@@ -28,18 +30,41 @@ namespace imarket.Controllers
         {
             try
             {
-                IEnumerable<CommentModels> comments;
-                if (_cache.TryGetValue($"Comments_cache{postid}", out var comment_cache))
+                _cache.TryGetValue(postid, out var comments);
+                if (comments != null)
                 {
-                    comments = comment_cache as IEnumerable<CommentModels>;
-                    return Ok(new { success = true, comments });
+                    return Ok(new { success = true, comments = comments });
                 }
-                comments = await commentService.GetCommentsByPostIdAsync(postid);
-                _cache.Set($"Comments_cache{postid}", comments, new MemoryCacheEntryOptions
+                var Comments = await commentService.GetCommentsByPostIdAsync(postid);
+                var response = new List<CommentResponse>();
+                foreach (var comment in Comments)
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
+                    var avatar = "/images/defaultAvatar.jpg";
+                    var likeNum = 0;
+                    try
+                    {
+                        avatar = (await userService.GetUserByIdAsync(comment.UserId))!.Avatar;
+                        likeNum = await likeService.GetCommentLikeNumsByCommentIdAsync(comment.Id);
+                    }
+                    catch
+                    {
+                        avatar = "/images/defaultAvatar.jpg";
+                    }
+                    response.Add(new CommentResponse
+                    {
+                        Id = comment.Id,
+                        UserId = comment.UserId,
+                        UserAvatar = avatar,
+                        Content = comment.Content,
+                        likeNum = likeNum,
+                        CreatedAt = comment.CreatedAt
+                    });
+                }
+                _cache.Set(postid, response, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
                 });
-                return Ok(new { success = true, comments});
+                return Ok(new { success = true, comments = response });
             }
             catch (Exception e)
             {
@@ -56,7 +81,7 @@ namespace imarket.Controllers
             {
 
                 var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
-                var post = await postService.GetPostByIdAsync(comment.PostId);
+                var post = await postService.GetPostByIdAsync(comment.PostId!);
                 if (post == null)
                 {
                     return NotFound("Post not found.");
@@ -84,7 +109,7 @@ namespace imarket.Controllers
                     new CommentModels
                     {
                         Id = Guid.NewGuid().ToString(),
-                        PostId = comment.PostId,
+                        PostId = comment.PostId!,
                         Content = comment.Content,
                         UserId = user.Id,
                         CreatedAt = DateTime.Now
@@ -109,5 +134,14 @@ namespace imarket.Controllers
     {
         public string? PostId { get; set; }
         public string? Content { get; set; }
+    }
+    public class CommentResponse
+    {
+        public string? Id { get; set; }
+        public string? UserId { get; set; }
+        public string? UserAvatar { get; set; }
+        public string? Content { get; set; }
+        public int? likeNum { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -15,16 +15,18 @@ namespace imarket.Controllers
         private readonly IPostCategoriesService postCategoriesService;
         private readonly ICommentService commentService;
         private readonly IImageService imageService;
+        private readonly ILikeService likeService;
         private readonly ILogger<PostController> _logger;
         // 缓存
         private readonly IMemoryCache _cache;
-        public PostController(IUserService userService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
+        public PostController(IUserService userService,ILikeService likeService ,IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
         {
             this.userService = userService;
             this.postService = postService;
             this.commentService = commentService;
             this.postCategoriesService = postCategoriesService;
             this.imageService = imageService;
+            this.likeService = likeService;
             this._logger = logger;
             _cache = cache;
         }
@@ -34,7 +36,7 @@ namespace imarket.Controllers
         {
             try
             {
-                IEnumerable<PostModels> posts;
+                IEnumerable<PostModels>? posts;
                 if (_cache.TryGetValue($"Posts_cache{page},{pageSize}", out var post_cache))
                 {
                     posts = post_cache as IEnumerable<PostModels>;
@@ -60,7 +62,7 @@ namespace imarket.Controllers
         {
             try
             {
-                IEnumerable<PostModels> posts;
+                IEnumerable<PostModels>? posts;
                 if (_cache.TryGetValue($"CategorisedPosts_cache{page},{pageSize},{categoryId}", out var post_cache))
                 {
                     posts = post_cache as IEnumerable<PostModels>;
@@ -100,6 +102,7 @@ namespace imarket.Controllers
                 var categoryID = await postCategoriesService.GetPostCategoriesByPostIdAsync(postfind.Id);
                 var user = await userService.GetUserByIdAsync(postfind.UserId);
                 var comments = await commentService.GetCommentsByPostIdAsync(postfind.Id);
+                var likes = await likeService.GetPostLikeNumsByPostIdAsync(postfind.Id);
                 var images = await imageService.GetImagesByPostId(postfind.Id);
                 var response = new
                 {
@@ -112,6 +115,7 @@ namespace imarket.Controllers
                         images,
                         postfind.Status,
                         categoryID,
+                        likes,
                         postfind.CreatedAt,
                         user?.Nickname,
                         user?.Avatar
@@ -142,7 +146,7 @@ namespace imarket.Controllers
                 {
                     return BadRequest("Invalid post.");
                 }
-                if (postReq.Content.Length > 3000)
+                if (postReq.Content!.Length > 3000)
                 {
                     return BadRequest("Content is too long.");
                 }
@@ -164,14 +168,14 @@ namespace imarket.Controllers
                 var post = new PostModels
                 {
                     Id = postId,
-                    Title = postReq.Title,
+                    Title = postReq.Title!,
                     Content = postReq.Content,
                     UserId = User.Identity!.Name!,
                     Status = 0,
                     CreatedAt = DateTime.Now
                 };
                 var result1 = await postService.CreatePostAsync(post);
-                foreach (var image in postReq.Images)
+                foreach (var image in postReq.Images!)
                 {
                     var resut2 = await imageService.SaveImageAsync(new ImageModels 
                     { 
