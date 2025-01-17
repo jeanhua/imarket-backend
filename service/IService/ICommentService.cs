@@ -7,6 +7,6 @@ namespace imarket.service.IService
         Task<IEnumerable<CommentModels>> GetCommentsByPostIdAsync(string postId);
         Task<int> CreateCommentAsync(CommentModels comment);
         Task<int> DeleteCommentAsync(string id);
-        Task<CommentModels> GetCommentByIdAsync(string id);
+        Task<CommentModels?> GetCommentByIdAsync(string id);
     }
 }

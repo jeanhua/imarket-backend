@@ -6,7 +6,7 @@ namespace imarket.service.IService
     {
         Task<IEnumerable<MessageModels>> GetMessagesBySenderIdAsync(string senderId);
         Task<IEnumerable<MessageModels>> GetMessagesByReceiverIdAsync(string receiverId);
-        Task<MessageModels> GetMessageByIdAsync(string id);
+        Task<MessageModels?> GetMessageByIdAsync(string id);
         Task<int> CreateMessageAsync(MessageModels message);
         Task<int> DeleteMessageByIdAsync(string id);
         Task<int> DeleteMessageByReceiverIdAsync(string receiverId);

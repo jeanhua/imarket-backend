@@ -58,7 +58,7 @@ namespace imarket.service.Service
             return messages;
         }
 
-        public async Task<MessageModels> GetMessageByIdAsync(string id)
+        public async Task<MessageModels?> GetMessageByIdAsync(string id)
         {
             var query = "SELECT * FROM Messages WHERE Id = @Id";
             var parameters = new SqlParameter[]

@@ -34,7 +34,7 @@ namespace imarket.service.Service
             }
             return comments;
         }
-        public async Task<CommentModels> GetCommentByIdAsync(string id)
+        public async Task<CommentModels?> GetCommentByIdAsync(string id)
         {
             var query = "SELECT * FROM Comments WHERE Id = @Id";
             var parameters = new SqlParameter[]

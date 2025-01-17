@@ -42,7 +42,7 @@ namespace imarket.service.Service
             }
             return images;
         }
-        public async Task<ImageModels> GetImageByIdAsync(string id)
+        public async Task<ImageModels?> GetImageByIdAsync(string id)
         {
             var query = "SELECT * FROM Images WHERE Id = @Id";
             var parameters = new SqlParameter[]
