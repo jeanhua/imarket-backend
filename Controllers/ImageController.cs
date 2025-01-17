@@ -9,9 +9,11 @@ namespace imarket.Controllers
     public class ImageController : ControllerBase
     {
         private readonly IImageService imageService;
-        public ImageController(IImageService imageService)
+        private readonly ILogger<ImageController> _logger;
+        public ImageController(IImageService imageService, ILogger<ImageController> logger)
         {
             this.imageService = imageService;
+            this._logger = logger;
         }
 
         [HttpPost("UploadImage")] // api/image/UploadImage
@@ -38,9 +40,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("/api/image/UploadImage: " + e.ToString());
+                _logger.LogError("api/image/UploadImage:" + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }

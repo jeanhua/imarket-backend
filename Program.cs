@@ -66,6 +66,11 @@ namespace imarket
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddScoped<IFavoriteService,FavoriteService>();
+            // 添加日志服务
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddDebug();
+            builder.Logging.AddEventSourceLogger();
 
             var app = builder.Build();
             if (app.Environment.IsDevelopment())

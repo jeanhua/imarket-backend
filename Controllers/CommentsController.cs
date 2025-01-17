@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using imarket.service.IService;
 using Microsoft.Extensions.Caching.Memory;
 using imarket.models;
@@ -15,11 +14,13 @@ namespace imarket.Controllers
         private readonly IUserService userService;
         private readonly IPostService postService;
         private readonly IMemoryCache _cache;
-        public CommentsController(ICommentService commentService,IPostService postService ,IUserService userService, IMemoryCache cache)
+        private readonly ILogger<CommentsController> _logger;
+        public CommentsController(ICommentService commentService,IPostService postService ,IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
         {
             this.commentService = commentService;
             this.userService = userService;
             this.postService = postService;
+            this._logger = _logger;
             _cache = cache;
         }
         [HttpGet("{postid}")] // api/Comments/{postid}
@@ -42,9 +43,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("/api/Comments/{postid}: " + e.ToString());
+                _logger.LogError("/api/Comments/{postid}: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
         [HttpPost("Create")] // api/Comments/Create
@@ -97,9 +98,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("/api/Comments/Create: " + e.ToString());
+                _logger.LogError("/api/Comments/Create: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }

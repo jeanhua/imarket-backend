@@ -13,11 +13,13 @@ namespace imarket.Controllers
         private readonly JwtTokenGenerator _tokenGenerator;
         private readonly IUserService userService;
         private readonly ILoginService loginService;
-        public AuthController(JwtTokenGenerator tokenGenerator,IUserService userService,ILoginService loginService)
+        private readonly ILogger<AuthController> _logger;
+        public AuthController(JwtTokenGenerator tokenGenerator,IUserService userService,ILoginService loginService, ILogger<AuthController> _logger)
         {
             _tokenGenerator = tokenGenerator;
             this.userService = userService;
             this.loginService = loginService;
+            this._logger = _logger;
         }
 
         [HttpPost("login")] // api/auth/login
@@ -61,8 +63,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError("/api/auth/login: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
@@ -118,8 +121,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError("/api/auth/register: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
@@ -153,8 +157,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError("/api/auth/change-password: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
@@ -179,8 +184,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError("/api/auth/forgot-password: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 

@@ -15,15 +15,17 @@ namespace imarket.Controllers
         private readonly IPostCategoriesService postCategoriesService;
         private readonly ICommentService commentService;
         private readonly IImageService imageService;
+        private readonly ILogger<PostController> _logger;
         // 缓存
         private readonly IMemoryCache _cache;
-        public PostController(IUserService userService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache)
+        public PostController(IUserService userService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
         {
             this.userService = userService;
             this.postService = postService;
             this.commentService = commentService;
             this.postCategoriesService = postCategoriesService;
             this.imageService = imageService;
+            this._logger = logger;
             _cache = cache;
         }
 
@@ -47,9 +49,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("/api/post/Posts: " + e.ToString());
+                _logger.LogError("api/post/Posts:" + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
@@ -73,9 +75,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("/api/post/CategorisedPosts: " + e.ToString());
+                _logger.LogError("/api/post/CategorisedPosts: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
@@ -124,9 +126,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("/api/post/{id}: " + e.ToString());
+                _logger.LogError("/api/post/{id}: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
@@ -180,17 +182,18 @@ namespace imarket.Controllers
                     });
                     if(resut2 == 0)
                     {
-                        return StatusCode(500);
+                        return StatusCode(500,$"{image}upload failed");
                     }
                 }
                 if (result1 == 0)
                 {
-                    return StatusCode(500);
+                    return StatusCode(500,"create post failed");
                 }
                 return Ok(new { success = true });
             }
             catch (Exception e)
             {
+                _logger.LogError("api/post/create:" + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return StatusCode(500, e.Message);
             }
@@ -222,6 +225,7 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError("api/post/delete:"+e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return StatusCode(500, e.Message);
             }

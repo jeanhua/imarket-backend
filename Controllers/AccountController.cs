@@ -10,9 +10,11 @@ namespace imarket.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IUserService userService;
-        public AccountController(IUserService userService)
+        private readonly ILogger<AccountController> _logger;
+        public AccountController(IUserService userService, ILogger<AccountController> _logger)
         {
             this.userService = userService;
+            this._logger = _logger;
         }
         [HttpGet("info")] // api/account/info
         public async Task<IActionResult> getinfo()
@@ -43,9 +45,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("/api/account/info: " + e.ToString());
+                _logger.LogError("/api/account/info: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
@@ -71,9 +73,9 @@ namespace imarket.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine("/api/account/edit: " + e.ToString());
+                _logger.LogError("/api/account/edit: " + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, e.Message);
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }
