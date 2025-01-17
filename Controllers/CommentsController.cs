@@ -107,7 +107,7 @@ namespace imarket.Controllers
 
     public class CommentPostRequest
     {
-        public string PostId { get; set; }
-        public string Content { get; set; }
+        public string? PostId { get; set; }
+        public string? Content { get; set; }
     }
 }

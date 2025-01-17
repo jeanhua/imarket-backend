@@ -28,7 +28,7 @@ namespace imarket.Controllers
             // 登录认证：查找用户
             try
             {
-                var userCheck = await userService.GetUserByUsernameAsync(loginRequest.Username);
+                var userCheck = await userService.GetUserByUsernameAsync(loginRequest.Username!);
                 if (userCheck == null)
                 {
                     return Unauthorized("Invalid username or password.");
@@ -82,24 +82,24 @@ namespace imarket.Controllers
             try
             {
                 // 检查用户名是否已存在
-                var userCheck = await userService.GetUserByUsernameAsync(registerRequest.Username);
+                var userCheck = await userService.GetUserByUsernameAsync(registerRequest.Username!);
                 if (userCheck != null)
                 {
                     return BadRequest("Username already exists.");
                 }
                 // 检查邮箱是否已存在
-                userCheck = await userService.GetUserByEmailAsync(registerRequest.Email);
+                userCheck = await userService.GetUserByEmailAsync(registerRequest.Email!);
                 if (userCheck != null)
                 {
                     return BadRequest("Email already exists.");
                 }
                 // 检查用户名是否符合要求
-                if (UsernameValidator.IsValidUsername(registerRequest.Username)==false)
+                if (UsernameValidator.IsValidUsername(registerRequest.Username!)==false)
                 {
                     return BadRequest("Invalid username");
                 }
                 // 检查密码是否符合要求
-                if (registerRequest.Password == "" || registerRequest.Password.Length!= 64)
+                if (registerRequest.Password == "" || registerRequest.Password!.Length!= 64)
                 {
                     return BadRequest("Invalid password");
                 }
@@ -107,9 +107,9 @@ namespace imarket.Controllers
                 var newUser = new UserModels
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Username = registerRequest.Username,
+                    Username = registerRequest.Username!,
                     PasswordHash = registerRequest.Password,
-                    Email = registerRequest.Email,
+                    Email = registerRequest.Email!,
                     Nickname = RandomChineseNicknameGenerator.GenerateRandomNickname(),
                     Avatar = "/images/defaultAvatar.jpg",
                     Role = "user",
@@ -147,7 +147,7 @@ namespace imarket.Controllers
                 {
                     return BadRequest("Invalid old password.");
                 }
-                if (changePasswordRequest.NewPassword == "" || changePasswordRequest.NewPassword.Length != 64)
+                if (changePasswordRequest.NewPassword == "" || changePasswordRequest.NewPassword!.Length != 64)
                 {
                     return BadRequest("Invalid new password.");
                 }
@@ -169,7 +169,7 @@ namespace imarket.Controllers
             // 忘记密码：发送重置密码邮件
             try
             {
-                var user = await userService.GetUserByEmailAsync(forgotPasswordRequest.Email);
+                var user = await userService.GetUserByEmailAsync(forgotPasswordRequest.Email!);
                 if (user == null)
                 {
                     return BadRequest("User not found.");
@@ -192,26 +192,26 @@ namespace imarket.Controllers
 
         public class LoginRequest
         {
-            public string Username { get; set; }
-            public string Password { get; set; }
+            public string? Username { get; set; }
+            public string? Password { get; set; }
         }
 
         public class RegisterRequest
         {
-            public string Username { get; set; }
-            public string Password { get; set; }
-            public string Email { get; set; }
+            public string? Username { get; set; }
+            public string? Password { get; set; }
+            public string? Email { get; set; }
         }
 
         public class ChangePasswordRequest
         {
-            public string OldPassword { get; set; }
-            public string NewPassword { get; set; }
+            public string? OldPassword { get; set; }
+            public string? NewPassword { get; set; }
         }
 
         public class ForgotPasswordRequest
         {
-            public string Email { get; set; }
+            public string? Email { get; set; }
         }
     }
 }

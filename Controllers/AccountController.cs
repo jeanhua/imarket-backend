@@ -21,7 +21,7 @@ namespace imarket.Controllers
         {
             try
             {
-                if (User.Identity.IsAuthenticated == false)
+                if (User.Identity!.IsAuthenticated == false)
                 {
                     return Unauthorized();
                 }
@@ -56,7 +56,7 @@ namespace imarket.Controllers
         {
             try
             {
-                if (User.Identity.IsAuthenticated == false)
+                if (User.Identity!.IsAuthenticated == false)
                 {
                     return Unauthorized();
                 }
@@ -65,9 +65,9 @@ namespace imarket.Controllers
                 {
                     return Unauthorized();
                 }
-                userCheck.Nickname = user.Nickname;
-                userCheck.Avatar = user.Avatar;
-                userCheck.Email = user.Email;
+                userCheck.Nickname = user.Nickname!;
+                userCheck.Avatar = user.Avatar!;
+                userCheck.Email = user.Email!;
                 await userService.UpdateUserAsync(userCheck.Id, userCheck);
                 return Ok(new { success = true });
             }
@@ -82,8 +82,8 @@ namespace imarket.Controllers
 
     public class EditRequest
     {
-        public string Nickname { get; set; }
-        public string Avatar { get; set; }
-        public string Email { get; set; }
+        public string? Nickname { get; set; }
+        public string? Avatar { get; set; }
+        public string? Email { get; set; }
     }
 }

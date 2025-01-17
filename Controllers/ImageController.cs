@@ -49,6 +49,6 @@ namespace imarket.Controllers
 
     public class ImageRequest
     {
-        public string Base64 { get; set; }
+        public string? Base64 { get; set; }
     }
 }

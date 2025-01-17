@@ -113,8 +113,8 @@ namespace imarket.Controllers
                         postfind.Status,
                         categoryID,
                         postfind.CreatedAt,
-                        user.Nickname,
-                        user.Avatar
+                        user?.Nickname,
+                        user?.Avatar
                     },
                     comments,
                 };
@@ -211,7 +211,7 @@ namespace imarket.Controllers
                     return NotFound();
                 }
                 var author = await userService.GetUserByIdAsync(post.UserId);
-                if (author.Username != User.Identity!.Name! && User.IsInRole("admin") == false)
+                if (author?.Username != User.Identity!.Name! && User.IsInRole("admin") == false)
                 {
                     return BadRequest("You are not the author of this post.");
                 }
@@ -234,9 +234,9 @@ namespace imarket.Controllers
 
     public class CreatePostRequest
     {
-        public string Title { get; set; }
-        public string Content { get; set; }
-        public string CategoryId { get; set; }
-        public string[] Images { get; set; }
+        public string? Title { get; set; }
+        public string? Content { get; set; }
+        public string? CategoryId { get; set; }
+        public string[]? Images { get; set; }
     }
 }
