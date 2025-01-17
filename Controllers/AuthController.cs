@@ -108,6 +108,13 @@ namespace imarket.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var ip = IPtool.GetClientIP(HttpContext);
+            _cache.TryGetValue("ip:" + ip, out var ip_cache);
+            var ipNums = ip_cache as int? ?? 0;
+            if (ipNums >= 5)
+            {
+                return Unauthorized("Too many register attempts. Try 5 minutes later !");
+            }
             // 注册新用户
             // 检查用户名是否已存在
             var userCheck = await userService.GetUserByUsernameAsync(registerRequest.Username!);
@@ -131,6 +138,10 @@ namespace imarket.Controllers
             {
                 return BadRequest("Invalid password");
             }
+            _cache.Set("ip:" + ip, ipNums + 1, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
             // 添加用户
             var newUser = new UserModels
             {
