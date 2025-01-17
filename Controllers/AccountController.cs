@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using imarket.service.IService;
+using System.ComponentModel.DataAnnotations;
 
 namespace imarket.Controllers
 {
@@ -19,64 +20,46 @@ namespace imarket.Controllers
         [HttpGet("info")] // api/account/info
         public async Task<IActionResult> getinfo()
         {
-            try
+            if (User.Identity!.IsAuthenticated == false)
             {
-                if (User.Identity!.IsAuthenticated == false)
-                {
-                    return Unauthorized();
-                }
-                var user = await userService.GetUserByUsernameAsync(User.Identity.Name!);
-                if (user == null)
-                {
-                    return Unauthorized();
-                }
-                return Ok(new
-                {
-                    success = true,
-                    account = new
-                    {
-                        username = user.Username,
-                        nickname = user.Nickname,
-                        avatar = user.Avatar,
-                        email = user.Email,
-                        status = user.Status
-                    }
-                });
+                return Unauthorized();
             }
-            catch (Exception e)
+            var user = await userService.GetUserByUsernameAsync(User.Identity.Name!);
+            if (user == null)
             {
-                _logger.LogError("/api/account/info: " + e.ToString());
-                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, "Internal Server Error");
+                return Unauthorized();
             }
+            return Ok(new
+            {
+                success = true,
+                account = new
+                {
+                    username = user.Username,
+                    nickname = user.Nickname,
+                    avatar = user.Avatar,
+                    email = user.Email,
+                    status = user.Status
+                }
+            });
         }
 
         [HttpPost("edit")] // api/account/edit
         public async Task<IActionResult> edit([FromBody] EditRequest user)
         {
-            try
+            if (User.Identity!.IsAuthenticated == false)
             {
-                if (User.Identity!.IsAuthenticated == false)
-                {
-                    return Unauthorized();
-                }
-                var userCheck = await userService.GetUserByUsernameAsync(User.Identity.Name!);
-                if (userCheck == null)
-                {
-                    return Unauthorized();
-                }
-                userCheck.Nickname = user.Nickname!;
-                userCheck.Avatar = user.Avatar!;
-                userCheck.Email = user.Email!;
-                await userService.UpdateUserAsync(userCheck.Id, userCheck);
-                return Ok(new { success = true });
+                return Unauthorized();
             }
-            catch (Exception e)
+            var userCheck = await userService.GetUserByUsernameAsync(User.Identity.Name!);
+            if (userCheck == null)
             {
-                _logger.LogError("/api/account/edit: " + e.ToString());
-                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, "Internal Server Error");
+                return Unauthorized();
             }
+            userCheck.Nickname = user.Nickname??userCheck.Nickname;
+            userCheck.Avatar = user.Avatar??userCheck.Avatar;
+            userCheck.Email = user.Email??userCheck.Email;
+            await userService.UpdateUserAsync(userCheck.Id, userCheck);
+            return Ok(new { success = true });
         }
     }
 

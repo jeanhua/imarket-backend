@@ -20,30 +20,21 @@ namespace imarket.Controllers
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UploadImage([FromBody] ImageRequest request)
         {
-            try
+            if (request.Base64 == null)
             {
-                if (request.Base64 == null)
-                {
-                    return BadRequest("Image is required");
-                }
-                if(request.Base64.Length == 0)
-                {
-                    return BadRequest("Image is required");
-                }
-                // 图片大小限制3MB
-                if (request.Base64.Length > 4 * 1024 * 1024)
-                {
-                    return BadRequest("Image size should be less than 3MB");
-                }
-                var path = await imageService.UploadImageAsync(request.Base64);
-                return Ok(new { success = true, path = path }); 
+                return BadRequest("Image is required");
             }
-            catch (Exception e)
+            if (request.Base64.Length == 0)
             {
-                _logger.LogError("api/image/UploadImage:" + e.ToString());
-                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, "Internal Server Error");
+                return BadRequest("Image is required");
             }
+            // 图片大小限制3MB
+            if (request.Base64.Length > 4 * 1024 * 1024)
+            {
+                return BadRequest("Image size should be less than 3MB");
+            }
+            var path = await imageService.UploadImageAsync(request.Base64);
+            return Ok(new { success = true, path = path });
         }
     }
 

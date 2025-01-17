@@ -1,3 +1,4 @@
+using imarket.middleware;
 using imarket.service.IService;
 using imarket.service.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -72,13 +73,18 @@ namespace imarket
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
             builder.Logging.AddEventSourceLogger();
-
             var app = builder.Build();
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseMiddleware<GlobalExceptionHandlerMiddleware>(); // 全局异常处理中间件
+            }
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseDefaultFiles();

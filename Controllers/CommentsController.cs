@@ -3,6 +3,7 @@ using imarket.service.IService;
 using Microsoft.Extensions.Caching.Memory;
 using imarket.models;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 
 namespace imarket.Controllers
 {
@@ -28,153 +29,131 @@ namespace imarket.Controllers
         [HttpGet("{postid}")] // api/Comments/{postid}
         public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute] string postid)
         {
-            try
+            _cache.TryGetValue(postid, out var comments);
+            if (comments != null)
             {
-                _cache.TryGetValue(postid, out var comments);
-                if (comments != null)
+                return Ok(new { success = true, comments = comments });
+            }
+            var Comments = await commentService.GetCommentsByPostIdAsync(postid);
+            var response = new List<CommentResponse>();
+            foreach (var comment in Comments)
+            {
+                var avatar = "/images/defaultAvatar.png";
+                var likeNum = 0;
+                var isLike = false;
+                try
                 {
-                    return Ok(new { success = true, comments = comments });
+                    avatar = (await userService.GetUserByIdAsync(comment.UserId))!.Avatar;
+                    likeNum = await likeService.GetCommentLikeNumsByCommentIdAsync(comment.Id);
+                    isLike = await likeService.CheckUserLikeCommentAsync(comment.Id, User.Identity!.Name!);
                 }
-                var Comments = await commentService.GetCommentsByPostIdAsync(postid);
-                var response = new List<CommentResponse>();
-                foreach (var comment in Comments)
+                catch
                 {
-                    var avatar = "/images/defaultAvatar.jpg";
-                    var likeNum = 0;
-                    var isLike = false;
-                    try
-                    {
-                        avatar = (await userService.GetUserByIdAsync(comment.UserId))!.Avatar;
-                        likeNum = await likeService.GetCommentLikeNumsByCommentIdAsync(comment.Id);
-                        isLike = await likeService.CheckUserLikeCommentAsync(comment.Id, User.Identity!.Name!);
-                    }
-                    catch
-                    {
-                        avatar = "/images/defaultAvatar.jpg";
-                    }
-                    response.Add(new CommentResponse
-                    {
-                        Id = comment.Id,
-                        UserId = comment.UserId,
-                        UserAvatar = avatar,
-                        Content = comment.Content,
-                        isLike = isLike,
-                        likeNum = likeNum,
-                        CreatedAt = comment.CreatedAt
-                    });
+                    avatar = "/images/defaultAvatar.png";
                 }
-                _cache.Set(postid, response, new MemoryCacheEntryOptions
+                response.Add(new CommentResponse
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                    Id = comment.Id,
+                    UserId = comment.UserId,
+                    UserAvatar = avatar,
+                    Content = comment.Content,
+                    isLike = isLike,
+                    likeNum = likeNum,
+                    CreatedAt = comment.CreatedAt
                 });
-                return Ok(new { success = true, comments = response });
             }
-            catch (Exception e)
+            _cache.Set(postid, response, new MemoryCacheEntryOptions
             {
-                _logger.LogError("/api/Comments/{postid}: " + e.ToString());
-                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, "Internal Server Error");
-            }
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+            return Ok(new { success = true, comments = response });
         }
         [HttpPost("Create")] // api/Comments/Create
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> CreateCommentAsync([FromBody] CommentPostRequest comment)
         {
-            try
+            if(!ModelState.IsValid)
             {
-
-                var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
-                var post = await postService.GetPostByIdAsync(comment.PostId!);
-                if (post == null)
-                {
-                    return NotFound("Post not found.");
-                }
-                if (user == null)
-                {
-                    return Unauthorized("Invalid user.");
-                }
-                if (comment.Content == null)
-                {
-                    return BadRequest("Content is required.");
-                }
-                if (comment.Content.Length == 0)
-                {
-                    return BadRequest("Content is required.");
-                }
-                if (post == null)
-                {
-                    return NotFound("Post not found.");
-                }
-                if (post.Status == 1)
-                {
-                    return BadRequest("Post is finished");
-                }
-                var result = await commentService.CreateCommentAsync(
-                    new CommentModels
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        PostId = comment.PostId!,
-                        Content = comment.Content,
-                        UserId = user.Id,
-                        CreatedAt = DateTime.Now
-                    }
-                    );
-                if (result == 0)
-                {
-                    return StatusCode(500);
-                }
-                return Ok(new { success = true, commentId = result });
+                return BadRequest(ModelState);
             }
-            catch (Exception e)
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            var post = await postService.GetPostByIdAsync(comment.PostId!);
+            if (post == null)
             {
-                _logger.LogError("/api/Comments/Create: " + e.ToString());
-                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, "Internal Server Error");
+                return NotFound("Post not found.");
             }
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+            if (comment.Content == null)
+            {
+                return BadRequest("Content is required.");
+            }
+            if (comment.Content.Length == 0)
+            {
+                return BadRequest("Content is required.");
+            }
+            if (post == null)
+            {
+                return NotFound("Post not found.");
+            }
+            if (post.Status == 1)
+            {
+                return BadRequest("Post is finished");
+            }
+            var result = await commentService.CreateCommentAsync(
+                new CommentModels
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    PostId = comment.PostId!,
+                    Content = comment.Content,
+                    UserId = user.Id,
+                    CreatedAt = DateTime.Now
+                }
+                );
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true, commentId = result });
         }
 
         [HttpPost("Like")] // api/Comments/Like?CommentId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> LikeCommentAsync([FromQuery] string CommentId)
         {
-            try
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (user == null)
             {
-                var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
-                if (user == null)
-                {
-                    return Unauthorized("Invalid user.");
-                }
-                var comment = await commentService.GetCommentByIdAsync(CommentId!);
-                if (comment == null)
-                {
-                    return NotFound("Comment not found.");
-                }
-                var result = await likeService.CreateLikeAsync(new LikeModels
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    PostId = null,
-                    CommentId = CommentId!,
-                    UserId = user.Id,
-                    CreatedAt = DateTime.Now
-                });
-                if (result == 0)
-                {
-                    return StatusCode(500);
-                }
-                return Ok(new { success = true });
+                return Unauthorized("Invalid user.");
             }
-            catch (Exception e)
+            var comment = await commentService.GetCommentByIdAsync(CommentId!);
+            if (comment == null)
             {
-                _logger.LogError("/api/Comments/Like: " + e.ToString());
-                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
-                return StatusCode(500, "Internal Server Error");
+                return NotFound("Comment not found.");
             }
+            var result = await likeService.CreateLikeAsync(new LikeModels
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostId = null,
+                CommentId = CommentId!,
+                UserId = user.Id,
+                CreatedAt = DateTime.Now
+            });
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true });
         }
     }
 
     public class CommentPostRequest
     {
+        [Required]
         public string? PostId { get; set; }
+        [Required]
         public string? Content { get; set; }
     }
     public class CommentResponse
@@ -183,6 +162,7 @@ namespace imarket.Controllers
         public string? UserId { get; set; }
         public string? UserAvatar { get; set; }
         public string? Content { get; set; }
+
         public bool isLike { get; set; }
         public int? likeNum { get; set; }
         public DateTime CreatedAt { get; set; }
