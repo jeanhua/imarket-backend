@@ -246,7 +246,12 @@ namespace imarket.Controllers
                 var post = await postService.GetPostByIdAsync(postId);
                 if (post == null)
                 {
-                    return NotFound();
+                    return NotFound("Post not found.");
+                }
+                var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+                if (user == null)
+                {
+                    return Unauthorized("Invalid user.");
                 }
                 var like = new LikeModels
                 {
