@@ -16,7 +16,7 @@ namespace imarket.Controllers
         private readonly IMemoryCache _cache;
         private readonly ILikeService likeService;
         private readonly ILogger<CommentsController> _logger;
-        public CommentsController(ILikeService likeService, ICommentService commentService,IPostService postService ,IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
+        public CommentsController(ILikeService likeService, ICommentService commentService, IPostService postService, IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
         {
             this.commentService = commentService;
             this.userService = userService;
@@ -26,7 +26,7 @@ namespace imarket.Controllers
             _cache = cache;
         }
         [HttpGet("{postid}")] // api/Comments/{postid}
-        public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute]string postid)
+        public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute] string postid)
         {
             try
             {
@@ -41,10 +41,12 @@ namespace imarket.Controllers
                 {
                     var avatar = "/images/defaultAvatar.jpg";
                     var likeNum = 0;
+                    var isLike = false;
                     try
                     {
                         avatar = (await userService.GetUserByIdAsync(comment.UserId))!.Avatar;
                         likeNum = await likeService.GetCommentLikeNumsByCommentIdAsync(comment.Id);
+                        isLike = await likeService.CheckUserLikeCommentAsync(comment.Id, User.Identity!.Name!);
                     }
                     catch
                     {
@@ -56,6 +58,7 @@ namespace imarket.Controllers
                         UserId = comment.UserId,
                         UserAvatar = avatar,
                         Content = comment.Content,
+                        isLike = isLike,
                         likeNum = likeNum,
                         CreatedAt = comment.CreatedAt
                     });
@@ -90,7 +93,7 @@ namespace imarket.Controllers
                 {
                     return Unauthorized("Invalid user.");
                 }
-                if(comment.Content == null)
+                if (comment.Content == null)
                 {
                     return BadRequest("Content is required.");
                 }
@@ -98,7 +101,8 @@ namespace imarket.Controllers
                 {
                     return BadRequest("Content is required.");
                 }
-                if (post == null) {
+                if (post == null)
+                {
                     return NotFound("Post not found.");
                 }
                 if (post.Status == 1)
@@ -128,6 +132,44 @@ namespace imarket.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
+
+        [HttpPost("Like")] // api/Comments/Like?CommentId=xxx
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> LikeCommentAsync([FromQuery] string CommentId)
+        {
+            try
+            {
+                var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+                if (user == null)
+                {
+                    return Unauthorized("Invalid user.");
+                }
+                var comment = await commentService.GetCommentByIdAsync(CommentId!);
+                if (comment == null)
+                {
+                    return NotFound("Comment not found.");
+                }
+                var result = await likeService.CreateLikeAsync(new LikeModels
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    PostId = null,
+                    CommentId = CommentId!,
+                    UserId = user.Id,
+                    CreatedAt = DateTime.Now
+                });
+                if (result == 0)
+                {
+                    return StatusCode(500);
+                }
+                return Ok(new { success = true });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("/api/Comments/Like: " + e.ToString());
+                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
     }
 
     public class CommentPostRequest
@@ -141,6 +183,7 @@ namespace imarket.Controllers
         public string? UserId { get; set; }
         public string? UserAvatar { get; set; }
         public string? Content { get; set; }
+        public bool isLike { get; set; }
         public int? likeNum { get; set; }
         public DateTime CreatedAt { get; set; }
     }

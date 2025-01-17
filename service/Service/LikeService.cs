@@ -75,7 +75,7 @@ namespace imarket.service.Service
             var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
             return Convert.ToInt32(result.Rows[0][0]!);
         }
-        public async Task<int> CreatePostLikeAsync(LikeModels like)
+        public async Task<int> CreateLikeAsync(LikeModels like)
         {
             var db = Database.getInstance();
             string query;
@@ -130,7 +130,7 @@ namespace imarket.service.Service
             };
             return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
-        public async Task<int> DeletePostLikeAsync(LikeModels like)
+        public async Task<int> DeleteLikeAsync(LikeModels like)
         {
             var db = Database.getInstance();
             if (like.CommentId == null)
@@ -153,6 +153,39 @@ namespace imarket.service.Service
                 };
                 return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
             }
+        }
+
+        public async Task<bool> CheckUserLikeCommentAsync(string userId, string commentId)
+        {
+            var db = Database.getInstance();
+            var query = "SELECT * FROM Likes WHERE UserId = @UserId AND CommentId = @CommentId";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new SqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
+            };
+            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            if (result.Rows.Count == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+        public async Task<bool> CheckUserLikePostAsync(string userId, string postId)
+        {
+            var db = Database.getInstance();
+            var query = "SELECT * FROM Likes WHERE UserId = @UserId AND PostId = @PostId";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+            };
+            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            if (result.Rows.Count == 0)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

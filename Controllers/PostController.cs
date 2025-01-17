@@ -104,6 +104,7 @@ namespace imarket.Controllers
                 var comments = await commentService.GetCommentsByPostIdAsync(postfind.Id);
                 var likes = await likeService.GetPostLikeNumsByPostIdAsync(postfind.Id);
                 var images = await imageService.GetImagesByPostId(postfind.Id);
+                var isLiked = await likeService.CheckUserLikePostAsync(User.Identity!.Name!, postfind.Id);
                 var response = new
                 {
                     success = true,
@@ -116,6 +117,7 @@ namespace imarket.Controllers
                         postfind.Status,
                         categoryID,
                         likes,
+                        isLiked,
                         postfind.CreatedAt,
                         user?.Nickname,
                         user?.Avatar
@@ -230,6 +232,40 @@ namespace imarket.Controllers
             catch (Exception e)
             {
                 _logger.LogError("api/post/delete:"+e.ToString());
+                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
+                return StatusCode(500, e.Message);
+            }
+        }
+
+        [HttpGet("like")] // api/post/like?postId=xxx
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> LikePost([FromQuery] string postId)
+        {
+            try
+            {
+                var post = await postService.GetPostByIdAsync(postId);
+                if (post == null)
+                {
+                    return NotFound();
+                }
+                var like = new LikeModels
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    PostId = postId,
+                    CommentId = null,
+                    UserId = User.Identity!.Name!,
+                    CreatedAt = DateTime.Now
+                };
+                var result = await likeService.CreateLikeAsync(like);
+                if (result == 0)
+                {
+                    return StatusCode(500);
+                }
+                return Ok(new { success = true });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("api/post/like:" + e.ToString());
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return StatusCode(500, e.Message);
             }
