@@ -11,11 +11,9 @@ namespace imarket.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IUserService userService;
-        private readonly ILogger<AccountController> _logger;
-        public AccountController(IUserService userService, ILogger<AccountController> _logger)
+        public AccountController(IUserService userService)
         {
             this.userService = userService;
-            this._logger = _logger;
         }
         [HttpGet("info")] // api/account/info
         public async Task<IActionResult> getinfo()

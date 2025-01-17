@@ -4,6 +4,7 @@ using imarket.models;
 using Microsoft.AspNetCore.Authorization;
 using imarket.service.IService;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace imarket.Controllers
 {
@@ -15,12 +16,14 @@ namespace imarket.Controllers
         private readonly IUserService userService;
         private readonly ILoginService loginService;
         private readonly ILogger<AuthController> _logger;
-        public AuthController(JwtTokenGenerator tokenGenerator,IUserService userService,ILoginService loginService, ILogger<AuthController> _logger)
+        private readonly IMemoryCache _cache;
+        public AuthController(JwtTokenGenerator tokenGenerator,IUserService userService,ILoginService loginService, ILogger<AuthController> _logger, IMemoryCache _cache)
         {
             _tokenGenerator = tokenGenerator;
             this.userService = userService;
             this.loginService = loginService;
             this._logger = _logger;
+            this._cache = _cache;
         }
 
         [HttpPost("login")] // api/auth/login
@@ -31,13 +34,40 @@ namespace imarket.Controllers
                 return BadRequest(ModelState);
             }
             // 登录认证：查找用户
+            _cache.TryGetValue($"login:{loginRequest.Username}", out var login_cache);
+            var loginNums = login_cache as int? ?? 0;
+            var ip = IPtool.GetClientIP(HttpContext);
+            _cache.TryGetValue("ip:" + ip, out var ip_cache);
+            var ipNums = ip_cache as int? ?? 0;
+            if (ipNums >= 10)
+            {
+                return Unauthorized("Too many login attempts. Try 5 minutes later !");
+            }
+            _cache.Set("ip:" + ip, ipNums + 1, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+            if (loginNums>=5)
+            {
+                return Unauthorized("Too many login attempts. Try 5 minutes later !");
+            }
             var userCheck = await userService.GetUserByUsernameAsync(loginRequest.Username!);
             if (userCheck == null)
             {
+                _logger.LogInformation($"IP:{ip} login with username:{loginRequest.Username} failed");
+                _cache.Set($"login:{loginRequest.Username}", loginNums + 1, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
                 return Unauthorized("Invalid username or password.");
             }
             if (userCheck.PasswordHash != loginRequest.Password)
             {
+                _logger.LogInformation($"IP:{ip} login with username:{loginRequest.Username} failed");
+                _cache.Set($"login:{loginRequest.Username}", loginNums + 1, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
                 return Unauthorized("Invalid username or password.");
             }
             // 生成 JWT Token
