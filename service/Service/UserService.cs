@@ -7,22 +7,25 @@ namespace imarket.service.Service
 {
     public class UserService:IUserService
     {
+        private readonly Database _database;
+        public UserService(Database database)
+        {
+            _database = database;
+        }
         public async Task<int> GetUserNums()
         {
-            var db = Database.getInstance();
             var query = "SELECT COUNT(*) FROM Users";
-            var result = await db.ExecuteQuery(query, CommandType.Text);
+            var result = await _database.ExecuteQuery(query, CommandType.Text);
             return Convert.ToInt32(result.Rows[0][0]!);
         }
         public async Task<UserModels?> GetUserByUsernameAsync(string username)
         {
-            var db = Database.getInstance();
             var query = "SELECT * FROM Users WHERE Username = @Username";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Username", SqlDbType.NVarChar) { Value = username }
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
             {
                 return null;
@@ -43,13 +46,12 @@ namespace imarket.service.Service
         }
         public async Task<UserModels> GetUserByEmailAsync(string email)
         {
-            var db = Database.getInstance();
             var query = "SELECT * FROM Users WHERE Email = @Email";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Email", SqlDbType.NVarChar) { Value = email }
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
             {
                 return null;
@@ -79,14 +81,13 @@ namespace imarket.service.Service
                 pageSize = 10;
             }
             var users = new List<UserModels>();
-            var db = Database.getInstance();
             var query = "SELECT * FROM Users ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
                 new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
             {
                 users.Add(new UserModels
@@ -107,13 +108,12 @@ namespace imarket.service.Service
 
         public async Task<UserModels?> GetUserByIdAsync(string id)
         {
-            var db = Database.getInstance();
             var query = "SELECT * FROM Users WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
             {
                 return null;
@@ -134,7 +134,6 @@ namespace imarket.service.Service
         }
         public async Task<int> CreateUserAsync(UserModels user)
         {
-            var db = Database.getInstance();
             var query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
             var parameters = new SqlParameter[]
             {
@@ -148,23 +147,21 @@ namespace imarket.service.Service
                 new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = user.CreatedAt },
                 new SqlParameter("@Status", SqlDbType.Int) { Value = user.Status },
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
         public async Task<int> DeleteUserAsync(string id)
         {
-            var db = Database.getInstance();
             var query = "DELETE FROM Users WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
         public async Task<int> UpdateUserAsync(string userId, UserModels user)
         {
-            var db = Database.getInstance();
             var query = "UPDATE Users SET Username = @Username, Nickname = @Nickname, PasswordHash = @PasswordHash, Avatar = @Avatar, Email = @Email, Role = @Role, CreatedAt = @CreatedAt, Status = @Status WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
@@ -178,7 +175,7 @@ namespace imarket.service.Service
                 new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = user.CreatedAt },
                 new SqlParameter("@Status", SqlDbType.Int) { Value = user.Status },
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
     }
 }

@@ -1,6 +1,7 @@
 using imarket.middleware;
 using imarket.service.IService;
 using imarket.service.Service;
+using imarket.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -68,6 +69,13 @@ namespace imarket
             builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddScoped<IFavoriteService,FavoriteService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
+            // 注入数据库
+            builder.Services.AddSingleton<Database>(provider =>
+            {
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                return new Database(configuration);
+            });
+
             // 添加日志服务
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();

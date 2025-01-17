@@ -6,10 +6,14 @@ namespace imarket.service.Service
 {
     public class FavoriteService:IFavoriteService
     {
+        private readonly Database _database;
+        public FavoriteService(Database database)
+        {
+            _database = database;
+        }
         public async Task<IEnumerable<int>> GetPostFavoriteByUserId(string userId, int page, int pagesize)
         {
             var favorites = new List<int>();
-            var db = Database.getInstance();
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
             var parameters = new SqlParameter[]
             {
@@ -17,7 +21,7 @@ namespace imarket.service.Service
                 new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pagesize },
                 new SqlParameter("@PageSize", SqlDbType.Int) { Value = pagesize },
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
             {
                 favorites.Add(Convert.ToInt32(row["PostId"]!));
@@ -26,7 +30,6 @@ namespace imarket.service.Service
         }
         public async Task<int> CreatePostFavoriteAsync(string userId, string postId)
         {
-            var db = Database.getInstance();
             // 检查是否已经收藏
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
             var parameters = new SqlParameter[]
@@ -34,7 +37,7 @@ namespace imarket.service.Service
                 new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
                 new SqlParameter("@PostId", SqlDbType.Char) { Value = postId },
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count > 0)
             {
                 return 0;
@@ -48,7 +51,7 @@ namespace imarket.service.Service
                 new SqlParameter("@PostId", SqlDbType.Char) { Value = postId },
                 new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = DateTime.Now },
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
     }
 }

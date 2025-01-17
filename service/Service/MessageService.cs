@@ -7,16 +7,20 @@ namespace imarket.service.Service
 {
     public class MessageService : IMessageService
     {
+        private readonly Database _database;
+        public MessageService(Database database)
+        {
+            _database = database;
+        }
         public async Task<IEnumerable<MessageModels>> GetMessagesBySenderIdAsync(string userId)
         {
             var messages = new List<MessageModels>();
-            var db = Database.getInstance();
             var query = "SELECT * FROM Messages WHERE SenderId = @SenderId";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@SenderId", SqlDbType.Char) { Value = userId }
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
             {
                 messages.Add(new MessageModels
@@ -34,13 +38,12 @@ namespace imarket.service.Service
         public async Task<IEnumerable<MessageModels>> GetMessagesByReceiverIdAsync(string userId)
         {
             var messages = new List<MessageModels>();
-            var db = Database.getInstance();
             var query = "SELECT * FROM Messages WHERE ReceiverId = @ReceiverId";
             var parameters = new SqlParameter[]
             {
             new SqlParameter("@ReceiverId", SqlDbType.Char) { Value = userId }
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
             {
                 messages.Add(new MessageModels
@@ -57,13 +60,12 @@ namespace imarket.service.Service
 
         public async Task<MessageModels> GetMessageByIdAsync(string id)
         {
-            var db = Database.getInstance();
             var query = "SELECT * FROM Messages WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
             {
                 return null;
@@ -81,7 +83,6 @@ namespace imarket.service.Service
 
         public async Task<int> CreateMessageAsync(MessageModels message)
         {
-            var db = Database.getInstance();
             var query = "INSERT INTO Messages (Id, SenderId, ReceiverId, Content, CreatedAt) VALUES (@Id, @SenderId, @ReceiverId, @Content, @CreatedAt)";
             var parameters = new SqlParameter[]
             {
@@ -91,41 +92,38 @@ namespace imarket.service.Service
                 new SqlParameter("@Content", SqlDbType.NVarChar) { Value = message.Content },
                 new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = message.CreatedAt },
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
         public async Task<int> DeleteMessageByIdAsync(string id)
         {
-            var db = Database.getInstance();
             var query = "DELETE FROM Messages WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
         public async Task<int> DeleteMessageByReceiverIdAsync(string receiverId)
         {
-            var db = Database.getInstance();
             var query = "DELETE FROM Messages WHERE ReceiverId = @ReceiverId";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@ReceiverId", SqlDbType.Char) { Value = receiverId }
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
         public async Task<int> DeleteMessageBySenderToReceiverIdAsync(string senderId, string receiverid)
         {
-            var db = Database.getInstance();
             var query = "DELETE FROM Messages WHERE SenderId = @SenderId AND ReceiverId = @ReceiverId";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@SenderId", SqlDbType.Char) { Value = senderId },
                 new SqlParameter("@ReceiverId", SqlDbType.Char) { Value = receiverid }
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
     }
 }

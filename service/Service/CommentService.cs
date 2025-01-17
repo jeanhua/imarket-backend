@@ -7,16 +7,20 @@ namespace imarket.service.Service
 {
     public class CommentService:ICommentService
     {
+        private readonly Database _database;
+        public CommentService(Database database)
+        {
+            _database = database;
+        }
         public async Task<IEnumerable<CommentModels>> GetCommentsByPostIdAsync(string postId)
         {
             var comments = new List<CommentModels>();
-            var db = Database.getInstance();
             var query = "SELECT * FROM Comments WHERE PostId = @PostId";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
             {
                 comments.Add(new CommentModels
@@ -32,13 +36,12 @@ namespace imarket.service.Service
         }
         public async Task<CommentModels> GetCommentByIdAsync(string id)
         {
-            var db = Database.getInstance();
             var query = "SELECT * FROM Comments WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
-            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
             {
                 return null;
@@ -55,7 +58,6 @@ namespace imarket.service.Service
         }
         public async Task<int> CreateCommentAsync(CommentModels comment)
         {
-            var db = Database.getInstance();
             var query = "INSERT INTO Comments (Id, PostId, UserId, Content, CreatedAt) VALUES (@Id, @PostId, @UserId, @Content, @CreatedAt)";
             var parameters = new SqlParameter[]
             {
@@ -65,17 +67,16 @@ namespace imarket.service.Service
                 new SqlParameter("@Content", SqlDbType.NVarChar) { Value = comment.Content },
                 new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = comment.CreatedAt },
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
         public async Task<int> DeleteCommentAsync(string id)
         {
-            var db = Database.getInstance();
             var query = "DELETE FROM Comments WHERE Id = @Id";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
-            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
     }
 }

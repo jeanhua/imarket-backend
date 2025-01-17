@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Text.Json;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 /*
  * 数据库操作示例
@@ -35,33 +36,14 @@ namespace imarket.utils
 {
     public class Database
     {
-        private static Database _instance;
-        private readonly string connectionString;
-        public static Database getInstance()
+        private readonly string? connectionString;
+        public Database(IConfiguration configuration)
         {
-            if (_instance == null)
+            connectionString = configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrEmpty(connectionString))
             {
-                _instance = new Database();
-            }
-            return _instance;
-        }
-        private Database()
-        {
-            try
-            {
-                JsonDocument config = JsonDocument.Parse(File.ReadAllText("appsettings.json"));
-                connectionString = config.RootElement.GetProperty("ConnectionStrings").GetProperty("DefaultConnection").GetString()!;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Database config error");
-                // 结束程序
-                Environment.Exit(1);
-            }
-            if(connectionString == null)
-            {
-                Console.WriteLine("Database config null");
-                // 结束程序
+                Console.WriteLine("Database connection string is empty");
                 Environment.Exit(1);
             }
         }
