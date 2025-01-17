@@ -32,7 +32,7 @@ namespace imarket
             }
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.ListenLocalhost(port);
+                options.ListenAnyIP(port);
             });
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             builder.Services.AddAuthentication(options =>
@@ -66,6 +66,7 @@ namespace imarket
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddScoped<IFavoriteService,FavoriteService>();
+            builder.Services.AddScoped<IMessageService, MessageService>();
             // 添加日志服务
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
