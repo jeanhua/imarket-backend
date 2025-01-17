@@ -30,6 +30,29 @@ namespace imarket.service.Service
             }
             return likes;
         }
+        public async Task<IEnumerable<LikeModels>> GetCommentLikesByCommentIdAsync(string commentId)
+        {
+            var likes = new List<LikeModels>();
+            var db = Database.getInstance();
+            var query = "SELECT * FROM Likes WHERE CommentId = @CommentId";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
+            };
+            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            foreach (DataRow row in result.Rows)
+            {
+                likes.Add(new LikeModels
+                {
+                    Id = row["Id"].ToString()!,
+                    PostId = row["PostId"].ToString()!,
+                    UserId = row["UserId"].ToString()!,
+                    CommentId = row["CommentId"].ToString()!,
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
+                });
+            }
+            return likes;
+        }
         public async Task<int> GetPostLikeNumsByPostIdAsync(string postId)
         {
             var db = Database.getInstance();
@@ -37,6 +60,17 @@ namespace imarket.service.Service
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+            };
+            var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
+            return Convert.ToInt32(result.Rows[0][0]!);
+        }
+        public async Task<int> GetCommentLikeNumsByCommentIdAsync(string commentId)
+        {
+            var db = Database.getInstance();
+            var query = "SELECT COUNT(*) FROM Likes WHERE CommentId = @CommentId";
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
             };
             var result = await db.ExecuteQuery(query, CommandType.Text, parameters);
             return Convert.ToInt32(result.Rows[0][0]!);

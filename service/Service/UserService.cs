@@ -105,7 +105,7 @@ namespace imarket.service.Service
             return users;
         }
 
-        public async Task<UserModels> GetUserByIdAsync(string id)
+        public async Task<UserModels?> GetUserByIdAsync(string id)
         {
             var db = Database.getInstance();
             var query = "SELECT * FROM Users WHERE Id = @Id";

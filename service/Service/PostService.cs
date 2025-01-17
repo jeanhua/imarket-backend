@@ -106,7 +106,7 @@ namespace imarket.service.Service
             return posts;
         }
 
-        public async Task<PostModels> GetPostByIdAsync(string id)
+        public async Task<PostModels?> GetPostByIdAsync(string id)
         {
             var db = Database.getInstance();
             var query = "SELECT * FROM Posts WHERE Id = @Id";

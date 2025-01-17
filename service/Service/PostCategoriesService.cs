@@ -26,7 +26,7 @@ namespace imarket.service.Service
             }
             return categories;
         }
-        public async Task<CategoryModels> GetCategoryByIdAsync(string id)
+        public async Task<CategoryModels?> GetCategoryByIdAsync(string id)
         {
             var db = Database.getInstance();
             var query = "SELECT * FROM Categories WHERE Id = @Id";
@@ -99,7 +99,7 @@ namespace imarket.service.Service
             }
             return categories;
         }
-        public async Task<PostCategoryModels> CreatePostCategoryAsync(PostCategoryModels postCategory)
+        public async Task<int> CreatePostCategoryAsync(PostCategoryModels postCategory)
         {
             var db = Database.getInstance();
             var query = "INSERT INTO PostCategories (PostId, CategoryId) VALUES (@PostId, @CategoryId)";
@@ -108,8 +108,7 @@ namespace imarket.service.Service
                 new SqlParameter("@PostId", SqlDbType.Char) { Value = postCategory.PostId },
                 new SqlParameter("@CategoryId", SqlDbType.Char) { Value = postCategory.CategoryId },
             };
-            await db.ExecuteNonQuery(query, CommandType.Text, parameters);
-            return postCategory;
+            return await db.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
         public async Task<int> DeletePostCategoryAsync(PostCategoryModels postCategory)
         {
