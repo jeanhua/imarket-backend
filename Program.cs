@@ -93,7 +93,6 @@ namespace imarket
             {
                 app.UseMiddleware<GlobalExceptionHandlerMiddleware>(); // 全局异常处理中间件
             }
-
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseDefaultFiles();

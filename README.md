@@ -30,7 +30,7 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
 2. 导入数据库初始化脚本（`create_tables_script.sql`），该脚本包含完整的表结构和外键约束。
 
    ```bash
-   mysql -u root -p < create_tables_script.sql
+   mysql -u imarket_root -p < create_tables_script.sql
    ```
 
 ### 2. 配置项目
