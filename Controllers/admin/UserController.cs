@@ -12,9 +12,11 @@ namespace imarket.Controllers.admin
     public class UserController : ControllerBase
     {
         public readonly IUserService userService;
-        public UserController(IUserService userService)
+        public readonly IPostService postService;
+        public UserController(IUserService userService, IPostService postService)
         {
             this.userService = userService;
+            this.postService = postService;
         }
 
         [HttpGet("list")] // api/admin/user/list?page=xx&size=xx
@@ -90,6 +92,56 @@ namespace imarket.Controllers.admin
             }
             return Ok(new { success = true });
         }
+        [HttpPost("edit")] // api/admin/user/edit
+        public async Task<IActionResult> EditUser([FromBody] UserEditRequest user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var userCheck = await userService.GetUserByIdAsync(user.Id!);
+            if (userCheck == null)
+            {
+                return NotFound();
+            }
+            userCheck.Username = user.Username??userCheck.Username;
+            userCheck.Nickname = user.Nickname??userCheck.Nickname;
+            userCheck.Avatar = user.Avatar ?? userCheck.Avatar;
+            userCheck.Email = user.Email??userCheck.Email;
+            userCheck.Role = user.Role ?? userCheck.Role;
+            userCheck.Status = user.Status ?? userCheck.Status;
+            await userService.UpdateUserAsync(user.Id!, userCheck);
+            return Ok(new { success = true });
+        }
+        [HttpGet("delete")] // api/admin/user/delete?userId=xxx
+        public async Task<IActionResult> DeleteUser([FromQuery] string userId)
+        {
+            var posts = await postService.GetPostsByUserIdAsync(userId);
+            if (posts != null)
+            {
+                return BadRequest("some posts of the user have not been deleted!");
+            }
+            var result = await userService.DeleteUserAsync(userId);
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("deletePosts")] // api/admin/user/deletePosts?userId=xxx
+        public async Task<IActionResult> DeletePosts([FromQuery] string userId)
+        {
+            var posts = await postService.GetPostsByUserIdAsync(userId);
+            if (posts != null)
+            {
+                foreach (var post in posts)
+                {
+                    await postService.DeletePostAsync(post.Id);
+                }
+            }
+            return Ok(new { success = true });
+        }
     }
 
     public class UserCreateRequest
@@ -106,5 +158,17 @@ namespace imarket.Controllers.admin
         [Required]
         public string? Role { get; set; }
         public int Status { get; set; }
+    }
+
+    public class UserEditRequest
+    {
+        [Required]
+        public string? Id { get; set; }
+        public string? Username { get; set; }
+        public string? Nickname { get; set; }
+        public string? Avatar { get; set; }
+        public string? Email { get; set; }
+        public string? Role { get; set; }
+        public int? Status { get; set; }
     }
 }
