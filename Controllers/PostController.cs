@@ -49,6 +49,13 @@ namespace imarket.Controllers
             return Ok(new { success = true, posts = posts });
         }
 
+        [HttpGet("categories")] // api/post/categories
+        public async Task<IActionResult> GetCategories()
+        {
+            var categories = await postCategoriesService.GetAllCategoriesAsync();
+            return Ok(new { success = true, categories });
+        }
+
         [HttpGet("CategorisedPosts")] // api/post/CategorisedPosts
         public async Task<IActionResult> GetCategorisedPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string categoryId)
         {
@@ -177,7 +184,7 @@ namespace imarket.Controllers
             return Ok(new { success = true });
         }
 
-        [HttpPost("delete")] // api/post/delete
+        [HttpPost("delete")] // api/post/delete?postId=xxx
         [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> DeletePost([FromQuery] string postId)
         {
