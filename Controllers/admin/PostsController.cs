@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using imarket.models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace imarket.Controllers.admin
 {
     [Route("api/admin/[controller]")]
     [ApiController]
+    [Authorize(Roles = "admin")]
     public class PostsController : ControllerBase
     {
         public readonly IPostService postService;
