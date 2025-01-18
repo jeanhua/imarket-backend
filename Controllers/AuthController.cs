@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using imarket.service.IService;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Caching.Memory;
+using System.Security.Claims;
 
 namespace imarket.Controllers
 {
@@ -71,7 +72,7 @@ namespace imarket.Controllers
                 return Unauthorized("Invalid username or password.");
             }
             // 生成 JWT Token
-            string _token;
+            TokenModels _token;
             if (userCheck.Status == 0)
             {
                 _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "unverified")!;
@@ -188,6 +189,39 @@ namespace imarket.Controllers
             user.PasswordHash = changePasswordRequest.NewPassword;
             await userService.UpdateUserAsync(user.Id, user);
             return Ok(new { success = true });
+        }
+
+        [HttpGet("refresh")] // api/auth/refresh
+        [Authorize]
+        public async Task<IActionResult> Refresh()
+        {
+            var userCheck = await userService.GetUserByUsernameAsync(User.Identity!.Name);
+            if (userCheck == null)
+            {
+                return Unauthorized();
+            }
+            TokenModels _token;
+            if (userCheck.Status == 0)
+            {
+                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "unverified")!;
+            }
+            else if (userCheck.Status == 1)
+            {
+                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, userCheck.Role)!;
+            }
+            else if (userCheck.Status == 2)
+            {
+                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "banned")!;
+            }
+            else
+            {
+                return Unauthorized("Invalid Role.");
+            }
+            if (_token == null)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true, token = _token });
         }
 
         [HttpPost("forgot-password")] // api/auth/forgot-password

@@ -5,7 +5,7 @@ namespace imarket.service.IService
     public interface IUserService
     {
         Task<int> GetUserNums();
-        Task<UserModels?> GetUserByUsernameAsync(string username);
+        Task<UserModels?> GetUserByUsernameAsync(string? username);
         Task<UserModels?> GetUserByEmailAsync(string email);
         Task<IEnumerable<UserModels>> GetAllUsers(int page, int pageSize);
         Task<UserModels?> GetUserByIdAsync(string id);

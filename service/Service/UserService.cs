@@ -18,8 +18,12 @@ namespace imarket.service.Service
             var result = await _database.ExecuteQuery(query, CommandType.Text);
             return Convert.ToInt32(result.Rows[0][0]!);
         }
-        public async Task<UserModels?> GetUserByUsernameAsync(string username)
+        public async Task<UserModels?> GetUserByUsernameAsync(string? username)
         {
+            if (username == null)
+            {
+                return null;
+            }
             var query = "SELECT * FROM Users WHERE Username = @Username";
             var parameters = new SqlParameter[]
             {

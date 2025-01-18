@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using imarket.models;
 
 namespace imarket.utils
 {
@@ -16,7 +17,7 @@ namespace imarket.utils
             this._logger = _logger;
         }
 
-        public string? GenerateToken(string username,string id,string role)
+        public TokenModels? GenerateToken(string username, string id, string role)
         {
             try
             {
@@ -33,13 +34,33 @@ namespace imarket.utils
                     new Claim(ClaimTypes.NameIdentifier, id)
                 };
 
+                DateTime expires = DateTime.Now.AddMinutes(double.Parse(jwtSettings["ExpiresInMinutes"]));
+
                 var token = new JwtSecurityToken(
                     issuer: jwtSettings["Issuer"],
                     audience: jwtSettings["Audience"],
                     claims: claims,
-                    expires: DateTime.Now.AddMinutes(double.Parse(jwtSettings["ExpiresInMinutes"])),
+                    expires: expires,
                     signingCredentials: credentials);
-                return new JwtSecurityTokenHandler().WriteToken(token);
+
+                var refreshToken = new JwtSecurityToken(
+                    issuer: jwtSettings["Issuer"],
+                    audience: jwtSettings["Audience"],
+                    claims: new[]{
+                    new Claim(JwtRegisteredClaimNames.Sub, id),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.Name, username),
+                    new Claim(ClaimTypes.NameIdentifier, id)
+                },
+                    expires: DateTime.Now.AddDays(double.Parse(jwtSettings["RefreshTokenExpiresInDays"])),
+                    signingCredentials: credentials);
+
+                return new TokenModels
+                {
+                    AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                    RefreshToken = new JwtSecurityTokenHandler().WriteToken(refreshToken),
+                    Expires = expires,
+                };
             }
             catch (Exception e)
             {
