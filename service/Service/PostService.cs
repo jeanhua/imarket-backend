@@ -1,7 +1,7 @@
 ﻿using imarket.models;
 using imarket.service.IService;
 using imarket.utils;
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Data;
 namespace imarket.service.Service
 {
@@ -30,10 +30,10 @@ namespace imarket.service.Service
             }
             var posts = new List<PostModels>();
             var query = "SELECT * FROM Posts ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
-                new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
+                new MySqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
+                new MySqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -54,9 +54,9 @@ namespace imarket.service.Service
         {
             var posts = new List<PostModels>();
             var query = "SELECT * FROM Posts WHERE UserId = @UserId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId }
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = userId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -85,11 +85,11 @@ namespace imarket.service.Service
             }
             var posts = new List<PostModels>();
             var query = "SELECT * FROM Posts WHERE Id IN (SELECT PostId FROM PostCategories WHERE CategoryId = @CategoryId) ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@CategoryId", SqlDbType.Char) { Value = categoryId },
-                new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
-                new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
+                new MySqlParameter("@CategoryId", SqlDbType.Char) { Value = categoryId },
+                new MySqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
+                new MySqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -110,9 +110,9 @@ namespace imarket.service.Service
         public async Task<PostModels?> GetPostByIdAsync(string id)
         {
             var query = "SELECT * FROM Posts WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -132,14 +132,14 @@ namespace imarket.service.Service
         public async Task<int> CreatePostAsync(PostModels post)
         {
             var query = "INSERT INTO Posts (Id, Title, Content, UserId, CreatedAt, Status) VALUES (@Id, @Title, @Content, @UserId, @CreatedAt, @Status)";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = post.Id },
-                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = post.Title },
-                new SqlParameter("@Content", SqlDbType.NVarChar) { Value = post.Content },
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = post.UserId },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = post.CreatedAt },
-                new SqlParameter("@Status", SqlDbType.Int) { Value = post.Status },
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = post.Id },
+                new MySqlParameter("@Title", SqlDbType.NVarChar) { Value = post.Title },
+                new MySqlParameter("@Content", SqlDbType.NVarChar) { Value = post.Content },
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = post.UserId },
+                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = post.CreatedAt },
+                new MySqlParameter("@Status", SqlDbType.Int) { Value = post.Status },
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -147,9 +147,9 @@ namespace imarket.service.Service
         public async Task<int> DeletePostAsync(string id)
         {
             var query = "DELETE FROM Posts WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -157,14 +157,14 @@ namespace imarket.service.Service
         public async Task<int> UpdatePostAsync(PostModels post)
         {
             var query = "UPDATE Posts SET Title = @Title, Content = @Content, UserId = @UserId , CreatedAt = @CreatedAt , Status = @Status WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = post.Id },
-                new SqlParameter("@Title", SqlDbType.NVarChar) { Value = post.Title },
-                new SqlParameter("@Content", SqlDbType.NVarChar) { Value = post.Content },
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = post.UserId },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = post.CreatedAt },
-                new SqlParameter("@Status", SqlDbType.Int) { Value = post.Status },
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = post.Id },
+                new MySqlParameter("@Title", SqlDbType.NVarChar) { Value = post.Title },
+                new MySqlParameter("@Content", SqlDbType.NVarChar) { Value = post.Content },
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = post.UserId },
+                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = post.CreatedAt },
+                new MySqlParameter("@Status", SqlDbType.Int) { Value = post.Status },
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

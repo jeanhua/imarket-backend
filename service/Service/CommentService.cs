@@ -1,7 +1,7 @@
 ﻿using imarket.models;
 using imarket.service.IService;
 using imarket.utils;
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Data;
 namespace imarket.service.Service
 {
@@ -16,9 +16,9 @@ namespace imarket.service.Service
         {
             var comments = new List<CommentModels>();
             var query = "SELECT * FROM Comments WHERE PostId = @PostId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -37,9 +37,9 @@ namespace imarket.service.Service
         public async Task<CommentModels?> GetCommentByIdAsync(string id)
         {
             var query = "SELECT * FROM Comments WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -59,22 +59,22 @@ namespace imarket.service.Service
         public async Task<int> CreateCommentAsync(CommentModels comment)
         {
             var query = "INSERT INTO Comments (Id, PostId, UserId, Content, CreatedAt) VALUES (@Id, @PostId, @UserId, @Content, @CreatedAt)";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = comment.Id },
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = comment.PostId },
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = comment.UserId },
-                new SqlParameter("@Content", SqlDbType.NVarChar) { Value = comment.Content },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = comment.CreatedAt },
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = comment.Id },
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = comment.PostId },
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = comment.UserId },
+                new MySqlParameter("@Content", SqlDbType.NVarChar) { Value = comment.Content },
+                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = comment.CreatedAt },
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
         public async Task<int> DeleteCommentAsync(string id)
         {
             var query = "DELETE FROM Comments WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

@@ -1,6 +1,6 @@
 ﻿using imarket.service.IService;
 using imarket.utils;
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Data;
 namespace imarket.service.Service
 {
@@ -15,11 +15,11 @@ namespace imarket.service.Service
         {
             var favorites = new List<int>();
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
-                new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pagesize },
-                new SqlParameter("@PageSize", SqlDbType.Int) { Value = pagesize },
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new MySqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pagesize },
+                new MySqlParameter("@PageSize", SqlDbType.Int) { Value = pagesize },
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -32,10 +32,10 @@ namespace imarket.service.Service
         {
             // 检查是否已经收藏
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId },
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId },
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count > 0)
@@ -44,12 +44,12 @@ namespace imarket.service.Service
             }
             // 添加收藏记录
             query = "INSERT INTO Favorites (Id, UserId, PostId, CreatedAt) VALUES (@Id, @UserId, @PostId, @CreatedAt)";
-            parameters = new SqlParameter[]
+            parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = Guid.NewGuid().ToString() },
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = DateTime.Now },
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = Guid.NewGuid().ToString() },
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId },
+                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = DateTime.Now },
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

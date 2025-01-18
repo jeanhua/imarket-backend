@@ -1,7 +1,7 @@
 ﻿using imarket.models;
 using imarket.service.IService;
 using imarket.utils;
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Data;
 namespace imarket.service.Service
 {
@@ -26,10 +26,10 @@ namespace imarket.service.Service
             }
             var images = new List<ImageModels>();
             var query = "SELECT * FROM Images ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
-                new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
+                new MySqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
+                new MySqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -47,9 +47,9 @@ namespace imarket.service.Service
         public async Task<ImageModels?> GetImageByIdAsync(string id)
         {
             var query = "SELECT * FROM Images WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -69,9 +69,9 @@ namespace imarket.service.Service
         {
             var images = new List<ImageModels>();
             var query = "SELECT * FROM Images WHERE PostId = @PostId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -110,12 +110,12 @@ namespace imarket.service.Service
         public async Task<int> SaveImageAsync(ImageModels image)
         {
             var query = "INSERT INTO Images (Id, Url, PostId, CreatedAt) VALUES (@Id, @Url, @PostId, @CreatedAt)";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = image.Id },
-                new SqlParameter("@Url", SqlDbType.NVarChar) { Value = image.Url },
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = image.PostId },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = image.CreatedAt },
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = image.Id },
+                new MySqlParameter("@Url", SqlDbType.NVarChar) { Value = image.Url },
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = image.PostId },
+                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = image.CreatedAt },
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -123,9 +123,9 @@ namespace imarket.service.Service
         public async Task<int> DeleteImageByIdAsync(string id)
         {
             var query = "DELETE FROM Images WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             var image = await GetImageByIdAsync(id);
             try
@@ -142,9 +142,9 @@ namespace imarket.service.Service
         public async Task<int> DeleteImagesByPostIdAsync(string postId)
         {
             var query = "DELETE FROM Images WHERE PostId = @PostId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-            new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+            new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             var images = await GetImagesByPostId(postId);
             foreach (var image in images)

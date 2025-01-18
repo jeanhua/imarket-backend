@@ -1,7 +1,7 @@
 ﻿using imarket.models;
 using imarket.service.IService;
 using imarket.utils;
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Data;
 namespace imarket.service.Service
 {
@@ -25,9 +25,9 @@ namespace imarket.service.Service
                 return null;
             }
             var query = "SELECT * FROM Users WHERE Username = @Username";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Username", SqlDbType.NVarChar) { Value = username }
+                new MySqlParameter("@Username", SqlDbType.NVarChar) { Value = username }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -51,9 +51,9 @@ namespace imarket.service.Service
         public async Task<UserModels> GetUserByEmailAsync(string email)
         {
             var query = "SELECT * FROM Users WHERE Email = @Email";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Email", SqlDbType.NVarChar) { Value = email }
+                new MySqlParameter("@Email", SqlDbType.NVarChar) { Value = email }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -86,10 +86,10 @@ namespace imarket.service.Service
             }
             var users = new List<UserModels>();
             var query = "SELECT * FROM Users ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
-                new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
+                new MySqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
+                new MySqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -113,9 +113,9 @@ namespace imarket.service.Service
         public async Task<UserModels?> GetUserByIdAsync(string id)
         {
             var query = "SELECT * FROM Users WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -139,17 +139,17 @@ namespace imarket.service.Service
         public async Task<int> CreateUserAsync(UserModels user)
         {
             var query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = user.Id },
-                new SqlParameter("@Username", SqlDbType.NVarChar) { Value = user.Username },
-                new SqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
-                new SqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = user.PasswordHash },
-                new SqlParameter("@Avatar", SqlDbType.NVarChar) { Value = user.Avatar },
-                new SqlParameter("@Email", SqlDbType.NVarChar) { Value = user.Email },
-                new SqlParameter("@Role", SqlDbType.NVarChar) { Value = user.Role },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = user.CreatedAt },
-                new SqlParameter("@Status", SqlDbType.Int) { Value = user.Status },
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = user.Id },
+                new MySqlParameter("@Username", SqlDbType.NVarChar) { Value = user.Username },
+                new MySqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
+                new MySqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = user.PasswordHash },
+                new MySqlParameter("@Avatar", SqlDbType.NVarChar) { Value = user.Avatar },
+                new MySqlParameter("@Email", SqlDbType.NVarChar) { Value = user.Email },
+                new MySqlParameter("@Role", SqlDbType.NVarChar) { Value = user.Role },
+                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = user.CreatedAt },
+                new MySqlParameter("@Status", SqlDbType.Int) { Value = user.Status },
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -157,9 +157,9 @@ namespace imarket.service.Service
         public async Task<int> DeleteUserAsync(string id)
         {
             var query = "DELETE FROM Users WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -167,17 +167,17 @@ namespace imarket.service.Service
         public async Task<int> UpdateUserAsync(string userId, UserModels user)
         {
             var query = "UPDATE Users SET Username = @Username, Nickname = @Nickname, PasswordHash = @PasswordHash, Avatar = @Avatar, Email = @Email, Role = @Role, CreatedAt = @CreatedAt, Status = @Status WHERE Id = @Id";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = userId },
-                new SqlParameter("@Username", SqlDbType.NVarChar) { Value = user.Username },
-                new SqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
-                new SqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = user.PasswordHash },
-                new SqlParameter("@Avatar", SqlDbType.NVarChar) { Value = user.Avatar },
-                new SqlParameter("@Email", SqlDbType.NVarChar) { Value = user.Email },
-                new SqlParameter("@Role", SqlDbType.NVarChar) { Value = user.Role },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = user.CreatedAt },
-                new SqlParameter("@Status", SqlDbType.Int) { Value = user.Status },
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = userId },
+                new MySqlParameter("@Username", SqlDbType.NVarChar) { Value = user.Username },
+                new MySqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
+                new MySqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = user.PasswordHash },
+                new MySqlParameter("@Avatar", SqlDbType.NVarChar) { Value = user.Avatar },
+                new MySqlParameter("@Email", SqlDbType.NVarChar) { Value = user.Email },
+                new MySqlParameter("@Role", SqlDbType.NVarChar) { Value = user.Role },
+                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = user.CreatedAt },
+                new MySqlParameter("@Status", SqlDbType.Int) { Value = user.Status },
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

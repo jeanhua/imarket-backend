@@ -1,7 +1,7 @@
 ﻿using imarket.models;
 using imarket.service.IService;
 using imarket.utils;
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Data;
 namespace imarket.service.Service
 {
@@ -16,9 +16,9 @@ namespace imarket.service.Service
         {
             var likes = new List<LikeModels>();
             var query = "SELECT * FROM Likes WHERE PostId = @PostId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -38,9 +38,9 @@ namespace imarket.service.Service
         {
             var likes = new List<LikeModels>();
             var query = "SELECT * FROM Likes WHERE CommentId = @CommentId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
+                new MySqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -59,9 +59,9 @@ namespace imarket.service.Service
         public async Task<int> GetPostLikeNumsByPostIdAsync(string postId)
         {
             var query = "SELECT COUNT(*) FROM Likes WHERE PostId = @PostId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             return Convert.ToInt32(result.Rows[0][0]!);
@@ -69,9 +69,9 @@ namespace imarket.service.Service
         public async Task<int> GetCommentLikeNumsByCommentIdAsync(string commentId)
         {
             var query = "SELECT COUNT(*) FROM Likes WHERE CommentId = @CommentId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
+                new MySqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             return Convert.ToInt32(result.Rows[0][0]!);
@@ -79,16 +79,16 @@ namespace imarket.service.Service
         public async Task<int> CreateLikeAsync(LikeModels like)
         {
             string query;
-            SqlParameter[] parameters;
+            MySqlParameter[] parameters;
             // 检查是帖子点赞还是评论点赞
             if (like.CommentId == null)
             {
                 // 检查是否已经点赞
                 query = "SELECT * FROM Likes WHERE PostId = @PostId AND UserId = @UserId AND CommentId IS NULL";
-                parameters = new SqlParameter[]
+                parameters = new MySqlParameter[]
                 {
-                    new SqlParameter("@PostId", SqlDbType.Char) { Value = like.PostId },
-                    new SqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
+                    new MySqlParameter("@PostId", SqlDbType.Char) { Value = like.PostId },
+                    new MySqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
                 };
                 var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
                 if (result.Rows.Count > 0)
@@ -100,10 +100,10 @@ namespace imarket.service.Service
             {
                 // 检查是否已经点赞
                 query = "SELECT * FROM Likes WHERE PostId IS NULL AND UserId = @UserId AND CommentId = @CommentId";
-                parameters = new SqlParameter[]
+                parameters = new MySqlParameter[]
                 {
-                    new SqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
-                    new SqlParameter("@CommentId", SqlDbType.Char) { Value = like.CommentId },
+                    new MySqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
+                    new MySqlParameter("@CommentId", SqlDbType.Char) { Value = like.CommentId },
                 };
                 var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
                 if (result.Rows.Count > 0)
@@ -120,13 +120,13 @@ namespace imarket.service.Service
             {
                 query = "INSERT INTO Likes (Id, PostId, UserId, CommentId, CreatedAt) VALUES (@Id, NULL, @UserId, @CommentId, @CreatedAt)";
             }
-            parameters = new SqlParameter[]
+            parameters = new MySqlParameter[]
             {
-                new SqlParameter("@Id", SqlDbType.Char) { Value = like.Id },
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = like.PostId },
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
-                new SqlParameter("@CommentId", SqlDbType.Char) { Value = like.CommentId },
-                new SqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = like.CreatedAt },
+                new MySqlParameter("@Id", SqlDbType.Char) { Value = like.Id },
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = like.PostId },
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
+                new MySqlParameter("@CommentId", SqlDbType.Char) { Value = like.CommentId },
+                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = like.CreatedAt },
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -135,20 +135,20 @@ namespace imarket.service.Service
             if (like.CommentId == null)
             {
                 var query = "DELETE FROM Likes WHERE PostId = @PostId AND UserId = @UserId AND CommentId IS NULL";
-                var parameters = new SqlParameter[]
+                var parameters = new MySqlParameter[]
                 {
-                    new SqlParameter("@PostId", SqlDbType.Char) { Value = like.PostId },
-                    new SqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
+                    new MySqlParameter("@PostId", SqlDbType.Char) { Value = like.PostId },
+                    new MySqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
                 };
                 return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
             }
             else
             {
                 var query = "DELETE FROM Likes WHERE PostId IS NULL AND UserId = @UserId AND CommentId = @CommentId";
-                var parameters = new SqlParameter[]
+                var parameters = new MySqlParameter[]
                 {
-                    new SqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
-                    new SqlParameter("@CommentId", SqlDbType.Char) { Value = like.CommentId },
+                    new MySqlParameter("@UserId", SqlDbType.Char) { Value = like.UserId },
+                    new MySqlParameter("@CommentId", SqlDbType.Char) { Value = like.CommentId },
                 };
                 return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
             }
@@ -157,10 +157,10 @@ namespace imarket.service.Service
         public async Task<bool> CheckUserLikeCommentAsync(string userId, string commentId)
         {
             var query = "SELECT * FROM Likes WHERE UserId = @UserId AND CommentId = @CommentId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
-                new SqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new MySqlParameter("@CommentId", SqlDbType.Char) { Value = commentId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -172,10 +172,10 @@ namespace imarket.service.Service
         public async Task<bool> CheckUserLikePostAsync(string userId, string postId)
         {
             var query = "SELECT * FROM Likes WHERE UserId = @UserId AND PostId = @PostId";
-            var parameters = new SqlParameter[]
+            var parameters = new MySqlParameter[]
             {
-                new SqlParameter("@UserId", SqlDbType.Char) { Value = userId },
-                new SqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+                new MySqlParameter("@UserId", SqlDbType.Char) { Value = userId },
+                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)

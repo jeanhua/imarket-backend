@@ -10,10 +10,10 @@ var posts = Database.getInstance().ExecuteQuery(query, CommandType.Text);
 
  * 非查询操作 (插入)
 var query = "INSERT INTO Posts (Title, Content) VALUES (@Title, @Content)";
-var parameters = new SqlParameter[]
+var parameters = new MySqlParameter[]
 {
-    new SqlParameter("@Title", SqlDbType.NVarChar) { Value = "New Post" },
-    new SqlParameter("@Content", SqlDbType.NVarChar) { Value = "This is a new post" }
+    new MySqlParameter("@Title", SqlDbType.NVarChar) { Value = "New Post" },
+    new MySqlParameter("@Content", SqlDbType.NVarChar) { Value = "This is a new post" }
 };
 int rowsAffected = Database.getInstance().ExecuteNonQuery(query, CommandType.Text, parameters);
 
