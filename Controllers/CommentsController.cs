@@ -119,6 +119,32 @@ namespace imarket.Controllers
             return Ok(new { success = true, commentId = result });
         }
 
+        [HttpGet("Delete")] // api/Comments/Delete?CommentId=xxx
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> DeleteCommentAsync([FromQuery] string CommentId)
+        {
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+            var comment = await commentService.GetCommentByIdAsync(CommentId!);
+            if (comment == null)
+            {
+                return NotFound("Comment not found.");
+            }
+            if (comment.UserId != user.Id && User.IsInRole("admin") == false)
+            {
+                return Unauthorized("You are not the author of this comment.");
+            }
+            var result = await commentService.DeleteCommentAsync(CommentId!);
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true });
+        }
+
         [HttpPost("Like")] // api/Comments/Like?CommentId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> LikeCommentAsync([FromQuery] string CommentId)
