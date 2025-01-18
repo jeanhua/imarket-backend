@@ -73,7 +73,8 @@ namespace imarket
             builder.Services.AddSingleton<Database>(provider =>
             {
                 var configuration = provider.GetRequiredService<IConfiguration>();
-                return new Database(configuration);
+                var logger = provider.GetRequiredService<ILogger<Database>>();
+                return new Database(configuration,logger);
             });
 
             // 添加日志服务
