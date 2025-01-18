@@ -16,10 +16,13 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
    mysql -u root -p
    ```
 
-   创建数据库
+   创建数据库和用户
 
    ```
    CREATE DATABASE imarket;
+   CREATE USER 'imarket_root'@'localhost' IDENTIFIED BY 'your_password';
+   GRANT ALL PRIVILEGES ON imarket.* TO 'imarket_root'@'localhost';
+   FLUSH PRIVILEGES;
    ```
 
    
@@ -43,7 +46,7 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
    ```json
    {
        "ConnectionStrings": {
-           "DefaultConnection": "Server=localhost;Database=imarket;User=root;Password=yourPassword;"
+           "DefaultConnection": "Server=localhost;Database=imarket;User Id=imarket_root;Password=your_password;"
        }
    }
    ```

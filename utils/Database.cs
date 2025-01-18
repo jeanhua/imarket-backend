@@ -1,7 +1,5 @@
-﻿using System.Data;
-using System.Text.Json;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+﻿using MySql.Data.MySqlClient; // 使用 MySQL 的 NuGet 包
+using System.Data;
 
 /*
  * 数据库操作示例
@@ -38,9 +36,10 @@ namespace imarket.utils
     {
         private readonly string? connectionString;
         private readonly ILogger<Database> _logger;
-        public Database(IConfiguration configuration, ILogger<Database> _logger)
+
+        public Database(IConfiguration configuration, ILogger<Database> logger)
         {
-            this._logger = _logger;
+            this._logger = logger;
             connectionString = configuration.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
@@ -51,19 +50,19 @@ namespace imarket.utils
         }
 
         // 数据库连接
-        private SqlConnection GetConnection()
+        private MySqlConnection GetConnection()
         {
-            var connection = new SqlConnection(connectionString);
+            var connection = new MySqlConnection(connectionString);
             connection.Open();
             return connection;
         }
 
         // 查询
-        public async Task<DataTable> ExecuteQuery(string query, CommandType commandType, SqlParameter[] parameters = null)
+        public async Task<DataTable> ExecuteQuery(string query, CommandType commandType, MySqlParameter[] parameters = null)
         {
             using (var connection = GetConnection())
             {
-                using (var command = new SqlCommand(query, connection))
+                using (var command = new MySqlCommand(query, connection))
                 {
                     command.CommandType = commandType;
                     if (parameters != null)
@@ -81,11 +80,11 @@ namespace imarket.utils
         }
 
         // 执行非查询命令
-        public async Task<int> ExecuteNonQuery(string query, CommandType commandType, SqlParameter[] parameters = null)
+        public async Task<int> ExecuteNonQuery(string query, CommandType commandType, MySqlParameter[] parameters = null)
         {
             using (var connection = GetConnection())
             {
-                using (var command = new SqlCommand(query, connection))
+                using (var command = new MySqlCommand(query, connection))
                 {
                     command.CommandType = commandType;
                     if (parameters != null)
@@ -98,11 +97,11 @@ namespace imarket.utils
         }
 
         // 执行事务
-        public async Task ExecuteTransaction(Action<SqlConnection> action)
+        public async Task ExecuteTransaction(Action<MySqlConnection> action)
         {
             using (var connection = GetConnection())
             {
-                using (var transaction = connection.BeginTransaction())
+                using (var transaction = await connection.BeginTransactionAsync())
                 {
                     try
                     {
@@ -111,7 +110,7 @@ namespace imarket.utils
                     }
                     catch (Exception ex)
                     {
-                        transaction.Rollback(); // 发生异常时回滚事务
+                        await transaction.RollbackAsync(); // 发生异常时回滚事务
                         throw new Exception("Transaction failed", ex);
                     }
                 }
@@ -119,11 +118,11 @@ namespace imarket.utils
         }
 
         // 获取单个值
-        public async Task<object?> ExecuteScalar(string query, CommandType commandType, SqlParameter[] parameters = null)
+        public async Task<object?> ExecuteScalar(string query, CommandType commandType, MySqlParameter[] parameters = null)
         {
             using (var connection = GetConnection())
             {
-                using (var command = new SqlCommand(query, connection))
+                using (var command = new MySqlCommand(query, connection))
                 {
                     command.CommandType = commandType;
                     if (parameters != null)
