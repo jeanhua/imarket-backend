@@ -18,7 +18,7 @@ namespace imarket.service.Service
             var query = "SELECT * FROM Messages WHERE SenderId = @SenderId";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@SenderId", SqlDbType.Char) { Value = userId }
+                new MySqlParameter("@SenderId",userId )
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -41,7 +41,7 @@ namespace imarket.service.Service
             var query = "SELECT * FROM Messages WHERE ReceiverId = @ReceiverId";
             var parameters = new MySqlParameter[]
             {
-            new MySqlParameter("@ReceiverId", SqlDbType.Char) { Value = userId }
+                new MySqlParameter("@ReceiverId",userId)
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -63,7 +63,7 @@ namespace imarket.service.Service
             var query = "SELECT * FROM Messages WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id",id )
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -86,11 +86,11 @@ namespace imarket.service.Service
             var query = "INSERT INTO Messages (Id, SenderId, ReceiverId, Content, CreatedAt) VALUES (@Id, @SenderId, @ReceiverId, @Content, @CreatedAt)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = message.Id },
-                new MySqlParameter("@SenderId", SqlDbType.Char) { Value = message.SenderId },
-                new MySqlParameter("@ReceiverId", SqlDbType.Char) { Value = message.ReceiverId },
-                new MySqlParameter("@Content", SqlDbType.NVarChar) { Value = message.Content },
-                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = message.CreatedAt },
+                new MySqlParameter("@Id", message.Id),
+                new MySqlParameter("@SenderId", message.SenderId),
+                new MySqlParameter("@ReceiverId", message.ReceiverId),
+                new MySqlParameter("@Content", message.Content),
+                new MySqlParameter("@CreatedAt", message.CreatedAt),
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -100,7 +100,7 @@ namespace imarket.service.Service
             var query = "DELETE FROM Messages WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", id)
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -110,7 +110,7 @@ namespace imarket.service.Service
             var query = "DELETE FROM Messages WHERE ReceiverId = @ReceiverId";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@ReceiverId", SqlDbType.Char) { Value = receiverId }
+                new MySqlParameter("@ReceiverId", receiverId )
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -120,8 +120,8 @@ namespace imarket.service.Service
             var query = "DELETE FROM Messages WHERE SenderId = @SenderId AND ReceiverId = @ReceiverId";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@SenderId", SqlDbType.Char) { Value = senderId },
-                new MySqlParameter("@ReceiverId", SqlDbType.Char) { Value = receiverid }
+                new MySqlParameter("@SenderId", senderId),
+                new MySqlParameter("@ReceiverId",receiverid)
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

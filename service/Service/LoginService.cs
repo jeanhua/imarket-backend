@@ -18,8 +18,8 @@ namespace imarket.service.Service
             var query = "SELECT * FROM Users WHERE Username = @Username AND PasswordHash = @PasswordHash";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Username", SqlDbType.NVarChar) { Value = username },
-                new MySqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = password },
+                new MySqlParameter("@Username", username),
+                new MySqlParameter("@PasswordHash", password),
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -48,15 +48,15 @@ namespace imarket.service.Service
             var query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = user.Id },
-                new MySqlParameter("@Username", SqlDbType.NVarChar) { Value = user.Username },
-                new MySqlParameter("@Nickname", SqlDbType.NVarChar) { Value = user.Nickname },
-                new MySqlParameter("@PasswordHash", SqlDbType.NVarChar) { Value = user.PasswordHash },
-                new MySqlParameter("@Avatar", SqlDbType.NVarChar) { Value = user.Avatar },
-                new MySqlParameter("@Email", SqlDbType.NVarChar) { Value = user.Email },
-                new MySqlParameter("@Role", SqlDbType.NVarChar) { Value = user.Role },
-                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = user.CreatedAt },
-                new MySqlParameter("@Status", SqlDbType.Int) { Value = user.Status },
+                new MySqlParameter("@Id", user.Id),
+                new MySqlParameter("@Username", user.Username),
+                new MySqlParameter("@Nickname", user.Nickname),
+                new MySqlParameter("@PasswordHash", user.PasswordHash),
+                new MySqlParameter("@Avatar", user.Avatar),
+                new MySqlParameter("@Email", user.Email),
+                new MySqlParameter("@Role", user.Role),
+                new MySqlParameter("@CreatedAt", user.CreatedAt),
+                new MySqlParameter("@Status", user.Status),
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

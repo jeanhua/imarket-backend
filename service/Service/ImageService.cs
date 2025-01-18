@@ -24,14 +24,19 @@ namespace imarket.service.Service
             {
                 pageSize = 10;
             }
-            var images = new List<ImageModels>();
-            var query = "SELECT * FROM Images ORDER BY CreatedAt DESC OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-            var parameters = new MySqlParameter[]
+            int offset = (page - 1) * pageSize;
+            var query = @"
+                SELECT * FROM Images 
+                ORDER BY CreatedAt DESC 
+                LIMIT @PageSize OFFSET @Offset;
+            ";
+            var parameters = new[]
             {
-                new MySqlParameter("@Offset", SqlDbType.Int) { Value = (page - 1) * pageSize },
-                new MySqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize },
+                new MySqlParameter("@Offset", offset),
+                new MySqlParameter("@PageSize", pageSize)
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
+            var images = new List<ImageModels>();
             foreach (DataRow row in result.Rows)
             {
                 images.Add(new ImageModels
@@ -49,7 +54,7 @@ namespace imarket.service.Service
             var query = "SELECT * FROM Images WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", id)
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -71,7 +76,7 @@ namespace imarket.service.Service
             var query = "SELECT * FROM Images WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+                new MySqlParameter("@PostId", postId)
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -112,10 +117,10 @@ namespace imarket.service.Service
             var query = "INSERT INTO Images (Id, Url, PostId, CreatedAt) VALUES (@Id, @Url, @PostId, @CreatedAt)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = image.Id },
-                new MySqlParameter("@Url", SqlDbType.NVarChar) { Value = image.Url },
-                new MySqlParameter("@PostId", SqlDbType.Char) { Value = image.PostId },
-                new MySqlParameter("@CreatedAt", SqlDbType.DateTime) { Value = image.CreatedAt },
+                new MySqlParameter("@Id", image.Id),
+                new MySqlParameter("@Url", image.Url),
+                new MySqlParameter("@PostId", image.PostId),
+                new MySqlParameter("@CreatedAt", image.CreatedAt),
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -125,7 +130,7 @@ namespace imarket.service.Service
             var query = "DELETE FROM Images WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", id)
             };
             var image = await GetImageByIdAsync(id);
             try
@@ -144,7 +149,7 @@ namespace imarket.service.Service
             var query = "DELETE FROM Images WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]
             {
-            new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+                new MySqlParameter("@PostId", postId)
             };
             var images = await GetImagesByPostId(postId);
             foreach (var image in images)

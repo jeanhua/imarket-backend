@@ -35,7 +35,7 @@ namespace imarket.service.Service
             var query = "SELECT * FROM Categories WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id", id)
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             if (result.Rows.Count == 0)
@@ -55,9 +55,9 @@ namespace imarket.service.Service
             var query = "INSERT INTO Categories (Id, Name, Description) VALUES (@Id, @Name, @Description)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = category.Id },
-                new MySqlParameter("@Name", SqlDbType.NVarChar) { Value = category.Name },
-                new MySqlParameter("@Description", SqlDbType.NVarChar) { Value = category.Description },
+                new MySqlParameter("@Id", category.Id),
+                new MySqlParameter("@Name", category.Name),
+                new MySqlParameter("@Description", category.Description),
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -66,7 +66,7 @@ namespace imarket.service.Service
             var query = "DELETE FROM Categories WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = id }
+                new MySqlParameter("@Id",id )
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -75,9 +75,9 @@ namespace imarket.service.Service
             var query = "UPDATE Categories SET Name = @Name, Description = @Description WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", SqlDbType.Char) { Value = categoryId },
-                new MySqlParameter("@Name", SqlDbType.NVarChar) { Value = category.Name },
-                new MySqlParameter("@Description", SqlDbType.NVarChar) { Value = category.Description },
+                new MySqlParameter("@Id", categoryId),
+                new MySqlParameter("@Name", category.Name),
+                new MySqlParameter("@Description", category.Description),
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -89,7 +89,7 @@ namespace imarket.service.Service
             var query = "SELECT * FROM PostCategories WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postId }
+                new MySqlParameter("@PostId", postId )
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -103,8 +103,8 @@ namespace imarket.service.Service
             var query = "INSERT INTO PostCategories (PostId, CategoryId) VALUES (@PostId, @CategoryId)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postCategory.PostId },
-                new MySqlParameter("@CategoryId", SqlDbType.Char) { Value = postCategory.CategoryId },
+                new MySqlParameter("@PostId",postCategory.PostId ),
+                new MySqlParameter("@CategoryId", postCategory.CategoryId ),
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
@@ -113,8 +113,8 @@ namespace imarket.service.Service
             var query = "DELETE FROM PostCategories WHERE PostId = @PostId AND CategoryId = @CategoryId";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@PostId", SqlDbType.Char) { Value = postCategory.PostId },
-                new MySqlParameter("@CategoryId", SqlDbType.Char) { Value = postCategory.CategoryId },
+                new MySqlParameter("@PostId",postCategory.PostId ),
+                new MySqlParameter("@CategoryId",postCategory.CategoryId ),
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
