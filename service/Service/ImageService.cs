@@ -8,9 +8,11 @@ namespace imarket.service.Service
     public class ImageService : IImageService
     {
         private readonly Database _database;
-        public ImageService(Database database)
+        private readonly ILogger<ImageService> _logger;
+        public ImageService(Database database, ILogger<ImageService> _logger)
         {
             _database = database;
+            this._logger = _logger;
         }
         public async Task<IEnumerable<ImageModels>> GetAllImagesAsync(int page, int pageSize)
         {
@@ -132,7 +134,7 @@ namespace imarket.service.Service
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"DeleteImageByIdAsync {image.Url} error");
+                _logger.LogError($"DeleteImageByIdAsync {image.Url} error");
                 System.IO.File.AppendAllText("log.txt", $"DeleteImageByIdAsync {image.Url} error");
             }
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
@@ -153,7 +155,7 @@ namespace imarket.service.Service
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"DeleteImageByIdAsync {image.Url} error");
+                    _logger.LogError($"DeleteImageByIdAsync {image.Url} error");
                     System.IO.File.AppendAllText("log.txt", $"DeleteImageByIdAsync {image.Url} error");
                 }
             }

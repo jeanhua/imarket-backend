@@ -37,13 +37,15 @@ namespace imarket.utils
     public class Database
     {
         private readonly string? connectionString;
-        public Database(IConfiguration configuration)
+        private readonly ILogger<Database> _logger;
+        public Database(IConfiguration configuration, ILogger<Database> _logger)
         {
+            this._logger = _logger;
             connectionString = configuration.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                Console.WriteLine("Database connection string is empty");
+                _logger.LogError("Database connection string is empty");
                 Environment.Exit(1);
             }
         }

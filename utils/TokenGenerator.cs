@@ -8,10 +8,12 @@ namespace imarket.utils
     public class JwtTokenGenerator
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<JwtTokenGenerator> _logger;
 
-        public JwtTokenGenerator(IConfiguration configuration)
+        public JwtTokenGenerator(IConfiguration configuration, ILogger<JwtTokenGenerator> _logger)
         {
             _configuration = configuration;
+            this._logger = _logger;
         }
 
         public string? GenerateToken(string username,string id,string role)
@@ -41,7 +43,7 @@ namespace imarket.utils
             }
             catch (Exception e)
             {
-                Console.WriteLine("token异常，详情查看log.txt");
+                _logger.LogError(e, "Error in GenerateToken");
                 File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + e.ToString() + "\n");
                 return null;
             }
