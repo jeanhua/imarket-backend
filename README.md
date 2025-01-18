@@ -55,7 +55,8 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
        "Key": "YourSuperSecretKeyHere",
        "Issuer": "imarket",
        "Audience": "web-client",
-       "ExpiresInMinutes": 60
+       "ExpiresInMinutes": 60,
+       "RefreshTokenExpiresInDays" : 7
      }
    ```
    
