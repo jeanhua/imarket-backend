@@ -126,7 +126,8 @@ namespace imarket.Controllers.open
             var categoryID = await postCategoriesService.GetPostCategoriesByPostIdAsync(postfind.Id);
             var user = await userService.GetUserByIdAsync(postfind.UserId);
             var me = await userService.GetUserByUsernameAsync(User.Identity.Name);
-            var likes = await likeService.GetPostLikeNumsByPostIdAsync(postfind.Id);
+            var likeNums = await likeService.GetPostLikeNumsByPostIdAsync(postfind.Id);
+            var favoriteNms = await favoriteService.GetFavoriteNumsByPostId(postfind.Id);
             var images = await imageService.GetImagesByPostId(postfind.Id);
             var isLiked = await likeService.CheckUserLikePostAsync(me.Id, postfind.Id);
             var response = new
@@ -140,7 +141,8 @@ namespace imarket.Controllers.open
                     images,
                     postfind.Status,
                     categoryID,
-                    likes,
+                    likeNums,
+                    favoriteNms,
                     isLiked,
                     postfind.CreatedAt,
                     user?.Nickname,
