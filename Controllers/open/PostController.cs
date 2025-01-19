@@ -79,18 +79,34 @@ namespace imarket.Controllers.open
         [HttpGet("CategorisedPosts")] // api/post/CategorisedPosts
         public async Task<IActionResult> GetCategorisedPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string categoryId)
         {
-            IEnumerable<PostModels>? posts;
-            if (_cache.TryGetValue($"CategorisedPosts_cache{page},{pageSize},{categoryId}", out var post_cache))
+            if (_cache.TryGetValue($"GetCategorisedPosts_page{page}_pageSize{pageSize}", out var posts_cache))
             {
-                posts = post_cache as IEnumerable<PostModels>;
-                return Ok(new { success = true, posts });
+                return Ok(posts_cache);
             }
-            posts = await postService.GetPostsByCategoryIdAsync(categoryId, page, pageSize);
-            _cache.Set($"CategorisedPosts_cache{page},{pageSize},{categoryId}", posts, new MemoryCacheEntryOptions
+            var posts = await postService.GetPostsByCategoryIdAsync(categoryId,page, pageSize);
+            var postsResponse = new List<PostsResponse>();
+            foreach (var post in posts)
+            {
+                postsResponse.Add(new PostsResponse
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Content = post.Content,
+                    FavoriteNums = await favoriteService.GetFavoriteNumsByPostId(post.Id),
+                    LikeNums = await likeService.GetPostLikeNumsByPostIdAsync(post.Id),
+                    CreatedAt = post.CreatedAt
+                });
+            }
+            var response = new
+            {
+                success = true,
+                posts = postsResponse
+            };
+            _cache.Set($"GetCategorisedPosts_page{page}_pageSize{pageSize}", response, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
-            return Ok(new { success = true, posts });
+            return Ok(response);
         }
 
         [HttpGet("{id}")] // api/post/{id}
