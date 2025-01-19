@@ -42,7 +42,7 @@ namespace imarket.Controllers.open
             var ipNums = ip_cache as int? ?? 0;
             if (ipNums >= 10)
             {
-                return Unauthorized("Too many login attempts. Try 5 minutes later !");
+                return StatusCode(403, new { message = "Too many login attempts. Try 5 minutes later !" });
             }
             _cache.Set("ip:" + ip, ipNums + 1, new MemoryCacheEntryOptions
             {
@@ -50,7 +50,7 @@ namespace imarket.Controllers.open
             });
             if (loginNums >= 5)
             {
-                return Unauthorized("Too many login attempts. Try 5 minutes later !");
+                return StatusCode(403, new { message = "Too many login attempts. Try 5 minutes later !" });
             }
             var userCheck = await userService.GetUserByUsernameAsync(loginRequest.Username!);
             if (userCheck == null)
