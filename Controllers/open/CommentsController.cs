@@ -173,6 +173,35 @@ namespace imarket.Controllers.open
             }
             return Ok(new { success = true });
         }
+
+        [HttpGet("UnLike")] // api/Comments/UnLike?CommentId=xxx
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> UnLikeCommentAsync([FromQuery] string CommentId)
+        {
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+            var comment = await commentService.GetCommentByIdAsync(CommentId!);
+            if (comment == null)
+            {
+                return NotFound("Comment not found.");
+            }
+            var result = await likeService.DeleteLikeAsync(new LikeModels
+            {
+                Id = comment.Id,
+                CommentId = CommentId!,
+                UserId = user.Id,
+                CreatedAt = comment.CreatedAt,
+                PostId = null
+            });
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true });
+        }
     }
 
     public class CommentPostRequest
