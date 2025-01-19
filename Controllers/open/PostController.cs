@@ -208,7 +208,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpGet("finish")]
+        [HttpGet("finish")] //api/post/finish?postId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> FinishPost([FromQuery] string postId)
         {
@@ -250,7 +250,7 @@ namespace imarket.Controllers.open
                 Id = Guid.NewGuid().ToString(),
                 PostId = postId,
                 CommentId = null,
-                UserId = User.Identity!.Name!,
+                UserId = user.Id,
                 CreatedAt = DateTime.Now
             };
             var result = await likeService.CreateLikeAsync(like);

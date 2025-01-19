@@ -117,7 +117,6 @@ namespace imarket.Controllers.admin
             {
                 return NotFound();
             }
-            userCheck.Username = user.Username ?? userCheck.Username;
             userCheck.Nickname = user.Nickname ?? userCheck.Nickname;
             userCheck.Avatar = user.Avatar ?? userCheck.Avatar;
             userCheck.Email = user.Email ?? userCheck.Email;
@@ -176,7 +175,6 @@ namespace imarket.Controllers.admin
     {
         [Required]
         public string? Id { get; set; }
-        public string? Username { get; set; }
         public string? Nickname { get; set; }
         public string? Avatar { get; set; }
         public string? Email { get; set; }
