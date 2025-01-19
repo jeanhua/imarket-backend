@@ -18,14 +18,16 @@ namespace imarket.Controllers.open
         private readonly IImageService imageService;
         private readonly IFavoriteService favoriteService;
         private readonly ILikeService likeService;
+        private readonly IConfiguration configuration;
         private readonly ILogger<PostController> _logger;
         // 缓存
         private readonly IMemoryCache _cache;
-        public PostController(IUserService userService, IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
+        public PostController(IUserService userService, IConfiguration configuration, IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
         {
             this.userService = userService;
             this.postService = postService;
             this.commentService = commentService;
+            this.configuration = configuration;
             this.postCategoriesService = postCategoriesService;
             this.imageService = imageService;
             this.likeService = likeService;
@@ -70,7 +72,7 @@ namespace imarket.Controllers.open
             posts = await postService.GetPostsByCategoryIdAsync(categoryId, page, pageSize);
             _cache.Set($"CategorisedPosts_cache{page},{pageSize},{categoryId}", posts, new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
             return Ok(new { success = true, posts });
         }
@@ -116,7 +118,7 @@ namespace imarket.Controllers.open
             };
             _cache.Set($"Post_cache{id}", response, new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]))
             });
             return Ok(response);
         }
