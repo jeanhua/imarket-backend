@@ -78,5 +78,20 @@ namespace imarket.service.Service
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
+
+        public async Task<int> GetCommentsNumByPostId(string postId)
+        {
+            var query = "SELECT COUNT(*) FROM Comments WHERE PostId = @PostId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@PostId",postId)
+            };
+            var num = await _database.ExecuteQuery(query,CommandType.Text,parameters);
+            if (num == null || num.Rows.Count == 0)
+            {
+                return 0;
+            }
+            return Convert.ToInt32(num.Rows[0][0]);
+        }
     }
 }

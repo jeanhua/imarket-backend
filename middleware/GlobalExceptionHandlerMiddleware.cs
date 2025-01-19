@@ -28,14 +28,14 @@ namespace imarket.middleware
             catch (Exception ex)
             {
                 // 记录日志
-                _logger.LogError(ex, "An unhandled exception occurred.");
+                _logger.LogError(ex, "Internal Server Error");
                 // 返回错误响应
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 context.Response.ContentType = "application/json";
 
                 var response = new
                 {
-                    message = "An unexpected error occurred.",
+                    message = "Internal Server Error",
                     detail = _env.IsDevelopment() ? ex.Message : null // 仅在开发环境中返回详细错误信息
                 };
                 System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + ex.ToString() + "\n");

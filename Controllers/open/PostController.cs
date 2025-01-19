@@ -39,18 +39,34 @@ namespace imarket.Controllers.open
         [HttpGet("Posts")] // api/post/Posts
         public async Task<IActionResult> GetPosts([FromQuery] int page, [FromQuery] int pageSize)
         {
-            IEnumerable<PostModels>? posts;
-            if (_cache.TryGetValue($"Posts_cache{page},{pageSize}", out var post_cache))
+            if(_cache.TryGetValue($"Posts_cache_page{page}_pageSize{pageSize}", out var posts_cache))
             {
-                posts = post_cache as IEnumerable<PostModels>;
-                return Ok(new { success = true, posts });
+                return Ok(posts_cache);
             }
-            posts = await postService.GetAllPostsAsync(page, pageSize);
-            _cache.Set("Posts_cache", posts, new MemoryCacheEntryOptions
+            var posts = await postService.GetAllPostsAsync(page,pageSize);
+            var postsResponse = new List<PostsResponse>();
+            foreach(var post in posts)
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
+                postsResponse.Add(new PostsResponse
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Content = post.Content,
+                    FavoriteNums = await favoriteService.GetFavoriteNumsByPostId(post.Id),
+                    LikeNums = await likeService.GetPostLikeNumsByPostIdAsync(post.Id),
+                    CreatedAt = post.CreatedAt
+                });
+            }
+            var response = new
+            {
+                success = true,
+                posts = postsResponse
+            };
+            _cache.Set($"Posts_cache_page{page}_pageSize{pageSize}", response, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
-            return Ok(new { success = true, posts });
+            return Ok(response);
         }
 
         [HttpGet("categories")] // api/post/categories
@@ -93,10 +109,10 @@ namespace imarket.Controllers.open
             }
             var categoryID = await postCategoriesService.GetPostCategoriesByPostIdAsync(postfind.Id);
             var user = await userService.GetUserByIdAsync(postfind.UserId);
-            var comments = await commentService.GetCommentsByPostIdAsync(postfind.Id);
+            var me = await userService.GetUserByUsernameAsync(User.Identity.Name);
             var likes = await likeService.GetPostLikeNumsByPostIdAsync(postfind.Id);
             var images = await imageService.GetImagesByPostId(postfind.Id);
-            var isLiked = await likeService.CheckUserLikePostAsync(User.Identity!.Name!, postfind.Id);
+            var isLiked = await likeService.CheckUserLikePostAsync(me.Id, postfind.Id);
             var response = new
             {
                 success = true,
@@ -114,7 +130,6 @@ namespace imarket.Controllers.open
                     user?.Nickname,
                     user?.Avatar
                 },
-                comments,
             };
             _cache.Set($"Post_cache{id}", response, new MemoryCacheEntryOptions
             {
@@ -260,7 +275,7 @@ namespace imarket.Controllers.open
             var result = await likeService.CreateLikeAsync(like);
             if (result == 0)
             {
-                return StatusCode(500);
+                return StatusCode(500,new {message = "you have liked it!"});
             }
             return Ok(new { success = true });
         }
@@ -279,13 +294,6 @@ namespace imarket.Controllers.open
             {
                 return Unauthorized("Invalid user.");
             }
-            var favorite = new FavoriteModels
-            {
-                Id = Guid.NewGuid().ToString(),
-                PostId = postId,
-                UserId = user.Id,
-                CreatedAt = DateTime.Now,
-            };
             var result = await favoriteService.CreatePostFavoriteAsync(postId,user.Id);
             if (result == 0)
             {
@@ -369,4 +377,16 @@ namespace imarket.Controllers.open
         public string? CategoryId { get; set; }
         public string[]? Images { get; set; }
     }
+
+    public class PostsResponse
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public int FavoriteNums { get; set; }
+        public int LikeNums { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+    }
+
 }

@@ -15,10 +15,12 @@ namespace imarket.Controllers.open
         private readonly IUserService userService;
         private readonly IPostService postService;
         private readonly IMemoryCache _cache;
+        private readonly IConfiguration configuration;
         private readonly ILikeService likeService;
         private readonly ILogger<CommentsController> _logger;
-        public CommentsController(ILikeService likeService, ICommentService commentService, IPostService postService, IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
+        public CommentsController(IConfiguration configuration, ILikeService likeService, ICommentService commentService, IPostService postService, IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
         {
+            this.configuration = configuration;
             this.commentService = commentService;
             this.userService = userService;
             this.postService = postService;
@@ -64,7 +66,7 @@ namespace imarket.Controllers.open
             }
             _cache.Set(postid, response, new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]))
             });
             return Ok(new { success = true, comments = response });
         }
@@ -102,21 +104,20 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("Post is finished");
             }
-            var result = await commentService.CreateCommentAsync(
-                new CommentModels
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    PostId = comment.PostId!,
-                    Content = comment.Content,
-                    UserId = user.Id,
-                    CreatedAt = DateTime.Now
-                }
-                );
+            var comment_new = new CommentModels
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostId = comment.PostId!,
+                Content = comment.Content,
+                UserId = user.Id,
+                CreatedAt = DateTime.Now
+            };
+            var result = await commentService.CreateCommentAsync(comment_new);
             if (result == 0)
             {
                 return StatusCode(500);
             }
-            return Ok(new { success = true, commentId = result });
+            return Ok(new { success = true, commentId = comment_new.Id });
         }
 
         [HttpGet("Delete")] // api/Comments/Delete?CommentId=xxx

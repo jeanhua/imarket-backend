@@ -32,6 +32,38 @@ namespace imarket.Controllers.admin
             });
             return Ok(new { success = true });
         }
+
+        [HttpGet("editCategories")] // api/admin/editCategories?id=xxx&name=xxx&description=xxx
+        public async Task<IActionResult> EditCatogory([FromQuery] string id, [FromQuery] string name, [FromQuery] string description)
+        {
+            var category = await postCategoriesService.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            category.Name = name;
+            category.Description = description;
+            await postCategoriesService.UpdateCategoryAsync(id, category);
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("deleteCategories")] // api/admin/deleteCategories?id=xxx
+        public async Task<IActionResult> DeleteCatogory([FromQuery] string id)
+        {
+            var category = await postCategoriesService.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            var posts = await postService.GetPostsByCategoryIdAsync(id,1,1);
+            if (posts != null)
+            {
+                return BadRequest("some posts of the category have not been deleted!");
+            }
+            await postCategoriesService.DeleteCategoryAsync(id);
+            return Ok(new { success = true });
+        }
+
         [HttpGet("listUsers")] // api/admin/listUsers?page=1&size=10
         public async Task<IActionResult> GetUserList([FromQuery] int page, [FromQuery] int size)
         {
