@@ -114,7 +114,7 @@ namespace imarket.Controllers.open
             var ipNums = ip_cache as int? ?? 0;
             if (ipNums >= 5)
             {
-                return Unauthorized("Too many register attempts. Try 5 minutes later !");
+                return StatusCode(403, new { message = "Too many register attempts. Try 5 minutes later !" });
             }
             // 注册新用户
             // 检查用户名是否已存在
