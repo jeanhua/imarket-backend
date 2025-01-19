@@ -150,12 +150,13 @@ namespace imarket.Controllers.open
                 return BadRequest("Invalid category.");
             }
             var postId = Guid.NewGuid().ToString();
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             var post = new PostModels
             {
                 Id = postId,
                 Title = postReq.Title!,
                 Content = postReq.Content!,
-                UserId = User.Identity!.Name!,
+                UserId = user.Id,
                 Status = 0,
                 CreatedAt = DateTime.Now
             };
@@ -204,6 +205,29 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("finish")]
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> FinishPost([FromQuery] string postId)
+        {
+            var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
+            var post = await postService.GetPostByIdAsync(postId);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            if(post.UserId != user.Id)
+            {
+                return BadRequest("you are not the author !");
+            }
+            post.Status = 1;
+            var result = await postService.UpdatePostAsync(post);
+            if (result == 0)
+            {
+                return StatusCode(500);
+            } 
             return Ok(new { success = true });
         }
 

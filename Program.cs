@@ -4,6 +4,7 @@ using imarket.service.Service;
 using imarket.utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 namespace imarket
 {
@@ -58,7 +59,32 @@ namespace imarket
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                //添加Jwt验证设置,添加请求头信息
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Id = "Bearer",
+                                Type = ReferenceType.SecurityScheme
+                            }
+                        },
+                        new List<string>()
+                    }
+                });
+                //放置接口Auth授权按钮
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "Value Bearer {token}",
+                    Name = "Authorization",//jwt默认的参数名称
+                    In = ParameterLocation.Header,//jwt默认存放Authorization信息的位置(请求头中)
+                    Type = SecuritySchemeType.ApiKey
+                });
+            });
             // 依赖注入
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IPostService, PostService>();
@@ -67,14 +93,15 @@ namespace imarket
             builder.Services.AddScoped<ILoginService, LoginService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IImageService, ImageService>();
-            builder.Services.AddScoped<IFavoriteService,FavoriteService>();
+            builder.Services.AddScoped<IFavoriteService, FavoriteService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
+            builder.Services.AddScoped<JwtTokenGenerator>();
             // 注入数据库
             builder.Services.AddSingleton<Database>(provider =>
             {
                 var configuration = provider.GetRequiredService<IConfiguration>();
                 var logger = provider.GetRequiredService<ILogger<Database>>();
-                return new Database(configuration,logger);
+                return new Database(configuration, logger);
             });
             // 数据库初始化
             var database = builder.Services.BuildServiceProvider().GetService<Database>();
