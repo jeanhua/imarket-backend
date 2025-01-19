@@ -74,8 +74,7 @@ namespace imarket
             {
                 var configuration = provider.GetRequiredService<IConfiguration>();
                 var logger = provider.GetRequiredService<ILogger<Database>>();
-                var userService = provider.GetRequiredService<IUserService>();
-                return new Database(configuration,logger,userService);
+                return new Database(configuration,logger);
             });
             // 数据库初始化
             var database = builder.Services.BuildServiceProvider().GetService<Database>();

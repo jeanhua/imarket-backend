@@ -8,14 +8,12 @@ namespace imarket.utils
     {
         private readonly string? connectionString;
         private readonly ILogger<Database> _logger;
-        private readonly IUserService userService;
         IConfiguration configuration;
 
-        public Database(IConfiguration configuration, ILogger<Database> logger, IUserService userService)
+        public Database(IConfiguration configuration, ILogger<Database> logger)
         {
             this._logger = logger;
             this.configuration = configuration;
-            this.userService = userService;
             connectionString = configuration.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
@@ -28,6 +26,9 @@ namespace imarket.utils
         {
             using (var connection = GetConnection())
             {
+                _logger.LogInformation("Database connected");
+                // 创建表
+                _logger.LogInformation("Checking tables");
                 var query = File.ReadAllText("./create_tables_script.sql");
                 using (var command = new MySqlCommand(query, connection))
                 {
@@ -57,18 +58,22 @@ namespace imarket.utils
                         Environment.Exit(1);
                     }
                     var passwordHash = SHA256Encryptor.Encrypt(password);
-                    await userService.CreateUserAsync(new models.UserModels
+                    // 创建管理员账户
+                    query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
+                    var parameters = new MySqlParameter[]
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        Username = username,
-                        Nickname = username,
-                        PasswordHash = passwordHash,
-                        Avatar = "/images/defaultAvatar.png",
-                        Email = Email,
-                        Role = "admin",
-                        CreatedAt = DateTime.Now,
-                        Status = 1
-                    });
+                        new MySqlParameter("@Id", Guid.NewGuid().ToString()),
+                        new MySqlParameter("@Username", username),
+                        new MySqlParameter("@Nickname", "admin"),
+                        new MySqlParameter("@PasswordHash", passwordHash),
+                        new MySqlParameter("@Avatar", "/images/defaultAvatar.png"),
+                        new MySqlParameter("@Email", Email),
+                        new MySqlParameter("@Role", "admin"),
+                        new MySqlParameter("@CreatedAt", DateTime.Now),
+                        new MySqlParameter("@Status", 1)
+                    };
+                    await ExecuteNonQuery(query, CommandType.Text, parameters);
+                    _logger.LogInformation("Admin account created");
                 }
             }
         }
@@ -77,7 +82,15 @@ namespace imarket.utils
         private MySqlConnection GetConnection()
         {
             var connection = new MySqlConnection(connectionString);
-            connection.Open();
+            try
+            {
+                connection.Open();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Database connection failed", ex);
+                Environment.Exit(1);
+            }
             return connection;
         }
 
