@@ -71,23 +71,23 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
 
 ### 3. 运行项目
 
-#### 下载release版本，运行即可，支持参数`--port=端口`来指定端口
+1. #### （推荐）下载release版本，运行即可，支持参数`--port=端口`来指定端口
 
----
+2. #### 或者运行代码
 
-#### 或者运行代码
+   1. 安装依赖：
 
-1. 安装依赖：
-   ```bash
-   dotnet restore
-   ```
+      ```bash
+      dotnet restore
+      ```
 
-2. 运行项目：
-   ```bash
-   dotnet run
-   ```
+   2. 运行项目：
 
-3. 后端 API 默认运行在 `https://localhost:5001`。
+      ```bash
+      dotnet run
+      ```
+
+3. ####  后端 API 默认运行在 `https://localhost:5001`
 
 ### 4. 测试接口
 
