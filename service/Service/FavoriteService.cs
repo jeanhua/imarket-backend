@@ -1,4 +1,5 @@
-﻿using imarket.service.IService;
+﻿using imarket.models;
+using imarket.service.IService;
 using imarket.utils;
 using MySql.Data.MySqlClient;
 using System.Data;
@@ -11,9 +12,9 @@ namespace imarket.service.Service
         {
             _database = database;
         }
-        public async Task<IEnumerable<int>> GetPostFavoriteByUserId(string userId, int page, int pagesize)
+        public async Task<IEnumerable<FavoriteModels>> GetPostFavoriteByUserId(string userId, int page, int pagesize)
         {
-            var favorites = new List<int>();
+            var favorites = new List<FavoriteModels>();
             int offset = (page - 1) * pagesize;
             string query = @"
                 SELECT * FROM Favorites 
@@ -30,7 +31,13 @@ namespace imarket.service.Service
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
             {
-                favorites.Add(Convert.ToInt32(row["PostId"]!));
+                favorites.Add(new FavoriteModels
+                {
+                    Id = row["Id"].ToString()!,
+                    UserId = row["UserId"].ToString()!,
+                    PostId = row["PostId"].ToString()!,
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
+                });
             }
             return favorites;
         }
@@ -56,6 +63,17 @@ namespace imarket.service.Service
                 new MySqlParameter("@UserId", userId),
                 new MySqlParameter("@PostId", postId),
                 new MySqlParameter("@CreatedAt", DateTime.Now),
+            };
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
+        public async Task<int> DeletePostFavoriteAsync(string postId, string userId)
+        {
+            var query = "DELETE FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@UserId", userId),
+                new MySqlParameter("@PostId", postId),
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }

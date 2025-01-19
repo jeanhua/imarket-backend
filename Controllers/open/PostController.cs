@@ -16,11 +16,12 @@ namespace imarket.Controllers.open
         private readonly IPostCategoriesService postCategoriesService;
         private readonly ICommentService commentService;
         private readonly IImageService imageService;
+        private readonly IFavoriteService favoriteService;
         private readonly ILikeService likeService;
         private readonly ILogger<PostController> _logger;
         // 缓存
         private readonly IMemoryCache _cache;
-        public PostController(IUserService userService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
+        public PostController(IUserService userService, IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
         {
             this.userService = userService;
             this.postService = postService;
@@ -28,6 +29,7 @@ namespace imarket.Controllers.open
             this.postCategoriesService = postCategoriesService;
             this.imageService = imageService;
             this.likeService = likeService;
+            this.favoriteService = favoriteService;
             _logger = logger;
             _cache = cache;
         }
@@ -259,6 +261,99 @@ namespace imarket.Controllers.open
                 return StatusCode(500);
             }
             return Ok(new { success = true });
+        }
+
+        [HttpGet("favorite")] // api/post/favorite?postId=xxx
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> FavoritePost([FromQuery] string postId)
+        {
+            var post = await postService.GetPostByIdAsync(postId);
+            if (post == null)
+            {
+                return NotFound("Post not found.");
+            }
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+            var favorite = new FavoriteModels
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostId = postId,
+                UserId = user.Id,
+                CreatedAt = DateTime.Now,
+            };
+            var result = await favoriteService.CreatePostFavoriteAsync(postId,user.Id);
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("unfavorite")] // api/post/unfavorite?postId=xxx
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> UnFavoritePost([FromQuery] string postId)
+        {
+            var post = await postService.GetPostByIdAsync(postId);
+            if (post == null)
+            {
+                return NotFound("Post not found.");
+            }
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+            var result = await favoriteService.DeletePostFavoriteAsync(postId, user.Id);
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("unlike")] // api/post/unlike?postId=xxx
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> UnLikePost([FromQuery] string postId)
+        {
+            var post = await postService.GetPostByIdAsync(postId);
+            if (post == null)
+            {
+                return NotFound("Post not found.");
+            }
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+            var result = await likeService.DeleteLikeAsync(new LikeModels
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostId = postId,
+                UserId = user.Id,
+                CommentId = null,
+                CreatedAt = DateTime.Now
+            });
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("GetFavorites")] // api/post/GetFavorites
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> GetFavorites([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+            var favorites = await favoriteService.GetPostFavoriteByUserId(user.Id, page, pageSize);
+            return Ok(new { success = true, favorites });
         }
     }
 

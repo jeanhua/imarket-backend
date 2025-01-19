@@ -21,7 +21,7 @@ namespace imarket.Controllers.admin
             this.userService = userService;
         }
 
-        [HttpGet("createCategories")] // api/admin/Posts/createCategories?name=xxx&description=xxx
+        [HttpGet("createCategories")] // api/admin/createCategories?name=xxx&description=xxx
         public async Task<IActionResult> CreateCatogory([FromQuery] string name, [FromQuery] string description)
         {
             await postCategoriesService.CreateCategoryAsync(new CategoryModels
@@ -32,13 +32,13 @@ namespace imarket.Controllers.admin
             });
             return Ok(new { success = true });
         }
-        [HttpGet("list")] // api/admin/user/list?page=xx&size=xx
+        [HttpGet("listUsers")] // api/admin/listUsers?page=1&size=10
         public async Task<IActionResult> GetUserList([FromQuery] int page, [FromQuery] int size)
         {
             var users = await userService.GetAllUsers(page, size);
             return Ok(new { success = true, users = users });
         }
-        [HttpGet("ban")] // api/admin/user/ban?id=xxx
+        [HttpGet("banUser")] // api/admin/banUser?id=xxx
         public async Task<IActionResult> BanUser([FromQuery] string id)
         {
             var user = await userService.GetUserByIdAsync(id);
@@ -54,7 +54,7 @@ namespace imarket.Controllers.admin
             }
             return Ok(new { success = true });
         }
-        [HttpGet("unban")] // api/admin/user/unban?id=xxx
+        [HttpGet("unbanUser")] // api/admin/unbanUser?id=xxx
         public async Task<IActionResult> UnbanUser([FromQuery] string id)
         {
             var user = await userService.GetUserByIdAsync(id);
@@ -70,7 +70,7 @@ namespace imarket.Controllers.admin
             }
             return Ok(new { success = true });
         }
-        [HttpPost("create")] // api/admin/user/create
+        [HttpPost("createUser")] // api/admin/createUser
         public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest user)
         {
             if (!ModelState.IsValid)
@@ -105,7 +105,7 @@ namespace imarket.Controllers.admin
             }
             return Ok(new { success = true });
         }
-        [HttpPost("edit")] // api/admin/user/edit
+        [HttpPost("editUser")] // api/admin/editUser
         public async Task<IActionResult> EditUser([FromBody] UserEditRequest user)
         {
             if (!ModelState.IsValid)
@@ -125,7 +125,7 @@ namespace imarket.Controllers.admin
             await userService.UpdateUserAsync(user.Id!, userCheck);
             return Ok(new { success = true });
         }
-        [HttpGet("delete")] // api/admin/user/delete?userId=xxx
+        [HttpGet("deleteUser")] // api/admin/deleteUser?userId=xxx
         public async Task<IActionResult> DeleteUser([FromQuery] string userId)
         {
             var posts = await postService.GetPostsByUserIdAsync(userId);
@@ -141,7 +141,7 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
 
-        [HttpGet("deletePosts")] // api/admin/user/deletePosts?userId=xxx
+        [HttpGet("deletePosts")] // api/admin/deletePosts?userId=xxx
         public async Task<IActionResult> DeletePosts([FromQuery] string userId)
         {
             var posts = await postService.GetPostsByUserIdAsync(userId);
