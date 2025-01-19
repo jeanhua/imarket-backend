@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using imarket.service.IService;
 using System.ComponentModel.DataAnnotations;
 
-namespace imarket.Controllers
+namespace imarket.Controllers.open
 {
     [Route("api/[controller]")]
     [Authorize]
@@ -53,9 +53,9 @@ namespace imarket.Controllers
             {
                 return Unauthorized();
             }
-            userCheck.Nickname = user.Nickname??userCheck.Nickname;
-            userCheck.Avatar = user.Avatar??userCheck.Avatar;
-            userCheck.Email = user.Email??userCheck.Email;
+            userCheck.Nickname = user.Nickname ?? userCheck.Nickname;
+            userCheck.Avatar = user.Avatar ?? userCheck.Avatar;
+            userCheck.Email = user.Email ?? userCheck.Email;
             await userService.UpdateUserAsync(userCheck.Id, userCheck);
             return Ok(new { success = true });
         }

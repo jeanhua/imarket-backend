@@ -5,7 +5,7 @@ using imarket.models;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 
-namespace imarket.Controllers
+namespace imarket.Controllers.open
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -32,7 +32,7 @@ namespace imarket.Controllers
             _cache.TryGetValue(postid, out var comments);
             if (comments != null)
             {
-                return Ok(new { success = true, comments = comments });
+                return Ok(new { success = true, comments });
             }
             var Comments = await commentService.GetCommentsByPostIdAsync(postid);
             var response = new List<CommentResponse>();
@@ -72,7 +72,7 @@ namespace imarket.Controllers
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> CreateCommentAsync([FromBody] CommentPostRequest comment)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }

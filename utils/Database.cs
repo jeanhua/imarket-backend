@@ -1,34 +1,6 @@
-﻿using MySql.Data.MySqlClient; // 使用 MySQL 的 NuGet 包
+﻿using imarket.service.IService;
+using MySql.Data.MySqlClient;
 using System.Data;
-
-/*
- * 数据库操作示例
-
- * 查询操作
-var query = "SELECT * FROM Posts";
-var posts = Database.getInstance().ExecuteQuery(query, CommandType.Text);
-
- * 非查询操作 (插入)
-var query = "INSERT INTO Posts (Title, Content) VALUES (@Title, @Content)";
-var parameters = new MySqlParameter[]
-{
-    new MySqlParameter("@Title", SqlDbType.NVarChar) { Value = "New Post" },
-    new MySqlParameter("@Content", SqlDbType.NVarChar) { Value = "This is a new post" }
-};
-int rowsAffected = Database.getInstance().ExecuteNonQuery(query, CommandType.Text, parameters);
-
- * 事务操作
- Database.getInstance().ExecuteTransaction(connection =>
-{
-    // 在事务中执行多个操作
-    var command1 = new SqlCommand("UPDATE Posts SET Title = 'Updated Title' WHERE Id = 1", connection, connection.BeginTransaction());
-    command1.ExecuteNonQuery();
-
-    var command2 = new SqlCommand("INSERT INTO Posts (Title, Content) VALUES ('New Post', 'Content')", connection, connection.BeginTransaction());
-    command2.ExecuteNonQuery();
-});
-
- */
 
 namespace imarket.utils
 {
@@ -36,16 +8,68 @@ namespace imarket.utils
     {
         private readonly string? connectionString;
         private readonly ILogger<Database> _logger;
+        private readonly IUserService userService;
+        IConfiguration configuration;
 
-        public Database(IConfiguration configuration, ILogger<Database> logger)
+        public Database(IConfiguration configuration, ILogger<Database> logger, IUserService userService)
         {
             this._logger = logger;
+            this.configuration = configuration;
+            this.userService = userService;
             connectionString = configuration.GetConnectionString("DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
             {
                 _logger.LogError("Database connection string is empty");
                 Environment.Exit(1);
+            }
+        }
+        public async void InitDatabase()
+        {
+            using (var connection = GetConnection())
+            {
+                var query = File.ReadAllText("./create_tables_script.sql");
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+                // 检查是否有管理员账户，没有则创建
+                query = "SELECT * FROM Users WHERE Role = 'admin'";
+                var result = await ExecuteQuery(query, CommandType.Text);
+                if (result.Rows.Count == 0)
+                {
+                    var username = configuration["admin:Username"];
+                    var password = configuration["admin:Password"];
+                    var Email = configuration["admin:Email"];
+                    if (string.IsNullOrEmpty(password))
+                    {
+                        _logger.LogError("Admin password is empty");
+                        Environment.Exit(1);
+                    }
+                    if (string.IsNullOrEmpty(username))
+                    {
+                        _logger.LogError("Admin username is empty");
+                        Environment.Exit(1);
+                    }
+                    if (string.IsNullOrEmpty(Email))
+                    {
+                        _logger.LogError("Admin Email is empty");
+                        Environment.Exit(1);
+                    }
+                    var passwordHash = SHA256Encryptor.Encrypt(password);
+                    await userService.CreateUserAsync(new models.UserModels
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Username = username,
+                        Nickname = username,
+                        PasswordHash = passwordHash,
+                        Avatar = "/images/defaultAvatar.png",
+                        Email = Email,
+                        Role = "admin",
+                        CreatedAt = DateTime.Now,
+                        Status = 1
+                    });
+                }
             }
         }
 

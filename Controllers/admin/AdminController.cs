@@ -6,21 +6,34 @@ using System.ComponentModel.DataAnnotations;
 
 namespace imarket.Controllers.admin
 {
-    [Route("api/admin/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles= "admin")]
-    public class UserController : ControllerBase
+    [Authorize(Roles = "admin")]
+    public class AdminController : ControllerBase
     {
-        public readonly IUserService userService;
         public readonly IPostService postService;
-        public UserController(IUserService userService, IPostService postService)
+        public readonly IPostCategoriesService postCategoriesService;
+        public readonly IUserService userService;
+        public AdminController(IPostService postService, IPostCategoriesService postCategoriesService, IUserService userService)
         {
-            this.userService = userService;
             this.postService = postService;
+            this.postCategoriesService = postCategoriesService;
+            this.userService = userService;
         }
 
+        [HttpGet("createCategories")] // api/admin/Posts/createCategories?name=xxx&description=xxx
+        public async Task<IActionResult> CreateCatogory([FromQuery] string name, [FromQuery] string description)
+        {
+            await postCategoriesService.CreateCategoryAsync(new CategoryModels
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = name,
+                Description = description
+            });
+            return Ok(new { success = true });
+        }
         [HttpGet("list")] // api/admin/user/list?page=xx&size=xx
-        public async Task<IActionResult> GetUserList([FromQuery]int page, [FromQuery]int size)
+        public async Task<IActionResult> GetUserList([FromQuery] int page, [FromQuery] int size)
         {
             var users = await userService.GetAllUsers(page, size);
             return Ok(new { success = true, users = users });
@@ -80,7 +93,7 @@ namespace imarket.Controllers.admin
                 Username = user.Username!,
                 Nickname = user.Nickname!,
                 PasswordHash = user.PasswordHash!,
-                Avatar = user.Avatar?? "/images/defaultAvatar.png",
+                Avatar = user.Avatar ?? "/images/defaultAvatar.png",
                 Email = user.Email!,
                 Role = user.Role!,
                 CreatedAt = DateTime.Now,
@@ -104,10 +117,10 @@ namespace imarket.Controllers.admin
             {
                 return NotFound();
             }
-            userCheck.Username = user.Username??userCheck.Username;
-            userCheck.Nickname = user.Nickname??userCheck.Nickname;
+            userCheck.Username = user.Username ?? userCheck.Username;
+            userCheck.Nickname = user.Nickname ?? userCheck.Nickname;
             userCheck.Avatar = user.Avatar ?? userCheck.Avatar;
-            userCheck.Email = user.Email??userCheck.Email;
+            userCheck.Email = user.Email ?? userCheck.Email;
             userCheck.Role = user.Role ?? userCheck.Role;
             userCheck.Status = user.Status ?? userCheck.Status;
             await userService.UpdateUserAsync(user.Id!, userCheck);
@@ -143,7 +156,6 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
     }
-
     public class UserCreateRequest
     {
         [Required]

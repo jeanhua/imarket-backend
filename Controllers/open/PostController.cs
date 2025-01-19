@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
 
-namespace imarket.Controllers
+namespace imarket.Controllers.open
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -20,7 +20,7 @@ namespace imarket.Controllers
         private readonly ILogger<PostController> _logger;
         // 缓存
         private readonly IMemoryCache _cache;
-        public PostController(IUserService userService,ILikeService likeService ,IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
+        public PostController(IUserService userService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
         {
             this.userService = userService;
             this.postService = postService;
@@ -28,7 +28,7 @@ namespace imarket.Controllers
             this.postCategoriesService = postCategoriesService;
             this.imageService = imageService;
             this.likeService = likeService;
-            this._logger = logger;
+            _logger = logger;
             _cache = cache;
         }
 
@@ -39,14 +39,14 @@ namespace imarket.Controllers
             if (_cache.TryGetValue($"Posts_cache{page},{pageSize}", out var post_cache))
             {
                 posts = post_cache as IEnumerable<PostModels>;
-                return Ok(new { success = true, posts = posts });
+                return Ok(new { success = true, posts });
             }
             posts = await postService.GetAllPostsAsync(page, pageSize);
             _cache.Set("Posts_cache", posts, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
             });
-            return Ok(new { success = true, posts = posts });
+            return Ok(new { success = true, posts });
         }
 
         [HttpGet("categories")] // api/post/categories
@@ -63,14 +63,14 @@ namespace imarket.Controllers
             if (_cache.TryGetValue($"CategorisedPosts_cache{page},{pageSize},{categoryId}", out var post_cache))
             {
                 posts = post_cache as IEnumerable<PostModels>;
-                return Ok(new { success = true, posts = posts });
+                return Ok(new { success = true, posts });
             }
             posts = await postService.GetPostsByCategoryIdAsync(categoryId, page, pageSize);
             _cache.Set($"CategorisedPosts_cache{page},{pageSize},{categoryId}", posts, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
             });
-            return Ok(new { success = true, posts = posts });
+            return Ok(new { success = true, posts });
         }
 
         [HttpGet("{id}")] // api/post/{id}
@@ -160,7 +160,7 @@ namespace imarket.Controllers
                 CreatedAt = DateTime.Now
             };
             var result1 = await postService.CreatePostAsync(post);
-            if(postReq.Images!=null)
+            if (postReq.Images != null)
             {
                 foreach (var image in postReq.Images!)
                 {

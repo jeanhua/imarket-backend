@@ -8,7 +8,7 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
 
 ### 1. 创建数据库
 
-1. 确保已安装 MySQL 数据库，并运行以下命令以创建项目所需的数据库和表。
+1. 确保已安装 MySQL 数据库，并运行以下命令以创建项目所需的数据库。
 
    连接数据库
 
@@ -16,7 +16,7 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
    mysql -u root -p
    ```
 
-   创建数据库和用户
+   创建数据库和用户，`your_password`换成你想要的密码
 
    ```
    CREATE DATABASE imarket;
@@ -25,13 +25,6 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
    FLUSH PRIVILEGES;
    ```
 
-   
-
-2. 导入数据库初始化脚本（`create_tables_script.sql`），该脚本包含完整的表结构和外键约束。
-
-   ```bash
-   mysql -u imarket_root -p < create_tables_script.sql
-   ```
 
 ### 2. 配置项目
 
@@ -42,7 +35,8 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
    ```
 
 2. 修改配置文件：
-   编辑 `appsettings.json`，填写数据库连接字符串，例如：
+   编辑 `appsettings.json`，填写数据库连接字符串，`your_password`换成你上面设置的密码
+   
    ```json
    {
        "ConnectionStrings": {
@@ -60,6 +54,16 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
        "Audience": "web-client",
        "ExpiresInMinutes": 60,
        "RefreshTokenExpiresInDays" : 7
+     }
+   ```
+   
+   填写管理员信息
+   
+   ```json
+   "admin":{
+       "Username":"admin",
+       "Email":"admin@imarkt.com",
+       "Password":"your password"
      }
    ```
    

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace imarket.Controllers
+namespace imarket.Controllers.open
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -13,7 +13,7 @@ namespace imarket.Controllers
         public ImageController(IImageService imageService, ILogger<ImageController> logger)
         {
             this.imageService = imageService;
-            this._logger = logger;
+            _logger = logger;
         }
 
         [HttpPost("UploadImage")] // api/image/UploadImage
@@ -34,7 +34,7 @@ namespace imarket.Controllers
                 return BadRequest("Image size should be less than 3MB");
             }
             var path = await imageService.UploadImageAsync(request.Base64);
-            return Ok(new { success = true, path = path });
+            return Ok(new { success = true, path });
         }
     }
 

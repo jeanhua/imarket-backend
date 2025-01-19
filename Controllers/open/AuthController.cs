@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 
-namespace imarket.Controllers
+namespace imarket.Controllers.open
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -18,7 +18,7 @@ namespace imarket.Controllers
         private readonly ILoginService loginService;
         private readonly ILogger<AuthController> _logger;
         private readonly IMemoryCache _cache;
-        public AuthController(JwtTokenGenerator tokenGenerator,IUserService userService,ILoginService loginService, ILogger<AuthController> _logger, IMemoryCache _cache)
+        public AuthController(JwtTokenGenerator tokenGenerator, IUserService userService, ILoginService loginService, ILogger<AuthController> _logger, IMemoryCache _cache)
         {
             _tokenGenerator = tokenGenerator;
             this.userService = userService;
@@ -30,7 +30,7 @@ namespace imarket.Controllers
         [HttpPost("login")] // api/auth/login
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -48,7 +48,7 @@ namespace imarket.Controllers
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
             });
-            if (loginNums>=5)
+            if (loginNums >= 5)
             {
                 return Unauthorized("Too many login attempts. Try 5 minutes later !");
             }
