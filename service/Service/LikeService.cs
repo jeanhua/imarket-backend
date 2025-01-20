@@ -172,7 +172,7 @@ namespace imarket.service.Service
 
         public async Task<int> DeleteLikesByCommentIdAsync(string commentId)
         {
-            var query = "DELETE FROM Likes WHERE PostId = NULL AND CommentId IS @CommentId";
+            var query = "DELETE FROM Likes WHERE PostId IS NULL AND CommentId = @CommentId";
             var parameters = new MySqlParameter[]
             {
                     new MySqlParameter("@CommentId", commentId),
