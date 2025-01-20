@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 namespace imarket.Controllers.open
 {
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = "user,unverified,banned,admin")]
     [ApiController]
     public class AccountController : ControllerBase
     {
