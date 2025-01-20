@@ -55,6 +55,7 @@ namespace imarket.utils
                     new Claim(JwtRegisteredClaimNames.Sub, id),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim(ClaimTypes.Name, username),
+                    new Claim(ClaimTypes.Role,"refresh"),
                     new Claim(ClaimTypes.NameIdentifier, id)
                 },
                     expires: DateTime.Now.AddDays(double.Parse(jwtSettings["RefreshTokenExpiresInDays"])),

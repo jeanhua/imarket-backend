@@ -192,7 +192,7 @@ namespace imarket.Controllers.open
         }
 
         [HttpGet("refresh")] // api/auth/refresh
-        [Authorize]
+        [Authorize(Roles = "refresh")]
         public async Task<IActionResult> Refresh()
         {
             var userCheck = await userService.GetUserByUsernameAsync(User.Identity!.Name);
