@@ -120,16 +120,16 @@ namespace imarket.Controllers.open
             return Ok(new { success = true, commentId = comment_new.Id });
         }
 
-        [HttpGet("Delete")] // api/Comments/Delete?CommentId=xxx
+        [HttpGet("Delete")] // api/Comments/Delete?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> DeleteCommentAsync([FromQuery] string CommentId)
+        public async Task<IActionResult> DeleteCommentAsync([FromQuery] string commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
                 return Unauthorized("Invalid user.");
             }
-            var comment = await commentService.GetCommentByIdAsync(CommentId!);
+            var comment = await commentService.GetCommentByIdAsync(commentId!);
             if (comment == null)
             {
                 return NotFound("Comment not found.");
@@ -138,7 +138,7 @@ namespace imarket.Controllers.open
             {
                 return Unauthorized("You are not the author of this comment.");
             }
-            var result = await commentService.DeleteCommentAsync(CommentId!);
+            var result = await commentService.DeleteCommentAsync(commentId!);
             if (result == 0)
             {
                 return StatusCode(500);
@@ -146,16 +146,16 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpPost("Like")] // api/Comments/Like?CommentId=xxx
+        [HttpPost("Like")] // api/Comments/Like?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> LikeCommentAsync([FromQuery] string CommentId)
+        public async Task<IActionResult> LikeCommentAsync([FromQuery] string commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
                 return Unauthorized("Invalid user.");
             }
-            var comment = await commentService.GetCommentByIdAsync(CommentId!);
+            var comment = await commentService.GetCommentByIdAsync(commentId!);
             if (comment == null)
             {
                 return NotFound("Comment not found.");
@@ -164,7 +164,7 @@ namespace imarket.Controllers.open
             {
                 Id = Guid.NewGuid().ToString(),
                 PostId = null,
-                CommentId = CommentId!,
+                CommentId = commentId!,
                 UserId = user.Id,
                 CreatedAt = DateTime.Now
             });
@@ -175,16 +175,16 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpGet("UnLike")] // api/Comments/UnLike?CommentId=xxx
+        [HttpGet("UnLike")] // api/Comments/UnLike?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> UnLikeCommentAsync([FromQuery] string CommentId)
+        public async Task<IActionResult> UnLikeCommentAsync([FromQuery] string commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
                 return Unauthorized("Invalid user.");
             }
-            var comment = await commentService.GetCommentByIdAsync(CommentId!);
+            var comment = await commentService.GetCommentByIdAsync(commentId!);
             if (comment == null)
             {
                 return NotFound("Comment not found.");
@@ -192,7 +192,7 @@ namespace imarket.Controllers.open
             var result = await likeService.DeleteLikeAsync(new LikeModels
             {
                 Id = comment.Id,
-                CommentId = CommentId!,
+                CommentId = commentId!,
                 UserId = user.Id,
                 CreatedAt = comment.CreatedAt,
                 PostId = null

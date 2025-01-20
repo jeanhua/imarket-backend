@@ -27,7 +27,7 @@ namespace imarket.Controllers.open
             this._cache = _cache;
         }
 
-        [HttpPost("login")] // api/auth/login
+        [HttpPost("Login")] // api/Auth/Login
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
@@ -96,13 +96,13 @@ namespace imarket.Controllers.open
             return Ok(new { success = true, token = _token });
         }
 
-        [HttpPost("logout")] // api/auth/logout
+        [HttpPost("Logout")] // api/Auth/Logout
         public IActionResult Logout()
         {
             return Ok();
         }
 
-        [HttpPost("register")] // api/auth/register
+        [HttpPost("Register")] // api/Auth/Register
         public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
         {
             if (!ModelState.IsValid)
@@ -161,7 +161,7 @@ namespace imarket.Controllers.open
         }
 
 
-        [HttpPost("change-password")] // api/auth/change-password
+        [HttpPost("ChangePassword")] // api/Auth/ChangePassword
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
         {
@@ -191,7 +191,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpGet("refresh")] // api/auth/refresh
+        [HttpGet("Refresh")] // api/Auth/Refresh
         [Authorize(Roles = "refresh")]
         public async Task<IActionResult> Refresh()
         {
@@ -224,7 +224,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true, token = _token });
         }
 
-        [HttpPost("forgot-password")] // api/auth/forgot-password
+        [HttpPost("ForgotPassword")] // api/Auth/ForgotPassword
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest forgotPasswordRequest)
         {
             if (!ModelState.IsValid)

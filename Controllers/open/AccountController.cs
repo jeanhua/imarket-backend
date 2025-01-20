@@ -15,7 +15,7 @@ namespace imarket.Controllers.open
         {
             this.userService = userService;
         }
-        [HttpGet("info")] // api/account/info
+        [HttpGet("Info")] // api/Cccount/Info
         public async Task<IActionResult> getinfo()
         {
             if (User.Identity!.IsAuthenticated == false)
@@ -41,7 +41,7 @@ namespace imarket.Controllers.open
             });
         }
 
-        [HttpPost("edit")] // api/account/edit
+        [HttpPost("Edit")] // api/Account/Edit
         public async Task<IActionResult> edit([FromBody] EditRequest user)
         {
             if (User.Identity!.IsAuthenticated == false)

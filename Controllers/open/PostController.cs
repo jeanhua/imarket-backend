@@ -36,7 +36,7 @@ namespace imarket.Controllers.open
             _cache = cache;
         }
 
-        [HttpGet("Posts")] // api/post/Posts
+        [HttpGet("Posts")] // api/Post/Posts
         public async Task<IActionResult> GetPosts([FromQuery] int page, [FromQuery] int pageSize)
         {
             if(_cache.TryGetValue($"Posts_cache_page{page}_pageSize{pageSize}", out var posts_cache))
@@ -69,14 +69,14 @@ namespace imarket.Controllers.open
             return Ok(response);
         }
 
-        [HttpGet("categories")] // api/post/categories
+        [HttpGet("Categories")] // api/Post/Categories
         public async Task<IActionResult> GetCategories()
         {
             var categories = await postCategoriesService.GetAllCategoriesAsync();
             return Ok(new { success = true, categories });
         }
 
-        [HttpGet("CategorisedPosts")] // api/post/CategorisedPosts
+        [HttpGet("CategorisedPosts")] // api/Post/CategorisedPosts
         public async Task<IActionResult> GetCategorisedPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string categoryId)
         {
             if (_cache.TryGetValue($"GetCategorisedPosts_page{page}_pageSize{pageSize}", out var posts_cache))
@@ -109,7 +109,7 @@ namespace imarket.Controllers.open
             return Ok(response);
         }
 
-        [HttpGet("{id}")] // api/post/{id}
+        [HttpGet("{id}")] // api/Post/{id}
         public async Task<IActionResult> GetPost([FromRoute] string id)
         {
             if (_cache.TryGetValue($"Post_cache{id}", out var post_cache))
@@ -156,7 +156,7 @@ namespace imarket.Controllers.open
             return Ok(response);
         }
 
-        [HttpPost("create")] // api/post/create
+        [HttpPost("Create")] // api/Post/Create
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> CreatePost([FromBody] CreatePostRequest postReq)
         {
@@ -222,7 +222,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpPost("delete")] // api/post/delete?postId=xxx
+        [HttpPost("Delete")] // api/Post/Delete?postId=xxx
         [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> DeletePost([FromQuery] string postId)
         {
@@ -245,7 +245,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpGet("finish")] //api/post/finish?postId=xxx
+        [HttpGet("Finish")] //api/Post/Finish?postId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> FinishPost([FromQuery] string postId)
         {
@@ -268,7 +268,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpGet("like")] // api/post/like?postId=xxx
+        [HttpGet("Like")] // api/Post/Like?postId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> LikePost([FromQuery] string postId)
         {
@@ -298,7 +298,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpGet("favorite")] // api/post/favorite?postId=xxx
+        [HttpGet("Favorite")] // api/Post/Favorite?postId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> FavoritePost([FromQuery] string postId)
         {
@@ -320,7 +320,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpGet("unfavorite")] // api/post/unfavorite?postId=xxx
+        [HttpGet("Unfavorite")] // api/Post/Unfavorite?postId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UnFavoritePost([FromQuery] string postId)
         {
@@ -335,14 +335,10 @@ namespace imarket.Controllers.open
                 return Unauthorized("Invalid user.");
             }
             var result = await favoriteService.DeletePostFavoriteAsync(postId, user.Id);
-            if (result == 0)
-            {
-                return StatusCode(500);
-            }
             return Ok(new { success = true });
         }
 
-        [HttpGet("unlike")] // api/post/unlike?postId=xxx
+        [HttpGet("Unlike")] // api/Post/Unlike?postId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UnLikePost([FromQuery] string postId)
         {

@@ -16,7 +16,7 @@ namespace imarket.Controllers.open
             _logger = logger;
         }
 
-        [HttpPost("UploadImage")] // api/image/UploadImage
+        [HttpPost("UploadImage")] // api/Image/UploadImage
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UploadImage([FromBody] ImageRequest request)
         {
