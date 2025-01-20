@@ -96,6 +96,10 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("Content is required.");
             }
+            if (comment.Content.Length > 1000)
+            {
+                return BadRequest("Content is too long.");
+            }
             if (post == null)
             {
                 return NotFound("Post not found.");
