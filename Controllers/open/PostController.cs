@@ -268,36 +268,6 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpGet("Like")] // api/Post/Like?postId=xxx
-        [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> LikePost([FromQuery] string postId)
-        {
-            var post = await postService.GetPostByIdAsync(postId);
-            if (post == null)
-            {
-                return NotFound("Post not found.");
-            }
-            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
-            if (user == null)
-            {
-                return Unauthorized("Invalid user.");
-            }
-            var like = new LikeModels
-            {
-                Id = Guid.NewGuid().ToString(),
-                PostId = postId,
-                CommentId = null,
-                UserId = user.Id,
-                CreatedAt = DateTime.Now
-            };
-            var result = await likeService.CreateLikeAsync(like);
-            if (result == 0)
-            {
-                return StatusCode(500,new {message = "you have liked it!"});
-            }
-            return Ok(new { success = true });
-        }
-
         [HttpGet("Favorite")] // api/Post/Favorite?postId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> FavoritePost([FromQuery] string postId)
@@ -313,9 +283,9 @@ namespace imarket.Controllers.open
                 return Unauthorized("Invalid user.");
             }
             var isFavorite = await favoriteService.CheckIsFavorite(user.Id, postId);
-            if (!isFavorite)
+            if (isFavorite)
             {
-                return BadRequest("It's not your favorite.");
+                return Ok(new { success = true });
             }
             var result = await favoriteService.CreatePostFavoriteAsync(postId,user.Id);
             if (result == 0)
@@ -351,6 +321,41 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
+        [HttpGet("Like")] // api/Post/Like?postId=xxx
+        [Authorize(Roles = "user,admin")]
+        public async Task<IActionResult> LikePost([FromQuery] string postId)
+        {
+            var post = await postService.GetPostByIdAsync(postId);
+            if (post == null)
+            {
+                return NotFound("Post not found.");
+            }
+            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+            var isLike = await likeService.CheckUserLikePostAsync(user.Id, postId);
+            if (isLike)
+            {
+                return Ok(new { success = true });
+            }
+            var like = new LikeModels
+            {
+                Id = Guid.NewGuid().ToString(),
+                PostId = postId,
+                CommentId = null,
+                UserId = user.Id,
+                CreatedAt = DateTime.Now
+            };
+            var result = await likeService.CreateLikeAsync(like);
+            if (result == 0)
+            {
+                return StatusCode(500);
+            }
+            return Ok(new { success = true });
+        }
+
         [HttpGet("Unlike")] // api/Post/Unlike?postId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UnLikePost([FromQuery] string postId)
@@ -364,6 +369,11 @@ namespace imarket.Controllers.open
             if (user == null)
             {
                 return Unauthorized("Invalid user.");
+            }
+            var isLike = await likeService.CheckUserLikePostAsync(user.Id,postId);
+            if(!isLike)
+            {
+                return Ok(new { success = true });
             }
             var result = await likeService.DeleteLikeAsync(new LikeModels
             {
