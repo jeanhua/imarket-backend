@@ -312,6 +312,11 @@ namespace imarket.Controllers.open
             {
                 return Unauthorized("Invalid user.");
             }
+            var isFavorite = await favoriteService.CheckIsFavorite(user.Id, postId);
+            if (!isFavorite)
+            {
+                return BadRequest("It's not your favorite.");
+            }
             var result = await favoriteService.CreatePostFavoriteAsync(postId,user.Id);
             if (result == 0)
             {
@@ -334,7 +339,15 @@ namespace imarket.Controllers.open
             {
                 return Unauthorized("Invalid user.");
             }
-            var result = await favoriteService.DeletePostFavoriteAsync(postId, user.Id);
+            var isFavorite = await favoriteService.CheckIsFavorite(user.Id,postId);
+            if(isFavorite)
+            {
+                var result = await favoriteService.DeletePostFavoriteAsync(postId, user.Id);
+                if(result == 0)
+                {
+                    return StatusCode(500);
+                }
+            }
             return Ok(new { success = true });
         }
 

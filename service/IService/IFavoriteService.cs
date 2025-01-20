@@ -8,5 +8,6 @@ namespace imarket.service.IService
         Task<int> CreatePostFavoriteAsync(string postId, string userId);
         Task<int> DeletePostFavoriteAsync(string postId, string userId);
         Task<int> GetFavoriteNumsByPostId(string postId);
+        Task<bool> CheckIsFavorite(string userId,string postId);
     }
 }

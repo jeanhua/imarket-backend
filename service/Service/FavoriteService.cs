@@ -92,5 +92,21 @@ namespace imarket.service.Service
             }
             return Convert.ToInt32(result.Rows[0][0]);
         }
+
+        public async Task<bool> CheckIsFavorite(string userId, string postId)
+        {
+            var query = "SELECT * FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@UserId",userId),
+                new MySqlParameter("@PostId",postId)
+            };
+            var result = await _database.ExecuteQuery(query,CommandType.Text, parameters);
+            if (Convert.ToInt32(result.Rows[0][0]) == 0)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
