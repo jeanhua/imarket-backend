@@ -38,7 +38,7 @@ namespace imarket.middleware
                     message = "Internal Server Error",
                     detail = _env.IsDevelopment() ? ex.Message : null // 仅在开发环境中返回详细错误信息
                 };
-                System.IO.File.AppendAllText("log.txt", DateTime.Now.ToString() + "\t" + ex.ToString() + "\n");
+                System.IO.File.AppendAllText("error.log", DateTime.Now.ToString() + "\t" + ex.ToString() + "\n");
                 await context.Response.WriteAsJsonAsync(response);
             }
         }
