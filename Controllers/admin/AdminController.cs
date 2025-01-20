@@ -11,14 +11,19 @@ namespace imarket.Controllers.admin
     [Authorize(Roles = "admin")]
     public class AdminController : ControllerBase
     {
-        public readonly IPostService postService;
-        public readonly IPostCategoriesService postCategoriesService;
-        public readonly IUserService userService;
-        public AdminController(IPostService postService, IPostCategoriesService postCategoriesService, IUserService userService)
+        private readonly IPostService postService;
+        private readonly IPostCategoriesService postCategoriesService;
+        private readonly IUserService userService;
+        private readonly ILikeService likeService;
+        private readonly IFavoriteService favoriteService;
+        
+        public AdminController(IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IUserService userService)
         {
             this.postService = postService;
             this.postCategoriesService = postCategoriesService;
             this.userService = userService;
+            this.likeService = likeService;
+            this.favoriteService = favoriteService;
         }
 
         [HttpGet("CreateCategories")] // api/Admin/CreateCategories?name=xxx&description=xxx
@@ -165,6 +170,11 @@ namespace imarket.Controllers.admin
             {
                 return BadRequest("some posts of the user have not been deleted!");
             }
+            // 删除用户点赞
+            await likeService.DeleteLikesByUserIdAsync(userId);
+            // 删除用户收藏
+            await favoriteService.DeletePostFavoriteByUserIdAsyc(userId);
+            // 删除用户
             var result = await userService.DeleteUserAsync(userId);
             if (result == 0)
             {

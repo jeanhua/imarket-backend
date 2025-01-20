@@ -78,6 +78,16 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
+        public async Task<int> DeletePostFavoriteByUserIdAsyc(string userId)
+        {
+            var query = "DELETE FROM Favorites WHERE UserId = @UserId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@UserId", userId),
+            };
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
         public async Task<int> GetFavoriteNumsByPostId(string postId)
         {
             var query = "SELECT COUNT(*) FROM Favorites WHERE PostId = @PostId";
