@@ -150,7 +150,7 @@ namespace imarket.service.Service
             }
         }
 
-        public async Task<int> DeleteLikesByPostId(string postId)
+        public async Task<int> DeleteLikesByPostIdAsync(string postId)
         {
             var query = "DELETE FROM Likes WHERE PostId = @PostId AND CommentId IS NULL";
             var parameters = new MySqlParameter[]
@@ -160,7 +160,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteLikesByUserId(string userId)
+        public async Task<int> DeleteLikesByUserIdAsync(string userId)
         {
             var query = "DELETE FROM Likes WHERE UserId = @UserId";
             var parameters = new MySqlParameter[]
@@ -170,7 +170,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteLikesByCommentId(string commentId)
+        public async Task<int> DeleteLikesByCommentIdAsync(string commentId)
         {
             var query = "DELETE FROM Likes WHERE PostId = NULL AND CommentId IS @CommentId";
             var parameters = new MySqlParameter[]

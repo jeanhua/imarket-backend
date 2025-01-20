@@ -252,6 +252,8 @@ namespace imarket.Controllers.open
             await imageService.DeleteImagesByPostIdAsync(postId);
             // 删除评论
             await commentService.DeleteCommentsByPostIdAsync(postId);
+            // 删除点赞
+            await likeService.DeleteLikesByPostIdAsync(postId);
             // 删除帖子
             var result = await postService.DeletePostAsync(postId);
             if (result == 0)
