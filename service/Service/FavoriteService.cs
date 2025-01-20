@@ -41,7 +41,7 @@ namespace imarket.service.Service
             }
             return favorites;
         }
-        public async Task<int> CreatePostFavoriteAsync(string userId, string postId)
+        public async Task<int> CreatePostFavoriteAsync(string postId, string userId)
         {
             // 检查是否已经收藏
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
