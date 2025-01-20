@@ -222,7 +222,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpPost("Delete")] // api/Post/Delete?postId=xxx
+        [HttpGet("Delete")] // api/Post/Delete?postId=xxx
         [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> DeletePost([FromQuery] string postId)
         {

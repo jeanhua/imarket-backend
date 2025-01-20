@@ -1,6 +1,7 @@
 ﻿using imarket.service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace imarket.Controllers.open
 {
@@ -40,6 +41,7 @@ namespace imarket.Controllers.open
 
     public class ImageRequest
     {
+        [Required]
         public string? Base64 { get; set; }
     }
 }

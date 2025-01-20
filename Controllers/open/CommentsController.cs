@@ -150,7 +150,7 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
-        [HttpPost("Like")] // api/Comments/Like?commentId=xxx
+        [HttpGet("Like")] // api/Comments/Like?commentId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> LikeCommentAsync([FromQuery] string commentId)
         {
