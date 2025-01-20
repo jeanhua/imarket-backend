@@ -198,6 +198,11 @@ namespace imarket.Controllers.open
                 CreatedAt = DateTime.Now
             };
             var result1 = await postService.CreatePostAsync(post);
+            await postCategoriesService.CreatePostCategoryAsync(new PostCategoryModels()
+            {
+                CategoryId = postReq.CategoryId,
+                PostId = postId,
+            });
             if (postReq.Images != null)
             {
                 foreach (var image in postReq.Images!)
@@ -236,8 +241,19 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("You are not the author of this post.");
             }
-            var result = await postService.DeletePostAsync(postId);
+            // 删除分类关联
+            var categoryID = await postCategoriesService.GetPostCategoriesByPostIdAsync(postId);
+            await postCategoriesService.DeletePostCategoryAsync(new PostCategoryModels
+            {
+                PostId = postId,
+                CategoryId = categoryID
+            });
+            // 删除图片
             await imageService.DeleteImagesByPostIdAsync(postId);
+            // 删除评论
+            await commentService.DeleteCommentsByPostIdAsync(postId);
+            // 删除帖子
+            var result = await postService.DeletePostAsync(postId);
             if (result == 0)
             {
                 return StatusCode(500);

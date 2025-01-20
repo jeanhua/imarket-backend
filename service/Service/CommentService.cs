@@ -79,7 +79,27 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> GetCommentsNumByPostId(string postId)
+        public async Task<int> DeleteCommentsByPostIdAsync(string postId)
+        {
+            var query = "DELETE FROM Comments WHERE PostId = @PostId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@PostId", postId)
+            };
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
+        public async Task<int> DeleteCommentsByUserIdAsync(string userId)
+        {
+            var query = "DELETE FROM Comments WHERE UserId = @UserId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@UserId", userId)
+            };
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
+        public async Task<int> GetCommentsNumByPostIdAsync(string postId)
         {
             var query = "SELECT COUNT(*) FROM Comments WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]

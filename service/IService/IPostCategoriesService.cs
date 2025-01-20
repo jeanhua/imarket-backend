@@ -12,7 +12,7 @@ namespace imarket.service.IService
         Task<int> DeleteCategoryAsync(string id);
 
         // 帖子分类关联相关
-        Task<IEnumerable<string>> GetPostCategoriesByPostIdAsync(string postId);
+        Task<string?> GetPostCategoriesByPostIdAsync(string postId);
         Task<int> CreatePostCategoryAsync(PostCategoryModels postCategory);
         Task<int> DeletePostCategoryAsync(PostCategoryModels postCategory);
     }

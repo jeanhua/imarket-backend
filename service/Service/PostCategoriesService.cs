@@ -83,7 +83,7 @@ namespace imarket.service.Service
         }
 
         // 帖子分类关联相关
-        public async Task<IEnumerable<string>> GetPostCategoriesByPostIdAsync(string postId)
+        public async Task<string?> GetPostCategoriesByPostIdAsync(string postId)
         {
             var categories = new List<string>();
             var query = "SELECT * FROM PostCategories WHERE PostId = @PostId";
@@ -92,11 +92,11 @@ namespace imarket.service.Service
                 new MySqlParameter("@PostId", postId )
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
-            foreach (DataRow row in result.Rows)
+            if(result.Rows.Count == 0)
             {
-                categories.Add(row["CategoryId"].ToString()!);
+                return null;
             }
-            return categories;
+            return result.Rows[0]["CategoryId"].ToString();
         }
         public async Task<int> CreatePostCategoryAsync(PostCategoryModels postCategory)
         {
