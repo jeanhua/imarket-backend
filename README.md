@@ -45,11 +45,11 @@ iMarket 是一个为校园环境设计的开源在线校园集市后端系统，
    }
    ```
    
-   填写密钥和token有效时间 ( 默认60分钟 )
+   填写密钥(*为自动生成)和token有效时间 ( 默认60分钟 )，refresh token有效时间（默认为7天）
    
    ```json
    "JwtSettings": {
-       "Key": "YourSuperSecretKeyHere",
+       "Key": "*",
        "Issuer": "imarket",
        "Audience": "web-client",
        "ExpiresInMinutes": 60,

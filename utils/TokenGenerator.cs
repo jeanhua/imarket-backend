@@ -22,7 +22,12 @@ namespace imarket.utils
             try
             {
                 var jwtSettings = _configuration.GetSection("JwtSettings");
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
+                var keyStr = jwtSettings["Key"];
+                if (keyStr == null || keyStr == "*" || keyStr.Length < 32)
+                {
+                    keyStr = Guid.NewGuid().ToString();
+                }
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr));
                 var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var claims = new[]
