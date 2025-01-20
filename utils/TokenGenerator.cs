@@ -10,24 +10,27 @@ namespace imarket.utils
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<JwtTokenGenerator> _logger;
+        private readonly string _jwtToken_key;
 
         public JwtTokenGenerator(IConfiguration configuration, ILogger<JwtTokenGenerator> _logger)
         {
             _configuration = configuration;
             this._logger = _logger;
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var keyStr = jwtSettings["Key"];
+            if (keyStr == null || keyStr == "*" || keyStr.Length < 32)
+            {
+                keyStr = Guid.NewGuid().ToString();
+            }
+            _jwtToken_key = keyStr;
         }
 
         public TokenModels? GenerateToken(string username, string id, string role)
         {
             try
             {
-                var jwtSettings = _configuration.GetSection("JwtSettings");
-                var keyStr = jwtSettings["Key"];
-                if (keyStr == null || keyStr == "*" || keyStr.Length < 32)
-                {
-                    keyStr = Guid.NewGuid().ToString();
-                }
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyStr));
+                
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtToken_key));
                 var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
                 var claims = new[]
@@ -39,18 +42,18 @@ namespace imarket.utils
                     new Claim(ClaimTypes.NameIdentifier, id)
                 };
 
-                DateTime expires = DateTime.Now.AddMinutes(double.Parse(jwtSettings["ExpiresInMinutes"]));
+                DateTime expires = DateTime.Now.AddMinutes(double.Parse(_configuration["JwtSettings:ExpiresInMinutes"]));
 
                 var token = new JwtSecurityToken(
-                    issuer: jwtSettings["Issuer"],
-                    audience: jwtSettings["Audience"],
+                    issuer: _configuration["JwtSettings:Issuer"],
+                    audience: _configuration["JwtSettings:Audience"],
                     claims: claims,
                     expires: expires,
                     signingCredentials: credentials);
 
                 var refreshToken = new JwtSecurityToken(
-                    issuer: jwtSettings["Issuer"],
-                    audience: jwtSettings["Audience"],
+                    issuer: _configuration["JwtSettings:Issuer"],
+                    audience: _configuration["JwtSettings:Audience"],
                     claims: new[]{
                     new Claim(JwtRegisteredClaimNames.Sub, id),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -58,7 +61,7 @@ namespace imarket.utils
                     new Claim(ClaimTypes.Role,"refresh"),
                     new Claim(ClaimTypes.NameIdentifier, id)
                 },
-                    expires: DateTime.Now.AddDays(double.Parse(jwtSettings["RefreshTokenExpiresInDays"])),
+                    expires: DateTime.Now.AddDays(double.Parse(_configuration["JwtSettings:RefreshTokenExpiresInDays"])),
                     signingCredentials: credentials);
 
                 return new TokenModels

@@ -95,13 +95,19 @@ namespace imarket
             builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddScoped<IFavoriteService, FavoriteService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
-            builder.Services.AddScoped<JwtTokenGenerator>();
             // 注入数据库
             builder.Services.AddSingleton<Database>(provider =>
             {
                 var configuration = provider.GetRequiredService<IConfiguration>();
                 var logger = provider.GetRequiredService<ILogger<Database>>();
                 return new Database(configuration, logger);
+            });
+            // 注入token生成器
+            builder.Services.AddSingleton<JwtTokenGenerator>(provider =>
+            {
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                var logger = provider.GetRequiredService<ILogger<JwtTokenGenerator>>();
+                return new JwtTokenGenerator(configuration, logger);
             });
             // 数据库初始化
             var database = builder.Services.BuildServiceProvider().GetService<Database>();
