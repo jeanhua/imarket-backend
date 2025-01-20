@@ -10,6 +10,7 @@ namespace imarket.service.IService
         Task<int> CreateMessageAsync(MessageModels message);
         Task<int> DeleteMessageByIdAsync(string id);
         Task<int> DeleteMessageByReceiverIdAsync(string receiverId);
+        Task<int> DeleteMessageBySenderIdAsync(int senderId);
         Task<int> DeleteMessageBySenderToReceiverIdAsync(string senderId,string receiverid);
     }
 }

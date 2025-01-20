@@ -115,6 +115,16 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
+        public async Task<int> DeleteMessageBySenderIdAsync(int senderId)
+        {
+            var query = "DELETE FROM Messages WHERE SenderId = @SenderId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@SenderId", senderId )
+            };
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
         public async Task<int> DeleteMessageBySenderToReceiverIdAsync(string senderId, string receiverid)
         {
             var query = "DELETE FROM Messages WHERE SenderId = @SenderId AND ReceiverId = @ReceiverId";
