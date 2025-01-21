@@ -76,7 +76,12 @@ namespace imarket.utils
                         new MySqlParameter("@CreatedAt", DateTime.Now),
                         new MySqlParameter("@Status", 1)
                     };
-                    await ExecuteNonQuery(query, CommandType.Text, parameters);
+                    var cu = await ExecuteNonQuery(query, CommandType.Text, parameters);
+                    if(cu == 0)
+                    {
+                        _logger.LogError("Can's create the admin");
+                        Environment.Exit(1);
+                    }
                     _logger.LogInformation("Admin account created");
                 }
             }

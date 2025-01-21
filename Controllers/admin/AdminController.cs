@@ -156,6 +156,10 @@ namespace imarket.Controllers.admin
             {
                 return NotFound();
             }
+            if(userCheck.Username == configuration["admin:Username"] && user.Role != "admin")
+            {
+                return BadRequest("you can't change the super admin's role");
+            }
             userCheck.Nickname = user.Nickname ?? userCheck.Nickname;
             userCheck.Avatar = user.Avatar ?? userCheck.Avatar;
             userCheck.Email = user.Email ?? userCheck.Email;
