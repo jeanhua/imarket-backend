@@ -165,15 +165,12 @@ namespace imarket.Controllers.admin
         [HttpGet("DeleteUser")] // api/Admin/DeleteUser?userId=xxx
         public async Task<IActionResult> DeleteUser([FromQuery] string userId)
         {
+            var user = await userService.GetUserByIdAsync(userId);
             var posts = await postService.GetPostsByUserIdAsync(userId);
             if (posts.Count() != 0)
             {
                 return BadRequest("some posts of the user have not been deleted!");
             }
-            // 删除用户点赞
-            await likeService.DeleteLikesByUserIdAsync(userId);
-            // 删除用户收藏
-            await favoriteService.DeletePostFavoriteByUserIdAsyc(userId);
             // 删除用户
             var result = await userService.DeleteUserAsync(userId);
             if (result == 0)
