@@ -56,8 +56,8 @@ namespace imarket.Controllers.open
                 response.Add(new CommentResponse
                 {
                     Id = comment.Id,
-                    Nickname = (await userService.GetUserByUsernameAsync(comment.UserId)).Nickname,
-                    Username = (await userService.GetUserByUsernameAsync(comment.UserId)).Username,
+                    Nickname = (await userService.GetUserByIdAsync(comment.UserId))?.Nickname,
+                    Username = (await userService.GetUserByIdAsync(comment.UserId))?.Username,
                     UserAvatar = avatar,
                     Content = comment.Content,
                     isLike = isLike,
@@ -67,7 +67,7 @@ namespace imarket.Controllers.open
             }
             cache.Set(postid, response, new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]))
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]!))
             });
             return Ok(new { success = true, comments = response });
         }
