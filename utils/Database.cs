@@ -64,7 +64,7 @@ namespace imarket.utils
                     var passwordHash = SHA256Encryptor.Encrypt(password);
                     // 创建管理员账户
                     query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
-                    var parameters = new MySqlParameter[]
+                    parameters = new MySqlParameter[]
                     {
                         new MySqlParameter("@Id", Guid.NewGuid().ToString()),
                         new MySqlParameter("@Username", username),

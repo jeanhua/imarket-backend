@@ -151,6 +151,7 @@ namespace imarket.Controllers.open
                     favoriteNms,
                     isLiked,
                     postfind.CreatedAt,
+                    user?.Username,
                     user?.Nickname,
                     user?.Avatar
                 },
