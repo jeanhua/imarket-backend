@@ -124,9 +124,9 @@ namespace imarket.service.Service
             var result = await _database.ExecuteQuery(query,CommandType.Text, parameters);
             if (result.Rows.Count > 0)
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
     }
 }

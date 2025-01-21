@@ -297,7 +297,7 @@ namespace imarket.Controllers.open
             var isFavorite = await favoriteService.CheckIsFavorite(user.Id, postId);
             if (isFavorite)
             {
-                return Ok(new { success = true });
+                return Ok(new { success = true,message = "your have favorited it." });
             }
             var result = await favoriteService.CreatePostFavoriteAsync(postId,user.Id);
             if (result == 0)
@@ -325,10 +325,6 @@ namespace imarket.Controllers.open
             if(isFavorite)
             {
                 var result = await favoriteService.DeletePostFavoriteAsync(postId, user.Id);
-                if(result == 0)
-                {
-                    return StatusCode(500);
-                }
             }
             return Ok(new { success = true });
         }
