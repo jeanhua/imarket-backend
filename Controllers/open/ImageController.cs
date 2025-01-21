@@ -10,11 +10,11 @@ namespace imarket.Controllers.open
     public class ImageController : ControllerBase
     {
         private readonly IImageService imageService;
-        private readonly ILogger<ImageController> _logger;
+        private readonly ILogger<ImageController> logger;
         public ImageController(IImageService imageService, ILogger<ImageController> logger)
         {
             this.imageService = imageService;
-            _logger = logger;
+            this.logger = logger;
         }
 
         [HttpPost("UploadImage")] // api/Image/UploadImage

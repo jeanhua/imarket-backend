@@ -63,7 +63,7 @@ namespace imarket.Controllers.admin
                 return NotFound();
             }
             var posts = await postService.GetPostsByCategoryIdAsync(id,1,1);
-            if (posts != null)
+            if (posts.Count() != 0)
             {
                 return BadRequest("some posts of the category have not been deleted!");
             }

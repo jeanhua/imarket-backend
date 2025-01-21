@@ -13,17 +13,17 @@ namespace imarket.Controllers.open
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly JwtTokenGenerator _tokenGenerator;
+        private readonly JwtTokenGenerator tokenGenerator;
         private readonly IUserService userService;
         private readonly ILoginService loginService;
-        private readonly ILogger<AuthController> _logger;
+        private readonly ILogger<AuthController> logger;
         private readonly IMemoryCache _cache;
         public AuthController(JwtTokenGenerator tokenGenerator, IUserService userService, ILoginService loginService, ILogger<AuthController> _logger, IMemoryCache _cache)
         {
-            _tokenGenerator = tokenGenerator;
+            this.tokenGenerator = tokenGenerator;
             this.userService = userService;
             this.loginService = loginService;
-            this._logger = _logger;
+            this.logger = _logger;
             this._cache = _cache;
         }
 
@@ -55,7 +55,7 @@ namespace imarket.Controllers.open
             var userCheck = await userService.GetUserByUsernameAsync(loginRequest.Username!);
             if (userCheck == null)
             {
-                _logger.LogInformation($"IP:{ip} login with username:{loginRequest.Username} failed");
+                logger.LogInformation($"IP:{ip} login with username:{loginRequest.Username} failed");
                 _cache.Set($"login:{loginRequest.Username}", loginNums + 1, new MemoryCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
@@ -64,7 +64,7 @@ namespace imarket.Controllers.open
             }
             if (userCheck.PasswordHash != loginRequest.Password)
             {
-                _logger.LogInformation($"IP:{ip} login with username:{loginRequest.Username} failed");
+                logger.LogInformation($"IP:{ip} login with username:{loginRequest.Username} failed");
                 _cache.Set($"login:{loginRequest.Username}", loginNums + 1, new MemoryCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
@@ -75,15 +75,15 @@ namespace imarket.Controllers.open
             TokenModels _token;
             if (userCheck.Status == 0)
             {
-                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "unverified")!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "unverified")!;
             }
             else if (userCheck.Status == 1)
             {
-                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, userCheck.Role)!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, userCheck.Role)!;
             }
             else if (userCheck.Status == 2)
             {
-                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "banned")!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "banned")!;
             }
             else
             {
@@ -203,15 +203,15 @@ namespace imarket.Controllers.open
             TokenModels _token;
             if (userCheck.Status == 0)
             {
-                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "unverified")!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "unverified")!;
             }
             else if (userCheck.Status == 1)
             {
-                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, userCheck.Role)!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, userCheck.Role)!;
             }
             else if (userCheck.Status == 2)
             {
-                _token = _tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "banned")!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "banned")!;
             }
             else
             {

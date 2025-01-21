@@ -19,7 +19,7 @@ namespace imarket.Controllers.open
         private readonly IFavoriteService favoriteService;
         private readonly ILikeService likeService;
         private readonly IConfiguration configuration;
-        private readonly ILogger<PostController> _logger;
+        private readonly ILogger<PostController> logger;
         // 缓存
         private readonly IMemoryCache _cache;
         public PostController(IUserService userService, IConfiguration configuration, IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
@@ -32,7 +32,7 @@ namespace imarket.Controllers.open
             this.imageService = imageService;
             this.likeService = likeService;
             this.favoriteService = favoriteService;
-            _logger = logger;
+            this.logger = logger;
             _cache = cache;
         }
 

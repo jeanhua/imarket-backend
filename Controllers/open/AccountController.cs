@@ -15,7 +15,7 @@ namespace imarket.Controllers.open
         {
             this.userService = userService;
         }
-        [HttpGet("Info")] // api/Cccount/Info
+        [HttpGet("Info")] // api/Account/Info
         public async Task<IActionResult> getinfo()
         {
             if (User.Identity!.IsAuthenticated == false)

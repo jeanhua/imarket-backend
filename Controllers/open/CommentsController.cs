@@ -14,10 +14,10 @@ namespace imarket.Controllers.open
         private readonly ICommentService commentService;
         private readonly IUserService userService;
         private readonly IPostService postService;
-        private readonly IMemoryCache _cache;
+        private readonly IMemoryCache cache;
         private readonly IConfiguration configuration;
         private readonly ILikeService likeService;
-        private readonly ILogger<CommentsController> _logger;
+        private readonly ILogger<CommentsController> logger;
         public CommentsController(IConfiguration configuration, ILikeService likeService, ICommentService commentService, IPostService postService, IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
         {
             this.configuration = configuration;
@@ -25,13 +25,13 @@ namespace imarket.Controllers.open
             this.userService = userService;
             this.postService = postService;
             this.likeService = likeService;
-            this._logger = _logger;
-            _cache = cache;
+            this.logger = _logger;
+            this.cache = cache;
         }
         [HttpGet("{postid}")] // api/Comments/{postid}
         public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute] string postid)
         {
-            _cache.TryGetValue(postid, out var comments);
+            cache.TryGetValue(postid, out var comments);
             if (comments != null)
             {
                 return Ok(new { success = true, comments });
@@ -56,6 +56,7 @@ namespace imarket.Controllers.open
                 response.Add(new CommentResponse
                 {
                     Id = comment.Id,
+                    Nickname = (await userService.GetUserByUsernameAsync(comment.UserId)).Nickname,
                     Username = (await userService.GetUserByUsernameAsync(comment.UserId)).Username,
                     UserAvatar = avatar,
                     Content = comment.Content,
@@ -64,7 +65,7 @@ namespace imarket.Controllers.open
                     CreatedAt = comment.CreatedAt
                 });
             }
-            _cache.Set(postid, response, new MemoryCacheEntryOptions
+            cache.Set(postid, response, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]))
             });
@@ -121,7 +122,7 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            _cache.Remove(post.Id);
+            cache.Remove(post.Id);
             return Ok(new { success = true, commentId = comment_new.Id });
         }
 
@@ -230,6 +231,7 @@ namespace imarket.Controllers.open
     public class CommentResponse
     {
         public string? Id { get; set; }
+        public string? Nickname { get; set; }
         public string? Username { get; set; }
         public string? UserAvatar { get; set; }
         public string? Content { get; set; }
