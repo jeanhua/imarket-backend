@@ -28,6 +28,10 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetUserPosts([FromQuery]string username)
         {
             var user = await userService.GetUserByUsernameAsync(username);
+            if (user == null)
+            {
+                return NotFound();
+            }
             var posts = await postService.GetPostsByUserIdAsync(user.Id);
             return Ok(posts);
         }
@@ -38,6 +42,10 @@ namespace imarket.Controllers.open
         {
 
             var user = await userService.GetUserByUsernameAsync(username);
+            if (user == null)
+            {
+                return NotFound();
+            }
             return Ok(new
             {
                 Id = user.Id,

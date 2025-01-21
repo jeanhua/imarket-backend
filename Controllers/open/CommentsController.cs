@@ -45,7 +45,7 @@ namespace imarket.Controllers.open
                 var isLike = false;
                 try
                 {
-                    avatar = (await userService.GetUserByIdAsync(comment.UserId))!.Avatar;
+                    avatar = (await userService.GetUserByIdAsync(comment.UserId))?.Avatar;
                     likeNum = await likeService.GetCommentLikeNumsByCommentIdAsync(comment.Id);
                     isLike = await likeService.CheckUserLikeCommentAsync(comment.Id, User.Identity!.Name!);
                 }

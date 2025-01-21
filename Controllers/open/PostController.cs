@@ -411,7 +411,17 @@ namespace imarket.Controllers.open
                 return Unauthorized("Invalid user.");
             }
             var favorites = await favoriteService.GetPostFavoriteByUserId(user.Id, page, pageSize);
-            return Ok(new { success = true, favorites });
+            var favorite = new List<dynamic>();
+            foreach (var fav in favorites)
+            {
+                favorite.Add(new
+                {
+                    Id = fav.Id,
+                    PostId = fav.PostId,
+                    CreatedAt = fav.CreatedAt
+                });
+            }
+            return Ok(new { success = true, favorite });
         }
     }
 
