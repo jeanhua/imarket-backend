@@ -52,7 +52,7 @@ namespace imarket.Controllers.open
                     Id = post.Id,
                     Title = post.Title,
                     Content = post.Content,
-                    FavoriteNums = await favoriteService.GetFavoriteNumsByPostId(post.Id),
+                    FavoriteNums = await favoriteService.GetFavoriteNumsByPostIdAsync(post.Id),
                     LikeNums = await likeService.GetPostLikeNumsByPostIdAsync(post.Id),
                     CreatedAt = post.CreatedAt
                 });
@@ -92,7 +92,7 @@ namespace imarket.Controllers.open
                     Id = post.Id,
                     Title = post.Title,
                     Content = post.Content,
-                    FavoriteNums = await favoriteService.GetFavoriteNumsByPostId(post.Id),
+                    FavoriteNums = await favoriteService.GetFavoriteNumsByPostIdAsync(post.Id),
                     LikeNums = await likeService.GetPostLikeNumsByPostIdAsync(post.Id),
                     CreatedAt = post.CreatedAt
                 });
@@ -127,7 +127,7 @@ namespace imarket.Controllers.open
             var user = await userService.GetUserByIdAsync(postfind.UserId);
             var me = await userService.GetUserByUsernameAsync(User.Identity.Name);
             var likeNums = await likeService.GetPostLikeNumsByPostIdAsync(postfind.Id);
-            var favoriteNms = await favoriteService.GetFavoriteNumsByPostId(postfind.Id);
+            var favoriteNms = await favoriteService.GetFavoriteNumsByPostIdAsync(postfind.Id);
             var images = await imageService.GetImagesByPostId(postfind.Id);
             var isLiked = await likeService.CheckUserLikePostAsync(me.Id, postfind.Id);
             var response = new
@@ -241,19 +241,6 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("You are not the author of this post.");
             }
-            // 删除分类关联
-            var categoryID = await postCategoriesService.GetPostCategoriesByPostIdAsync(postId);
-            await postCategoriesService.DeletePostCategoryAsync(new PostCategoryModels
-            {
-                PostId = postId,
-                CategoryId = categoryID
-            });
-            // 删除图片
-            await imageService.DeleteImagesByPostIdAsync(postId);
-            // 删除评论
-            await commentService.DeleteCommentsByPostIdAsync(postId);
-            // 删除点赞
-            await likeService.DeleteLikesByPostIdAsync(postId);
             // 删除帖子
             var result = await postService.DeletePostAsync(postId);
             if (result == 0)

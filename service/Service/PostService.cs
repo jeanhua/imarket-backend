@@ -8,9 +8,17 @@ namespace imarket.service.Service
     public class PostService : IPostService
     {
         private readonly Database _database;
-        public PostService(Database database)
+        private readonly ILikeService _likeService;
+        private readonly ICommentService _commentService;
+        private readonly IImageService _imageService;
+        private readonly IFavoriteService _favoriteService;
+        public PostService(Database database, ILikeService likeService, ICommentService commentService, IImageService imageService, IFavoriteService favoriteService)
         {
             _database = database;
+            _likeService = likeService;
+            _commentService = commentService;
+            _imageService = imageService;
+            _favoriteService = favoriteService;
         }
         public async Task<int> GetPostNums()
         {
@@ -150,12 +158,27 @@ namespace imarket.service.Service
 
         public async Task<int> DeletePostAsync(string id)
         {
+            await _likeService.DeleteLikesByPostIdAsync(id);
+            await _commentService.DeleteCommentsByPostIdAsync(id);
+            await _imageService.DeleteImagesByPostIdAsync(id);
+            await _favoriteService.DeletePostFavoriteByPostIdAsyc(id);
             var query = "DELETE FROM Posts WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {
                 new MySqlParameter("@Id",id)
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
+        public async Task<int> DeletePostByUserIdAsync(string userId)
+        {
+            var posts = await GetPostsByUserIdAsync(userId);
+            var result = 0;
+            foreach(var post in posts)
+            {
+                result += await DeletePostAsync(post.Id);
+            }
+            return result;
         }
 
         public async Task<int> UpdatePostAsync(PostModels post)

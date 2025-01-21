@@ -88,7 +88,17 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> GetFavoriteNumsByPostId(string postId)
+        public async Task<int> DeletePostFavoriteByPostIdAsyc(string postId)
+        {
+            var query = "DELETE FROM Favorites WHERE PostId = @PostId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@PostId", postId),
+            };
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
+
+        public async Task<int> GetFavoriteNumsByPostIdAsync(string postId)
         {
             var query = "SELECT COUNT(*) FROM Favorites WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]
@@ -112,7 +122,7 @@ namespace imarket.service.Service
                 new MySqlParameter("@PostId",postId)
             };
             var result = await _database.ExecuteQuery(query,CommandType.Text, parameters);
-            if (Convert.ToInt32(result.Rows[0][0]) == 0)
+            if (result.Rows.Count > 0)
             {
                 return false;
             }

@@ -146,11 +146,6 @@ namespace imarket.service.Service
         }
         public async Task<int> DeleteImagesByPostIdAsync(string postId)
         {
-            var query = "DELETE FROM Images WHERE PostId = @PostId";
-            var parameters = new MySqlParameter[]
-            {
-                new MySqlParameter("@PostId", postId)
-            };
             var images = await GetImagesByPostId(postId);
             foreach (var image in images)
             {
@@ -164,6 +159,11 @@ namespace imarket.service.Service
                     System.IO.File.AppendAllText("log.txt", $"DeleteImageByIdAsync {image.Url} error");
                 }
             }
+            var query = "DELETE FROM Images WHERE PostId = @PostId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@PostId", postId)
+            };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
     }

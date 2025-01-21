@@ -86,15 +86,15 @@ namespace imarket
                 });
             });
             // 依赖注入
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<IPostCategoriesService, PostCategoriesService>();
-            builder.Services.AddScoped<ILoginService, LoginService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<IImageService, ImageService>();
             builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+            builder.Services.AddScoped<IPostService, PostService>();
             builder.Services.AddScoped<IMessageService, MessageService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<ILoginService, LoginService>();   
             // 注入数据库
             builder.Services.AddSingleton<Database>(provider =>
             {

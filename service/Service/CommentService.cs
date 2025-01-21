@@ -108,31 +108,25 @@ namespace imarket.service.Service
         public async Task<int> DeleteCommentsByPostIdAsync(string postId)
         {
             var comments = await GetCommentsByPostIdAsync(postId);
+            var result = 0;
             foreach (var comment in comments)
             {
                 await _likeService.DeleteLikesByCommentIdAsync(comment.Id);
+                result += await DeleteCommentAsync(comment.Id);
             }
-            var query = "DELETE FROM Comments WHERE PostId = @PostId";
-            var parameters = new MySqlParameter[]
-            {
-                new MySqlParameter("@PostId", postId)
-            };
-            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return result;
         }
 
         public async Task<int> DeleteCommentsByUserIdAsync(string userId)
         {
             var comments = await GetCommentsByUserIdAsync(userId);
+            var result = 0;
             foreach (var comment in comments)
             {
                 await _likeService.DeleteLikesByCommentIdAsync(comment.Id);
+                result += await DeleteCommentAsync(comment.Id);
             }
-            var query = "DELETE FROM Comments WHERE UserId = @UserId";
-            var parameters = new MySqlParameter[]
-            {
-                new MySqlParameter("@UserId", userId)
-            };
-            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return result;
         }
 
         public async Task<int> GetCommentsNumByPostIdAsync(string postId)

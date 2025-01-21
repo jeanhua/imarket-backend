@@ -8,9 +8,13 @@ namespace imarket.service.Service
     public class UserService:IUserService
     {
         private readonly Database _database;
-        public UserService(Database database)
+        private readonly IPostService _postService;
+        private readonly IMessageService _messageService;
+        public UserService(Database database, IPostService postService,IMessageService _messageService)
         {
             _database = database;
+            _postService = postService;
+            this._messageService = _messageService;
         }
         public async Task<int> GetUserNums()
         {
@@ -156,6 +160,9 @@ namespace imarket.service.Service
 
         public async Task<int> DeleteUserAsync(string id)
         {
+            await _postService.DeletePostByUserIdAsync(id);
+            await _messageService.DeleteMessageByReceiverIdAsync(id);
+            await _messageService.DeleteMessageBySenderIdAsync(id);
             var query = "DELETE FROM Users WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {

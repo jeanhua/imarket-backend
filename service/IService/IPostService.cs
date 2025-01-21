@@ -12,5 +12,6 @@ namespace imarket.service.IService
         Task<int> CreatePostAsync(PostModels post);
         Task<int> UpdatePostAsync(PostModels post);
         Task<int> DeletePostAsync(string id);
+        Task<int> DeletePostByUserIdAsync(string userId);
     }
 }
