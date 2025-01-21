@@ -326,6 +326,7 @@ namespace imarket.Controllers.open
             {
                 var result = await favoriteService.DeletePostFavoriteAsync(postId, user.Id);
             }
+            _cache.Remove($"Post_cache{postId}");
             return Ok(new { success = true });
         }
 
@@ -361,6 +362,7 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
+            _cache.Remove($"Post_cache{postId}");
             return Ok(new { success = true });
         }
 
@@ -395,6 +397,7 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
+            _cache.Remove($"Post_cache{postId}");
             return Ok(new { success = true });
         }
 

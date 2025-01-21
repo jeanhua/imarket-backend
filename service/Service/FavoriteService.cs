@@ -106,10 +106,6 @@ namespace imarket.service.Service
                 new MySqlParameter("@PostId", postId),
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
-            if (result.Rows.Count == 0 || result == null)
-            {
-                return 0;
-            }
             return Convert.ToInt32(result.Rows[0][0]);
         }
 

@@ -164,6 +164,11 @@ namespace imarket.Controllers.open
             {
                 return NotFound("Comment not found.");
             }
+            var isLike = await likeService.CheckUserLikeCommentAsync(user.Id, commentId);
+            if(isLike)
+            {
+                return Ok(new { success = true,message = "you have liked it." });
+            }
             var result = await likeService.CreateLikeAsync(new LikeModels
             {
                 Id = Guid.NewGuid().ToString(),
@@ -192,6 +197,11 @@ namespace imarket.Controllers.open
             if (comment == null)
             {
                 return NotFound("Comment not found.");
+            }
+            var isLike = await likeService.CheckUserLikeCommentAsync(user.Id, commentId);
+            if (!isLike)
+            {
+                return Ok(new { success = true, message = "you have unliked it." });
             }
             var result = await likeService.DeleteLikeAsync(new LikeModels
             {
