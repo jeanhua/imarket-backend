@@ -47,11 +47,14 @@ namespace imarket.Controllers.open
             var postsResponse = new List<PostsResponse>();
             foreach(var post in posts)
             {
+                var user = await userService.GetUserByIdAsync(post.UserId);
                 postsResponse.Add(new PostsResponse
                 {
                     Id = post.Id,
                     Title = post.Title,
                     Content = post.Content,
+                    Nickname = user.Nickname,
+                    Avatar = user.Avatar,
                     FavoriteNums = await favoriteService.GetFavoriteNumsByPostIdAsync(post.Id),
                     LikeNums = await likeService.GetPostLikeNumsByPostIdAsync(post.Id),
                     CreatedAt = post.CreatedAt
@@ -87,11 +90,14 @@ namespace imarket.Controllers.open
             var postsResponse = new List<PostsResponse>();
             foreach (var post in posts)
             {
+                var user = await userService.GetUserByIdAsync(post.UserId);
                 postsResponse.Add(new PostsResponse
                 {
                     Id = post.Id,
                     Title = post.Title,
                     Content = post.Content,
+                    Nickname = user.Nickname,
+                    Avatar = user.Avatar,
                     FavoriteNums = await favoriteService.GetFavoriteNumsByPostIdAsync(post.Id),
                     LikeNums = await likeService.GetPostLikeNumsByPostIdAsync(post.Id),
                     CreatedAt = post.CreatedAt
@@ -424,6 +430,8 @@ namespace imarket.Controllers.open
     {
         public string Id { get; set; }
         public string Title { get; set; }
+        public string Nickname { get; set; }
+        public string Avatar { get; set; }
         public string Content { get; set; }
         public int FavoriteNums { get; set; }
         public int LikeNums { get; set; }

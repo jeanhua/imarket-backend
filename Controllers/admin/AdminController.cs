@@ -166,7 +166,7 @@ namespace imarket.Controllers.admin
         public async Task<IActionResult> DeleteUser([FromQuery] string userId)
         {
             var posts = await postService.GetPostsByUserIdAsync(userId);
-            if (posts != null)
+            if (posts.Count() != 0)
             {
                 return BadRequest("some posts of the user have not been deleted!");
             }
