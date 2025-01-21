@@ -34,9 +34,13 @@ namespace imarket.utils
                 {
                     command.ExecuteNonQuery();
                 }
-                // 检查是否有管理员账户，没有则创建
-                query = "SELECT * FROM Users WHERE Role = 'admin'";
-                var result = await ExecuteQuery(query, CommandType.Text);
+                // 检查是否有超级管理员账户，没有则创建
+                query = "SELECT * FROM Users WHERE Role = 'admin' AND Username = @Username";
+                var parameters = new MySqlParameter[]
+                {
+                    new MySqlParameter("@Username",configuration["admin:Username"])
+                };
+                var result = await ExecuteQuery(query, CommandType.Text,parameters);
                 if (result.Rows.Count == 0)
                 {
                     var username = configuration["admin:Username"];

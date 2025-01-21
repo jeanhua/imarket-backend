@@ -16,14 +16,16 @@ namespace imarket.Controllers.admin
         private readonly IUserService userService;
         private readonly ILikeService likeService;
         private readonly IFavoriteService favoriteService;
+        private readonly IConfiguration configuration;
         
-        public AdminController(IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IUserService userService)
+        public AdminController(IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IUserService userService,IConfiguration configuration)
         {
             this.postService = postService;
             this.postCategoriesService = postCategoriesService;
             this.userService = userService;
             this.likeService = likeService;
             this.favoriteService = favoriteService;
+            this.configuration = configuration;
         }
 
         [HttpGet("CreateCategories")] // api/Admin/CreateCategories?name=xxx&description=xxx
@@ -166,6 +168,18 @@ namespace imarket.Controllers.admin
         public async Task<IActionResult> DeleteUser([FromQuery] string userId)
         {
             var user = await userService.GetUserByIdAsync(userId);
+            if(user == null)
+            {
+                return NotFound();
+            }
+            if(user.Role == "admin" && (await userService.GetUserByUsernameAsync(User.Identity.Name)).Username != configuration["admin:Username"])
+            {
+                return BadRequest("you are not super admin.");
+            }
+            if(user.Username == User.Identity.Name)
+            {
+                return BadRequest("you can't delete yourself");
+            }
             var posts = await postService.GetPostsByUserIdAsync(userId);
             if (posts.Count() != 0)
             {
