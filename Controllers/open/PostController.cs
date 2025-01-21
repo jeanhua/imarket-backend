@@ -416,7 +416,6 @@ namespace imarket.Controllers.open
             {
                 favorite.Add(new
                 {
-                    Id = fav.Id,
                     PostId = fav.PostId,
                     CreatedAt = fav.CreatedAt
                 });
