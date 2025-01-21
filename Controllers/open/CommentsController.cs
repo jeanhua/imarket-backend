@@ -56,7 +56,7 @@ namespace imarket.Controllers.open
                 response.Add(new CommentResponse
                 {
                     Id = comment.Id,
-                    UserId = comment.UserId,
+                    Username = (await userService.GetUserByUsernameAsync(comment.UserId)).Username,
                     UserAvatar = avatar,
                     Content = comment.Content,
                     isLike = isLike,
@@ -121,6 +121,7 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
+            _cache.Remove(post.Id);
             return Ok(new { success = true, commentId = comment_new.Id });
         }
 
@@ -229,7 +230,7 @@ namespace imarket.Controllers.open
     public class CommentResponse
     {
         public string? Id { get; set; }
-        public string? UserId { get; set; }
+        public string? Username { get; set; }
         public string? UserAvatar { get; set; }
         public string? Content { get; set; }
 
