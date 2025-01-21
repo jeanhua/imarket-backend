@@ -118,5 +118,15 @@ namespace imarket.service.Service
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
+
+        public async Task<int> DeletePostCategoryByPostIdAsync(string postId)
+        {
+            var query = "DELETE FROM PostCategories WHERE PostId = @PostId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@PostId",postId),
+            };
+            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+        }
     }
 }

@@ -12,13 +12,15 @@ namespace imarket.service.Service
         private readonly ICommentService _commentService;
         private readonly IImageService _imageService;
         private readonly IFavoriteService _favoriteService;
-        public PostService(Database database, ILikeService likeService, ICommentService commentService, IImageService imageService, IFavoriteService favoriteService)
+        private readonly IPostCategoriesService _postCategoriesService;
+        public PostService(Database database, ILikeService likeService, ICommentService commentService, IImageService imageService, IFavoriteService favoriteService, IPostCategoriesService postCategoriesService)
         {
             _database = database;
             _likeService = likeService;
             _commentService = commentService;
             _imageService = imageService;
             _favoriteService = favoriteService;
+            _postCategoriesService = postCategoriesService;
         }
         public async Task<int> GetPostNums()
         {
@@ -162,6 +164,7 @@ namespace imarket.service.Service
             await _commentService.DeleteCommentsByPostIdAsync(id);
             await _imageService.DeleteImagesByPostIdAsync(id);
             await _favoriteService.DeletePostFavoriteByPostIdAsyc(id);
+            await _postCategoriesService.DeletePostCategoryByPostIdAsync(id);
             var query = "DELETE FROM Posts WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {

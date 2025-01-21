@@ -15,5 +15,6 @@ namespace imarket.service.IService
         Task<string?> GetPostCategoriesByPostIdAsync(string postId);
         Task<int> CreatePostCategoryAsync(PostCategoryModels postCategory);
         Task<int> DeletePostCategoryAsync(PostCategoryModels postCategory);
+        Task<int> DeletePostCategoryByPostIdAsync(string postId);
     }
 }
