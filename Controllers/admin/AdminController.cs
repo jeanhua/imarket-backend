@@ -29,7 +29,7 @@ namespace imarket.Controllers.admin
         }
 
         [HttpGet("CreateCategories")] // api/Admin/CreateCategories?name=xxx&description=xxx
-        public async Task<IActionResult> CreateCatogory([FromQuery] string name, [FromQuery] string description)
+        public async Task<IActionResult> CreateCatogory([FromQuery][Required] string name, [FromQuery][Required] string description)
         {
             await postCategoriesService.CreateCategoryAsync(new CategoryModels
             {
@@ -41,7 +41,7 @@ namespace imarket.Controllers.admin
         }
 
         [HttpGet("EditCategories")] // api/Admin/EditCategories?id=xxx&name=xxx&description=xxx
-        public async Task<IActionResult> EditCatogory([FromQuery] string id, [FromQuery] string name, [FromQuery] string description)
+        public async Task<IActionResult> EditCatogory([FromQuery][Required] string id, [FromQuery][Required] string name, [FromQuery][Required] string description)
         {
             var category = await postCategoriesService.GetCategoryByIdAsync(id);
             if (category == null)
@@ -55,7 +55,7 @@ namespace imarket.Controllers.admin
         }
 
         [HttpGet("DeleteCategories")] // api/Admin/DeleteCategories?id=xxx
-        public async Task<IActionResult> DeleteCatogory([FromQuery] string id)
+        public async Task<IActionResult> DeleteCatogory([FromQuery][Required] string id)
         {
             var category = await postCategoriesService.GetCategoryByIdAsync(id);
             if (category == null)
@@ -72,9 +72,9 @@ namespace imarket.Controllers.admin
         }
 
         [HttpGet("ListUsers")] // api/Admin/ListUsers?page=1&size=10
-        public async Task<IActionResult> GetUserList([FromQuery] int page, [FromQuery] int size)
+        public async Task<IActionResult> GetUserList([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
-            var users = await userService.GetAllUsers(page, size);
+            var users = await userService.GetAllUsers(page, pageSize);
             return Ok(new { success = true, users = users });
         }
         [HttpGet("BanUser")] // api/Admin/BanUser?id=xxx
@@ -94,7 +94,7 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
         [HttpGet("UnbanUser")] // api/Admin/UnbanUser?id=xxx
-        public async Task<IActionResult> UnbanUser([FromQuery] string id)
+        public async Task<IActionResult> UnbanUser([FromQuery][Required] string id)
         {
             var user = await userService.GetUserByIdAsync(id);
             if (user == null)
@@ -110,7 +110,7 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
         [HttpPost("CreateUser")] // api/Admin/CreateUser
-        public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest user)
+        public async Task<IActionResult> CreateUser([FromBody][Required] UserCreateRequest user)
         {
             if (!ModelState.IsValid)
             {
@@ -145,7 +145,7 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
         [HttpPost("EditUser")] // api/Admin/EditUser
-        public async Task<IActionResult> EditUser([FromBody] UserEditRequest user)
+        public async Task<IActionResult> EditUser([FromBody][Required] UserEditRequest user)
         {
             if (!ModelState.IsValid)
             {
@@ -169,7 +169,7 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
         [HttpGet("DeleteUser")] // api/Admin/DeleteUser?userId=xxx
-        public async Task<IActionResult> DeleteUser([FromQuery] string userId)
+        public async Task<IActionResult> DeleteUser([FromQuery][Required] string userId)
         {
             var user = await userService.GetUserByIdAsync(userId);
             if(user == null)
@@ -199,7 +199,7 @@ namespace imarket.Controllers.admin
         }
 
         [HttpGet("DeletePosts")] // api/Admin/DeletePosts?userId=xxx
-        public async Task<IActionResult> DeletePosts([FromQuery] string userId)
+        public async Task<IActionResult> DeletePosts([FromQuery][Required] string userId)
         {
             var posts = await postService.GetPostsByUserIdAsync(userId);
             if (posts != null)
@@ -226,6 +226,10 @@ namespace imarket.Controllers.admin
         [Required]
         public string? Role { get; set; }
         public int Status { get; set; }
+        public UserCreateRequest()
+        {
+            Role = "user";
+        }
     }
 
     public class UserEditRequest

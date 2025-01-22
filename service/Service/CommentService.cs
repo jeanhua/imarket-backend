@@ -111,7 +111,6 @@ namespace imarket.service.Service
             var result = 0;
             foreach (var comment in comments)
             {
-                await _likeService.DeleteLikesByCommentIdAsync(comment.Id);
                 result += await DeleteCommentAsync(comment.Id);
             }
             return result;
@@ -123,7 +122,6 @@ namespace imarket.service.Service
             var result = 0;
             foreach (var comment in comments)
             {
-                await _likeService.DeleteLikesByCommentIdAsync(comment.Id);
                 result += await DeleteCommentAsync(comment.Id);
             }
             return result;

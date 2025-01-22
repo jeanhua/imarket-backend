@@ -6,6 +6,7 @@ namespace imarket.service.IService
     {
         Task<IEnumerable<LikeModels>> GetPostLikesByPostIdAsync(string like);
         Task<IEnumerable<LikeModels>> GetCommentLikesByCommentIdAsync(string like);
+        Task<IEnumerable<HotRankingModels.Post>> GetHotRankingAsync();
         Task<int> GetPostLikeNumsByPostIdAsync(string postId);
         Task<int> GetCommentLikeNumsByCommentIdAsync(string commentId);
         Task<int> CreateLikeAsync(LikeModels postLike);

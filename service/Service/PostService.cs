@@ -121,6 +121,45 @@ namespace imarket.service.Service
             return posts;
         }
 
+        public async Task<IEnumerable<PostModels>> SearchPostsAsync(string keyWord, int page, int pageSize)
+        {
+            if (page < 1)
+            {
+                page = 1;
+            }
+            if (pageSize < 1 || pageSize > 20)
+            {
+                pageSize = 10;
+            }
+            var posts = new List<PostModels>();
+            var query = @"
+                SELECT * FROM Posts 
+                WHERE Title LIKE @KeyWord OR Content LIKE @KeyWord 
+                ORDER BY CreatedAt DESC 
+                LIMIT @PageSize OFFSET @Offset";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@KeyWord", $"%{keyWord}%"),
+                new MySqlParameter("@Offset", (page - 1) * pageSize),
+                new MySqlParameter("@PageSize", pageSize),
+            };
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
+            foreach (DataRow row in result.Rows)
+            {
+                posts.Add(new PostModels
+                {
+                    Id = row["Id"].ToString()!,
+                    Title = row["Title"].ToString()!,
+                    Content = row["Content"].ToString()!,
+                    UserId = row["UserId"].ToString()!,
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
+                    Status = Convert.ToInt32(row["Status"]!),
+                });
+            }
+            return posts;
+        }
+
+
         public async Task<PostModels?> GetPostByIdAsync(string id)
         {
             var query = "SELECT * FROM Posts WHERE Id = @Id";

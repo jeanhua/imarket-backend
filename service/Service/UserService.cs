@@ -12,13 +12,15 @@ namespace imarket.service.Service
         private readonly IMessageService _messageService;
         private readonly ILikeService _likeService;
         private readonly IFavoriteService _favoriteService;
-        public UserService(Database database, IPostService postService,IMessageService _messageService, ILikeService likeService, IFavoriteService favoriteService)
+        private readonly ICommentService _commentService;
+        public UserService(Database database, IPostService postService,IMessageService _messageService, ILikeService likeService, IFavoriteService favoriteService,ICommentService commentService)
         {
             _database = database;
             _postService = postService;
             this._messageService = _messageService;
             _likeService = likeService;
             _favoriteService = favoriteService;
+            _commentService = commentService;
         }
         public async Task<int> GetUserNums()
         {
@@ -169,6 +171,7 @@ namespace imarket.service.Service
             await _messageService.DeleteMessageBySenderIdAsync(id);
             await _likeService.DeleteLikesByUserIdAsync(id);
             await _favoriteService.DeletePostFavoriteByUserIdAsyc(id);
+            await _commentService.DeleteCommentsByUserIdAsync(id);
             var query = "DELETE FROM Users WHERE Id = @Id";
             var parameters = new MySqlParameter[]
             {

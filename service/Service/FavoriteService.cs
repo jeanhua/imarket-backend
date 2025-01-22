@@ -41,6 +41,47 @@ namespace imarket.service.Service
             }
             return favorites;
         }
+
+        public async Task<IEnumerable<HotRankingModels.Favorite>> GetHotRankingAsync()
+        {
+            var posts = new List<HotRankingModels.Favorite>();
+            // 查询本周收藏数最多的10条帖子
+            var query = @"
+                SELECT 
+                    p.Id, 
+                    p.Title, 
+                    p.Content, 
+                    p.UserId, 
+                    p.CreatedAt, 
+                    COUNT(f.Id) AS FavoriteCount
+                FROM 
+                    Favorites f
+                INNER JOIN 
+                    Posts p ON f.PostId = p.Id
+                WHERE 
+                    f.CreatedAt >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+                GROUP BY 
+                    p.Id
+                ORDER BY 
+                    FavoriteCount DESC
+                LIMIT 10";
+
+            var result = await _database.ExecuteQuery(query, CommandType.Text);
+            foreach (DataRow row in result.Rows)
+            {
+                posts.Add(new HotRankingModels.Favorite
+                {
+                    Id = row["Id"].ToString()!,
+                    Title = row["Title"].ToString()!,
+                    Content = row["Content"].ToString()!,
+                    UserId = row["UserId"].ToString()!,
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
+                    FavoriteCount = Convert.ToInt32(row["FavoriteCount"]!)
+                });
+            }
+
+            return posts;
+        }
         public async Task<int> CreatePostFavoriteAsync(string postId, string userId)
         {
             // 检查是否已经收藏

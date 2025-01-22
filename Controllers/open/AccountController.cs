@@ -42,7 +42,7 @@ namespace imarket.Controllers.open
         }
 
         [HttpPost("Edit")] // api/Account/Edit
-        public async Task<IActionResult> edit([FromBody] EditRequest user)
+        public async Task<IActionResult> edit([FromBody][Required] EditRequest user)
         {
             if (User.Identity!.IsAuthenticated == false)
             {

@@ -29,7 +29,7 @@ namespace imarket.Controllers.open
             this.cache = cache;
         }
         [HttpGet("{postid}")] // api/Comments/{postid}
-        public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute] string postid)
+        public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute][Required] string postid)
         {
             cache.TryGetValue(postid, out var comments);
             if (comments != null)
@@ -73,7 +73,7 @@ namespace imarket.Controllers.open
         }
         [HttpPost("Create")] // api/Comments/Create
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> CreateCommentAsync([FromBody] CommentPostRequest comment)
+        public async Task<IActionResult> CreateCommentAsync([FromBody][Required] CommentPostRequest comment)
         {
             if (!ModelState.IsValid)
             {
@@ -128,7 +128,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("Delete")] // api/Comments/Delete?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> DeleteCommentAsync([FromQuery] string commentId)
+        public async Task<IActionResult> DeleteCommentAsync([FromQuery][Required] string commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
@@ -154,7 +154,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("Like")] // api/Comments/Like?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> LikeCommentAsync([FromQuery] string commentId)
+        public async Task<IActionResult> LikeCommentAsync([FromQuery][Required] string commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
@@ -169,7 +169,7 @@ namespace imarket.Controllers.open
             var isLike = await likeService.CheckUserLikeCommentAsync(user.Id, commentId);
             if(isLike)
             {
-                return Ok(new { success = true,message = "you have liked it." });
+                return Ok(new { success = true,message = "you have already liked it." });
             }
             var result = await likeService.CreateLikeAsync(new LikeModels
             {
@@ -188,7 +188,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("UnLike")] // api/Comments/UnLike?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> UnLikeCommentAsync([FromQuery] string commentId)
+        public async Task<IActionResult> UnLikeCommentAsync([FromQuery][Required] string commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
@@ -203,7 +203,7 @@ namespace imarket.Controllers.open
             var isLike = await likeService.CheckUserLikeCommentAsync(user.Id, commentId);
             if (!isLike)
             {
-                return Ok(new { success = true, message = "you have unliked it." });
+                return Ok(new { success = true, message = "you have already unliked it." });
             }
             var result = await likeService.DeleteLikeAsync(new LikeModels
             {

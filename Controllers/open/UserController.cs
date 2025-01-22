@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using System.ComponentModel.DataAnnotations;
 
 namespace imarket.Controllers.open
 {
@@ -25,8 +26,12 @@ namespace imarket.Controllers.open
 
         [HttpGet("Posts")] // api/User/Posts?username=xxx
         [Authorize]
-        public async Task<IActionResult> GetUserPosts([FromQuery]string username)
+        public async Task<IActionResult> GetUserPosts([FromQuery][Required]string? username)
         {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var user = await userService.GetUserByUsernameAsync(username);
             if (user == null)
             {
@@ -38,9 +43,10 @@ namespace imarket.Controllers.open
 
         [HttpGet("Info")] // api/User/Info?username=xxx
         [Authorize]
-        public async Task<IActionResult> GetInfo([FromQuery] string username)
+        public async Task<IActionResult> GetInfo([FromQuery][Required] string? username)
         {
-
+            if(!ModelState.IsValid)
+                { return BadRequest(ModelState); }
             var user = await userService.GetUserByUsernameAsync(username);
             if (user == null)
             {

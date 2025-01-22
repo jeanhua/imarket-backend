@@ -56,6 +56,48 @@ namespace imarket.service.Service
             }
             return likes;
         }
+
+        public async Task<IEnumerable<HotRankingModels.Post>> GetHotRankingAsync()
+        {
+            var posts = new List<HotRankingModels.Post>();
+            // 查询最近一周内点赞数最多的10条帖子
+            var query = @"
+                SELECT 
+                    p.Id, 
+                    p.Title, 
+                    p.Content, 
+                    p.UserId, 
+                    p.CreatedAt, 
+                    COUNT(l.Id) AS LikeCount
+                FROM 
+                    Likes l
+                INNER JOIN 
+                    Posts p ON l.PostId = p.Id
+                WHERE 
+                    l.CreatedAt >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+                    AND l.PostId IS NOT NULL
+                GROUP BY 
+                    p.Id
+                ORDER BY 
+                    LikeCount DESC
+                LIMIT 10";
+
+            var result = await _database.ExecuteQuery(query, CommandType.Text);
+            foreach (DataRow row in result.Rows)
+            {
+                posts.Add(new HotRankingModels.Post
+                {
+                    Id = row["Id"].ToString()!,
+                    Title = row["Title"].ToString()!,
+                    Content = row["Content"].ToString()!,
+                    UserId = row["UserId"].ToString()!,
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
+                    LikeCount = Convert.ToInt32(row["LikeCount"]!)
+                });
+            }
+            return posts;
+        }
+
         public async Task<int> GetPostLikeNumsByPostIdAsync(string postId)
         {
             var query = "SELECT COUNT(*) FROM Likes WHERE PostId = @PostId";

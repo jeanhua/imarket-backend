@@ -36,8 +36,8 @@ namespace imarket.Controllers.open
             _cache = cache;
         }
 
-        [HttpGet("Posts")] // api/Post/Posts
-        public async Task<IActionResult> GetPosts([FromQuery] int page, [FromQuery] int pageSize)
+        [HttpGet("Posts")] // api/Post/Posts?page=1&pageSize=10
+        public async Task<IActionResult> GetPosts([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
             if(_cache.TryGetValue($"Posts_cache_page{page}_pageSize{pageSize}", out var posts_cache))
             {
@@ -80,7 +80,7 @@ namespace imarket.Controllers.open
         }
 
         [HttpGet("CategorisedPosts")] // api/Post/CategorisedPosts
-        public async Task<IActionResult> GetCategorisedPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string categoryId)
+        public async Task<IActionResult> GetCategorisedPosts([FromQuery][Required] string categoryId,[FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
             if (_cache.TryGetValue($"GetCategorisedPosts_page{page}_pageSize{pageSize}", out var posts_cache))
             {
@@ -116,7 +116,7 @@ namespace imarket.Controllers.open
         }
 
         [HttpGet("{id}")] // api/Post/{id}
-        public async Task<IActionResult> GetPost([FromRoute] string id)
+        public async Task<IActionResult> GetPost([FromRoute][Required] string id)
         {
             if (_cache.TryGetValue($"Post_cache{id}", out var post_cache))
             {
@@ -165,7 +165,7 @@ namespace imarket.Controllers.open
 
         [HttpPost("Create")] // api/Post/Create
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> CreatePost([FromBody] CreatePostRequest postReq)
+        public async Task<IActionResult> CreatePost([FromBody][Required] CreatePostRequest postReq)
         {
             if (!ModelState.IsValid)
             {
@@ -223,20 +223,20 @@ namespace imarket.Controllers.open
                     });
                     if (resut2 == 0)
                     {
-                        return StatusCode(500, $"{image}upload failed");
+                        return StatusCode(500, $"{image}upload failed.");
                     }
                 }
             }
             if (result1 == 0)
             {
-                return StatusCode(500, "create post failed");
+                return StatusCode(500, "create post failed.");
             }
             return Ok(new { success = true });
         }
 
         [HttpGet("Delete")] // api/Post/Delete?postId=xxx
         [Authorize(Roles = "admin,user")]
-        public async Task<IActionResult> DeletePost([FromQuery] string postId)
+        public async Task<IActionResult> DeletePost([FromQuery][Required] string postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -259,7 +259,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("Finish")] //api/Post/Finish?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> FinishPost([FromQuery] string postId)
+        public async Task<IActionResult> FinishPost([FromQuery][Required] string postId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
             var post = await postService.GetPostByIdAsync(postId);
@@ -269,7 +269,7 @@ namespace imarket.Controllers.open
             }
             if(post.UserId != user.Id)
             {
-                return BadRequest("you are not the author !");
+                return BadRequest("you are not the author.");
             }
             post.Status = 1;
             var result = await postService.UpdatePostAsync(post);
@@ -282,7 +282,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("Favorite")] // api/Post/Favorite?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> FavoritePost([FromQuery] string postId)
+        public async Task<IActionResult> FavoritePost([FromQuery][Required] string postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -309,7 +309,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("Unfavorite")] // api/Post/Unfavorite?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> UnFavoritePost([FromQuery] string postId)
+        public async Task<IActionResult> UnFavoritePost([FromQuery][Required] string postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -332,7 +332,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("Like")] // api/Post/Like?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> LikePost([FromQuery] string postId)
+        public async Task<IActionResult> LikePost([FromQuery][Required] string postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -347,7 +347,7 @@ namespace imarket.Controllers.open
             var isLike = await likeService.CheckUserLikePostAsync(user.Id, postId);
             if (isLike)
             {
-                return Ok(new { success = true });
+                return Ok(new { success = true,message = "you have already liked it." });
             }
             var like = new LikeModels
             {
@@ -368,7 +368,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("Unlike")] // api/Post/Unlike?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> UnLikePost([FromQuery] string postId)
+        public async Task<IActionResult> UnLikePost([FromQuery][Required] string postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -383,7 +383,7 @@ namespace imarket.Controllers.open
             var isLike = await likeService.CheckUserLikePostAsync(user.Id,postId);
             if(!isLike)
             {
-                return Ok(new { success = true });
+                return Ok(new { success = true ,message = "you have already unliked it."});
             }
             var result = await likeService.DeleteLikeAsync(new LikeModels
             {
@@ -403,7 +403,7 @@ namespace imarket.Controllers.open
 
         [HttpGet("GetFavorites")] // api/post/GetFavorites
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> GetFavorites([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<IActionResult> GetFavorites([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
@@ -444,7 +444,6 @@ namespace imarket.Controllers.open
         public string Content { get; set; }
         public int FavoriteNums { get; set; }
         public int LikeNums { get; set; }
-
         public DateTime CreatedAt { get; set; }
     }
 

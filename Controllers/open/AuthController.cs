@@ -28,7 +28,7 @@ namespace imarket.Controllers.open
         }
 
         [HttpPost("Login")] // api/Auth/Login
-        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        public async Task<IActionResult> Login([FromBody][Required] LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -103,7 +103,7 @@ namespace imarket.Controllers.open
         }
 
         [HttpPost("Register")] // api/Auth/Register
-        public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
+        public async Task<IActionResult> Register([FromBody][Required] RegisterRequest registerRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -163,7 +163,7 @@ namespace imarket.Controllers.open
 
         [HttpPost("ChangePassword")] // api/Auth/ChangePassword
         [Authorize]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
+        public async Task<IActionResult> ChangePassword([FromBody][Required] ChangePasswordRequest changePasswordRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -225,7 +225,7 @@ namespace imarket.Controllers.open
         }
 
         [HttpPost("ForgotPassword")] // api/Auth/ForgotPassword
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest forgotPasswordRequest)
+        public async Task<IActionResult> ForgotPassword([FromBody][Required] ForgotPasswordRequest forgotPasswordRequest)
         {
             if (!ModelState.IsValid)
             {
