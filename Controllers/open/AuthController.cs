@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using imarket.service.IService;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Caching.Memory;
-using System.Security.Claims;
 
 namespace imarket.Controllers.open
 {
@@ -16,15 +15,21 @@ namespace imarket.Controllers.open
         private readonly JwtTokenGenerator tokenGenerator;
         private readonly IUserService userService;
         private readonly ILoginService loginService;
+        private readonly IMessageService messageService;
         private readonly ILogger<AuthController> logger;
+        private readonly IMailService mailService;
         private readonly IMemoryCache _cache;
-        public AuthController(JwtTokenGenerator tokenGenerator, IUserService userService, ILoginService loginService, ILogger<AuthController> _logger, IMemoryCache _cache)
+        private readonly IConfiguration _configuration;
+        public AuthController(JwtTokenGenerator tokenGenerator, IMessageService messageService, IUserService userService, ILoginService loginService, ILogger<AuthController> _logger, IMemoryCache _cache,IConfiguration configuration,IMailService mailService)
         {
             this.tokenGenerator = tokenGenerator;
             this.userService = userService;
             this.loginService = loginService;
             this.logger = _logger;
             this._cache = _cache;
+            this.messageService = messageService;
+            this._configuration = configuration;
+            this.mailService = mailService;
         }
 
         [HttpPost("Login")] // api/Auth/Login
@@ -231,19 +236,80 @@ namespace imarket.Controllers.open
             {
                 return BadRequest(ModelState);
             }
-            // 忘记密码：发送重置密码邮件
             var user = await userService.GetUserByEmailAsync(forgotPasswordRequest.Email!);
             if (user == null)
             {
                 return BadRequest("User not found.");
             }
+            var admin = await userService.GetUserByUsernameAsync(_configuration["admin:Username"]);
+            await messageService.CreateMessageAsync(new MessageModels
+            {
+                Id = Guid.NewGuid().ToString(),
+                Content = $"User：[{user.Username}][{user.Nickname}] requests to reset password.",
+                SenderId = user.Id,
+                ReceiverId = admin.Id,
+                CreatedAt = DateTime.Now
+            });
             // 发送重置密码邮件
-
-            var response = new
+            if (Convert.ToBoolean(_configuration["MailSetting:Enable"]))
+            {
+                var token = SHA256Encryptor.Encrypt(Guid.NewGuid().ToString());
+                _cache.Set(token, user, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24)
+                });
+                var result = await mailService.SendMail(user.Email, $"{_configuration["SiteInfo:SiteName"]} 密码重置",
+                    _configuration["SiteInfo:RestPasswordEmailContent"]!.Replace("{Url}",$"{_configuration["SiteInfo:RestPasswordUrl"]}"));
+                if (result == false)
+                {
+                    return StatusCode(500, "Send Email Fail.");
+                }
+                return Ok(new {success = true});
+            }
+            return Ok(new
             {
                 success = true
-            };
-            return Ok(response);
+            });
+        }
+
+        [HttpGet("Certificate")]
+        public async Task<IActionResult> Certificate([FromQuery][Required] string token)
+        {
+            if(_cache.TryGetValue(token, out var Cache))
+            {
+                var userCache = Cache as UserModels;
+                var user = await userService.GetUserByIdAsync(userCache.Id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                return Ok(new {success=true});
+            }
+            else
+            {
+                return BadRequest("Token is invalid or has expired.");
+            }
+        }
+
+        [HttpPost("Reset")]
+        public async Task<IActionResult> Reset([FromBody][Required]ResetPasswordRequest request)
+        {
+            if (_cache.TryGetValue(request.Token!, out var Cache))
+            {
+                var userCache = Cache as UserModels;
+                var user = await userService.GetUserByIdAsync(userCache.Id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                user.PasswordHash = request.NewPassword!;
+                await userService.UpdateUserAsync(user.Id, user);
+                return Ok(new { success = true });
+            }
+            else
+            {
+                return BadRequest("Token is invalid or has expired.");
+            }
         }
 
         public class LoginRequest
@@ -276,6 +342,14 @@ namespace imarket.Controllers.open
         {
             [Required]
             public string? Email { get; set; }
+        }
+
+        public class ResetPasswordRequest
+        {
+            [Required] 
+            public string? Token { get; set; }
+            [Required]
+            public string? NewPassword { get; set; }
         }
     }
 }
