@@ -29,6 +29,13 @@ namespace imarket.Controllers.open
             this.configuration = configuration;
         }
 
+        /// <summary>
+        /// 搜索帖子
+        /// </summary>
+        /// <param name="keyWord"></param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet("Posts")]
         public async Task<IActionResult> SearchPost([FromQuery][Required] string keyWord, [FromQuery]int page = 1, [FromQuery]int pageSize=10)
         {
@@ -69,6 +76,10 @@ namespace imarket.Controllers.open
             return Ok(response);
         }
 
+        /// <summary>
+        /// 获取热门帖子
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("HotRanking")]
         public async Task<IActionResult> GetHotRankong()
         {

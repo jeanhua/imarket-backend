@@ -28,6 +28,12 @@ namespace imarket.Controllers.admin
             this.configuration = configuration;
         }
 
+        /// <summary>
+        /// 创建分类
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="description"></param>
+        /// <returns></returns>
         [HttpGet("CreateCategories")] // api/Admin/CreateCategories?name=xxx&description=xxx
         public async Task<IActionResult> CreateCatogory([FromQuery][Required] string name, [FromQuery][Required] string description)
         {
@@ -40,6 +46,13 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
 
+        /// <summary>
+        /// 编辑分类
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="description"></param>
+        /// <returns></returns>
         [HttpGet("EditCategories")] // api/Admin/EditCategories?id=xxx&name=xxx&description=xxx
         public async Task<IActionResult> EditCatogory([FromQuery][Required] string id, [FromQuery][Required] string name, [FromQuery][Required] string description)
         {
@@ -54,6 +67,11 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
 
+        /// <summary>
+        /// 删除分类
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("DeleteCategories")] // api/Admin/DeleteCategories?id=xxx
         public async Task<IActionResult> DeleteCatogory([FromQuery][Required] string id)
         {
@@ -71,12 +89,24 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
 
+        /// <summary>
+        /// 获取用户列表
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet("ListUsers")] // api/Admin/ListUsers?page=1&size=10
         public async Task<IActionResult> GetUserList([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
             var users = await userService.GetAllUsers(page, pageSize);
             return Ok(new { success = true, users = users });
         }
+
+        /// <summary>
+        /// 封禁用户
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("BanUser")] // api/Admin/BanUser?id=xxx
         public async Task<IActionResult> BanUser([FromQuery] string id)
         {
@@ -93,6 +123,12 @@ namespace imarket.Controllers.admin
             }
             return Ok(new { success = true });
         }
+
+        /// <summary>
+        /// 解封用户
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("UnbanUser")] // api/Admin/UnbanUser?id=xxx
         public async Task<IActionResult> UnbanUser([FromQuery][Required] string id)
         {
@@ -109,6 +145,12 @@ namespace imarket.Controllers.admin
             }
             return Ok(new { success = true });
         }
+
+        /// <summary>
+        /// 创建用户
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         [HttpPost("CreateUser")] // api/Admin/CreateUser
         public async Task<IActionResult> CreateUser([FromBody][Required] UserCreateRequest user)
         {
@@ -144,6 +186,12 @@ namespace imarket.Controllers.admin
             }
             return Ok(new { success = true });
         }
+
+        /// <summary>
+        /// 编辑用户
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         [HttpPost("EditUser")] // api/Admin/EditUser
         public async Task<IActionResult> EditUser([FromBody][Required] UserEditRequest user)
         {
@@ -168,6 +216,12 @@ namespace imarket.Controllers.admin
             await userService.UpdateUserAsync(user.Id!, userCheck);
             return Ok(new { success = true });
         }
+
+        /// <summary>
+        /// 删除用户
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpGet("DeleteUser")] // api/Admin/DeleteUser?userId=xxx
         public async Task<IActionResult> DeleteUser([FromQuery][Required] string userId)
         {
@@ -198,6 +252,11 @@ namespace imarket.Controllers.admin
             return Ok(new { success = true });
         }
 
+        /// <summary>
+        /// 删除用户的所有帖子
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         [HttpGet("DeletePosts")] // api/Admin/DeletePosts?userId=xxx
         public async Task<IActionResult> DeletePosts([FromQuery][Required] string userId)
         {

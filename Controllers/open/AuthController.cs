@@ -272,7 +272,7 @@ namespace imarket.Controllers.open
             });
         }
 
-        [HttpGet("Certificate")]
+        [HttpGet("Certificate")] // api/Auth/Certificate?token=xxx
         public async Task<IActionResult> Certificate([FromQuery][Required] string token)
         {
             if(_cache.TryGetValue(token, out var Cache))
@@ -291,7 +291,7 @@ namespace imarket.Controllers.open
             }
         }
 
-        [HttpPost("Reset")]
+        [HttpPost("Reset")] // api/Auth/Reset
         public async Task<IActionResult> Reset([FromBody][Required]ResetPasswordRequest request)
         {
             if (_cache.TryGetValue(request.Token!, out var Cache))
@@ -304,6 +304,7 @@ namespace imarket.Controllers.open
                 }
                 user.PasswordHash = request.NewPassword!;
                 await userService.UpdateUserAsync(user.Id, user);
+                _cache.Remove(request.Token!);
                 return Ok(new { success = true });
             }
             else

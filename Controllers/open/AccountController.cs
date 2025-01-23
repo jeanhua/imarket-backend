@@ -15,6 +15,11 @@ namespace imarket.Controllers.open
         {
             this.userService = userService;
         }
+
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("Info")] // api/Account/Info
         public async Task<IActionResult> getinfo()
         {
@@ -41,6 +46,11 @@ namespace imarket.Controllers.open
             });
         }
 
+        /// <summary>
+        /// 编辑用户信息
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         [HttpPost("Edit")] // api/Account/Edit
         public async Task<IActionResult> edit([FromBody][Required] EditRequest user)
         {

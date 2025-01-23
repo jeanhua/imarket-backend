@@ -24,6 +24,11 @@ namespace imarket.Controllers.open
             this.logger = logger;
         }
 
+        /// <summary>
+        /// 获取用户帖子
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         [HttpGet("Posts")] // api/User/Posts?username=xxx
         [Authorize]
         public async Task<IActionResult> GetUserPosts([FromQuery][Required]string? username)
@@ -41,6 +46,11 @@ namespace imarket.Controllers.open
             return Ok(posts);
         }
 
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         [HttpGet("Info")] // api/User/Info?username=xxx
         [Authorize]
         public async Task<IActionResult> GetInfo([FromQuery][Required] string? username)

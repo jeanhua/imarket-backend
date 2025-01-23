@@ -28,6 +28,12 @@ namespace imarket.Controllers.open
             this.logger = _logger;
             this.cache = cache;
         }
+
+        /// <summary>
+        /// 获取帖子的评论
+        /// </summary>
+        /// <param name="postid"></param>
+        /// <returns></returns>
         [HttpGet("{postid}")] // api/Comments/{postid}
         public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute][Required] string postid)
         {
@@ -71,6 +77,12 @@ namespace imarket.Controllers.open
             });
             return Ok(new { success = true, comments = response });
         }
+
+        /// <summary>
+        /// 发表评论
+        /// </summary>
+        /// <param name="comment"></param>
+        /// <returns></returns>
         [HttpPost("Create")] // api/Comments/Create
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> CreateCommentAsync([FromBody][Required] CommentPostRequest comment)
@@ -126,6 +138,11 @@ namespace imarket.Controllers.open
             return Ok(new { success = true, commentId = comment_new.Id });
         }
 
+        /// <summary>
+        /// 删除评论
+        /// </summary>
+        /// <param name="commentId"></param>
+        /// <returns></returns>
         [HttpGet("Delete")] // api/Comments/Delete?commentId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> DeleteCommentAsync([FromQuery][Required] string commentId)
@@ -152,6 +169,11 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
+        /// <summary>
+        /// 点赞评论
+        /// </summary>
+        /// <param name="commentId"></param>
+        /// <returns></returns>
         [HttpGet("Like")] // api/Comments/Like?commentId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> LikeCommentAsync([FromQuery][Required] string commentId)
@@ -186,6 +208,11 @@ namespace imarket.Controllers.open
             return Ok(new { success = true });
         }
 
+        /// <summary>
+        /// 取消点赞评论
+        /// </summary>
+        /// <param name="commentId"></param>
+        /// <returns></returns>
         [HttpGet("UnLike")] // api/Comments/UnLike?commentId=xxx
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UnLikeCommentAsync([FromQuery][Required] string commentId)
