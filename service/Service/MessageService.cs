@@ -12,13 +12,24 @@ namespace imarket.service.Service
         {
             _database = database;
         }
-        public async Task<IEnumerable<MessageModels>> GetMessagesBySenderIdAsync(string userId)
+        public async Task<IEnumerable<MessageModels>> GetMessagesBySenderIdAsync(string userId, int page, int pageSize)
         {
+            if (page < 1 || pageSize < 1)
+            {
+                page = 1;
+                pageSize = 10;
+            }
+            if (pageSize > 20)
+            {
+                pageSize = 20;
+            }
             var messages = new List<MessageModels>();
-            var query = "SELECT * FROM Messages WHERE SenderId = @SenderId";
+            var query = "SELECT * FROM Messages WHERE SenderId = @SenderId LIMIT @Offset, @PageSize";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@SenderId",userId )
+                new MySqlParameter("@SenderId",userId),
+                new MySqlParameter("@Offset",(page - 1) * pageSize),
+                new MySqlParameter("@PageSize",pageSize)
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
@@ -35,13 +46,23 @@ namespace imarket.service.Service
             return messages;
         }
 
-        public async Task<IEnumerable<MessageModels>> GetMessagesByReceiverIdAsync(string userId)
+        public async Task<IEnumerable<MessageModels>> GetMessagesByReceiverIdAsync(string userId, int page, int pageSize)
         {
+            if (page < 1 || pageSize < 1)
+            {
+                page = 1; pageSize = 10;
+            }
+            if (pageSize > 20)
+            { 
+                pageSize = 20;
+            }
             var messages = new List<MessageModels>();
-            var query = "SELECT * FROM Messages WHERE ReceiverId = @ReceiverId";
+            var query = "SELECT * FROM Messages WHERE ReceiverId = @ReceiverId LIMIT @Offset, @PageSize";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@ReceiverId",userId)
+                new MySqlParameter("@ReceiverId",userId),
+                new MySqlParameter("@Offset",(page - 1) * pageSize),
+                new MySqlParameter("@PageSize",pageSize)
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)

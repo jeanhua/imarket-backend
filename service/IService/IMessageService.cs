@@ -4,8 +4,8 @@ namespace imarket.service.IService
 {
     public interface IMessageService
     {
-        Task<IEnumerable<MessageModels>> GetMessagesBySenderIdAsync(string senderId);
-        Task<IEnumerable<MessageModels>> GetMessagesByReceiverIdAsync(string receiverId);
+        Task<IEnumerable<MessageModels>> GetMessagesBySenderIdAsync(string senderId,int page,int pageSize);
+        Task<IEnumerable<MessageModels>> GetMessagesByReceiverIdAsync(string receiverId,int page, int pageSize);
         Task<MessageModels?> GetMessageByIdAsync(string id);
         Task<int> CreateMessageAsync(MessageModels message);
         Task<int> DeleteMessageByIdAsync(string id);

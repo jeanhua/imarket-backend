@@ -31,15 +31,15 @@ namespace imarket.Controllers.open
         /// </summary>
         /// <returns></returns>
         [HttpGet("List")] // api/Message/List
-        public async Task<IActionResult> GetMessage()
+        public async Task<IActionResult> GetMessage([FromQuery]int page, [FromQuery]int pageSize)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
             if (user == null)
             {
                 return NotFound();
             }
-            var messages_send = await messageService.GetMessagesBySenderIdAsync(user.Id);
-            var messages_receive = await messageService.GetMessagesByReceiverIdAsync(user.Id);
+            var messages_send = await messageService.GetMessagesBySenderIdAsync(user.Id, page, pageSize);
+            var messages_receive = await messageService.GetMessagesByReceiverIdAsync(user.Id, page, pageSize);
             return Ok(new
             {
                 success = true,
@@ -92,6 +92,35 @@ namespace imarket.Controllers.open
                 CreatedAt = DateTime.Now,
                 Id = Guid.NewGuid().ToString(),
             });
+            return Ok(new
+            {
+                success = true,
+            });
+        }
+
+        /// <summary>
+        /// 删除消息
+        /// </summary>
+        /// <param name="messageId"></param>
+        /// <returns></returns>
+        [HttpGet("Delete")] // api/Message/Delete?messageId={messageId}
+        public async Task<IActionResult> DeleteMessage([FromQuery][Required] string messageId)
+        {
+            var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
+            if (user == null)
+            {
+                return NotFound("user not found");
+            }
+            var message = await messageService.GetMessageByIdAsync(messageId);
+            if (message == null)
+            {
+                return NotFound("message not found");
+            }
+            if (message.SenderId != user.Id || message.ReceiverId != user.Id)
+            {
+                return BadRequest("permission denied");
+            }
+            await messageService.DeleteMessageByIdAsync(messageId);
             return Ok(new
             {
                 success = true,
