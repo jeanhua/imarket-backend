@@ -68,7 +68,7 @@ namespace imarket.Controllers.open
             {
                 return NotFound("user not found");
             }
-            var receiver = await userService.GetUserByUsernameAsync(request.ReceiveId);
+            var receiver = await userService.GetUserByUsernameAsync(request.ReceiverId);
             if (receiver == null)
             {
                 return NotFound("receiver not found");
@@ -131,7 +131,7 @@ namespace imarket.Controllers.open
     public class SendMessageRequest
     {
         [Required]
-        public string? ReceiveId { get; set; }
+        public string? ReceiverId { get; set; }
         [Required]
         public string? Content { get; set; }
     }
