@@ -259,7 +259,7 @@ namespace imarket.Controllers.open
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24)
                 });
                 var result = await mailService.SendMail(user.Email, $"{_configuration["SiteInfo:SiteName"]} 密码重置",
-                    _configuration["SiteInfo:RestPasswordEmailContent"]!.Replace("{Url}",$"{_configuration["SiteInfo:RestPasswordUrl"]}"));
+                    _configuration["SiteInfo:RestPasswordEmailContent"]!.Replace("{Url}",$"{_configuration["SiteInfo:RestPasswordUrl"]}?token="+token));
                 if (result == false)
                 {
                     return StatusCode(500, "Send Email Fail.");
