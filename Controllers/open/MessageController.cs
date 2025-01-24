@@ -31,7 +31,7 @@ namespace imarket.Controllers.open
         /// </summary>
         /// <returns></returns>
         [HttpGet("List")] // api/Message/List
-        public async Task<IActionResult> GetMessage([FromQuery]int page, [FromQuery]int pageSize)
+        public async Task<IActionResult> GetMessage([FromQuery]int page=1, [FromQuery]int pageSize=10)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
             if (user == null)

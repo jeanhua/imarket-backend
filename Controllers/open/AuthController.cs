@@ -161,7 +161,7 @@ namespace imarket.Controllers.open
                 PasswordHash = registerRequest.Password,
                 Email = registerRequest.Email!,
                 Nickname = RandomChineseNicknameGenerator.GenerateRandomNickname(),
-                Avatar = "/images/defaultAvatar.png",
+                Avatar = "/images/defaultAvatar.svg",
                 Role = "user",
                 Status = 0,
                 CreatedAt = DateTime.Now,

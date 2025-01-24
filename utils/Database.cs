@@ -70,7 +70,7 @@ namespace imarket.utils
                         new MySqlParameter("@Username", username),
                         new MySqlParameter("@Nickname", "admin"),
                         new MySqlParameter("@PasswordHash", passwordHash),
-                        new MySqlParameter("@Avatar", "/images/defaultAvatar.png"),
+                        new MySqlParameter("@Avatar", "/images/defaultAvatar.svg"),
                         new MySqlParameter("@Email", Email),
                         new MySqlParameter("@Role", "admin"),
                         new MySqlParameter("@CreatedAt", DateTime.Now),

@@ -174,7 +174,7 @@ namespace imarket.Controllers.admin
                 Username = user.Username!,
                 Nickname = user.Nickname!,
                 PasswordHash = user.PasswordHash!,
-                Avatar = user.Avatar ?? "/images/defaultAvatar.png",
+                Avatar = user.Avatar ?? "/images/defaultAvatar.svg",
                 Email = user.Email!,
                 Role = user.Role!,
                 CreatedAt = DateTime.Now,

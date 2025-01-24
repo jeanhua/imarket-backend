@@ -46,7 +46,7 @@ namespace imarket.Controllers.open
             var response = new List<CommentResponse>();
             foreach (var comment in Comments)
             {
-                var avatar = "/images/defaultAvatar.png";
+                var avatar = "/images/defaultAvatar.svg";
                 var likeNum = 0;
                 var isLike = false;
                 try
@@ -57,7 +57,7 @@ namespace imarket.Controllers.open
                 }
                 catch
                 {
-                    avatar = "/images/defaultAvatar.png";
+                    avatar = "/images/defaultAvatar.svg";
                 }
                 response.Add(new CommentResponse
                 {
