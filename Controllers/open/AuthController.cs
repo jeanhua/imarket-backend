@@ -144,6 +144,11 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("Invalid password");
             }
+            // 检查邮箱是否符合要求
+            if(EmailValidator.IsValidEmail(registerRequest.Email!) == false || registerRequest.Email.Length>50)
+            {
+                return BadRequest("Invalid email");
+            }
             _cache.Set("ip:" + ip, ipNums + 1, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
