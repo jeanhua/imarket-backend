@@ -140,12 +140,15 @@ namespace imarket.Controllers.open
         [HttpGet("{id}")] // api/Post/{id}
         public async Task<IActionResult> GetPost([FromRoute][Required] string id)
         {
-            if (_cache.TryGetValue($"Post_cache{id}", out var post_cache))
+            // 检查用户是否已登录
+            var isUserAuthenticated = User.Identity.IsAuthenticated;
+            // 如果用户未登录，尝试从缓存中获取数据
+            if (!isUserAuthenticated && _cache.TryGetValue($"Post_cache{id}", out var post_cache))
             {
                 // 缓存命中
                 return Ok(post_cache);
             }
-            // 缓存未命中
+            // 缓存未命中或用户已登录，从数据库获取数据
             var postfind = await postService.GetPostByIdAsync(id);
             if (postfind == null)
             {
@@ -153,11 +156,17 @@ namespace imarket.Controllers.open
             }
             var categoryID = await postCategoriesService.GetPostCategoriesByPostIdAsync(postfind.Id);
             var user = await userService.GetUserByIdAsync(postfind.UserId);
-            var me = await userService.GetUserByUsernameAsync(User.Identity.Name);
             var likeNums = await likeService.GetPostLikeNumsByPostIdAsync(postfind.Id);
             var favoriteNms = await favoriteService.GetFavoriteNumsByPostIdAsync(postfind.Id);
             var images = await imageService.GetImagesByPostId(postfind.Id);
-            var isLiked = await likeService.CheckUserLikePostAsync(me.Id, postfind.Id);
+            bool isLiked = false;
+            bool isFavorite = false;
+            if (isUserAuthenticated)
+            {
+                var me = await userService.GetUserByUsernameAsync(User.Identity.Name);
+                isLiked = await likeService.CheckUserLikePostAsync(me.Id, postfind.Id);
+                isFavorite = await favoriteService.CheckIsFavorite(me.Id, postfind.Id);
+            }
             var response = new
             {
                 success = true,
@@ -172,16 +181,21 @@ namespace imarket.Controllers.open
                     likeNums,
                     favoriteNms,
                     isLiked,
+                    isFavorite,
                     postfind.CreatedAt,
                     user?.Username,
                     user?.Nickname,
                     user?.Avatar
                 },
             };
-            _cache.Set($"Post_cache{id}", response, new MemoryCacheEntryOptions
+            // 如果用户未登录，将结果存入缓存
+            if (!isUserAuthenticated)
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]))
-            });
+                _cache.Set($"Post_cache{id}", response, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]))
+                });
+            }
             return Ok(response);
         }
 
