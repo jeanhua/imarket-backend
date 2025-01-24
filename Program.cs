@@ -95,6 +95,7 @@ namespace imarket
             builder.Services.AddScoped<IMessageService, MessageService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ILoginService, LoginService>();   
+            builder.Services.AddScoped<IMailService, MailService>();
             // ×¢ÈëÊý¾Ý¿â
             builder.Services.AddSingleton<Database>(provider =>
             {
