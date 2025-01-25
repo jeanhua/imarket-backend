@@ -90,6 +90,18 @@ namespace imarket.Controllers.open
         }
 
         /// <summary>
+        /// 获取分类详情
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("Categories/{id}")] // api/Post/Categories/:id
+        public async Task<IActionResult> GetCategoryById([FromRoute] string id)
+        {
+            var category = await postCategoriesService.GetCategoryByIdAsync(id);
+            return Ok(new { success = true, category });
+        }
+
+        /// <summary>
         /// 获取分类下的帖子
         /// </summary>
         /// <param name="categoryId"></param>

@@ -43,7 +43,7 @@ namespace imarket.Controllers.open
                 return NotFound();
             }
             var posts = await postService.GetPostsByUserIdAsync(user.Id);
-            return Ok(posts);
+            return Ok(new{success=true ,posts});
         }
 
         /// <summary>
