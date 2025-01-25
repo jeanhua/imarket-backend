@@ -85,7 +85,13 @@ namespace imarket.Controllers.open
         [HttpGet("Categories")] // api/Post/Categories
         public async Task<IActionResult> GetCategories()
         {
+            const string cacheKey = "AllCategories";
+            if (_cache.TryGetValue(cacheKey, out var cachedCategories))
+            {
+                return Ok(new { success = true, categories = cachedCategories });
+            }
             var categories = await postCategoriesService.GetAllCategoriesAsync();
+            _cache.Set(cacheKey, categories, TimeSpan.FromMinutes(10));
             return Ok(new { success = true, categories });
         }
 
@@ -94,8 +100,8 @@ namespace imarket.Controllers.open
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("Categories/{id}")]
-        public async Task<IActionResult> GetCategoryById([FromRoute] string id)
+        [HttpGet("Categories/{id}")] // api/Post/Categories/{id}
+        public async Task<IActionResult> GetCategoryById([FromRoute][Required] string id)
         {
             var cacheKey = $"Category_{id}";
             if (_cache.TryGetValue(cacheKey, out var cachedCategory))
