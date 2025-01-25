@@ -94,10 +94,20 @@ namespace imarket.Controllers.open
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("Categories/{id}")] // api/Post/Categories/:id
+        [HttpGet("Categories/{id}")]
         public async Task<IActionResult> GetCategoryById([FromRoute] string id)
         {
+            var cacheKey = $"Category_{id}";
+            if (_cache.TryGetValue(cacheKey, out var cachedCategory))
+            {
+                return Ok(new { success = true, category = cachedCategory });
+            }
             var category = await postCategoriesService.GetCategoryByIdAsync(id);
+            if (category == null)
+            {
+                return NotFound(new { success = false, message = "Category not found." });
+            }
+            _cache.Set(cacheKey, category, TimeSpan.FromMinutes(10)); // 缓存 10 分钟
             return Ok(new { success = true, category });
         }
 
