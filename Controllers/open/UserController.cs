@@ -1,8 +1,10 @@
 ﻿using imarket.service.IService;
+using imarket.service.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace imarket.Controllers.open
@@ -15,13 +17,17 @@ namespace imarket.Controllers.open
         private readonly IMemoryCache cache;
         private readonly IUserService userService;
         private readonly IPostService postService;
+        private readonly IFavoriteService favoriteService;
+        private readonly ILikeService likeService;
 
-        public UserController(IUserService userService, IMemoryCache _cache, IPostService postService, ILogger<UserController> logger)
+        public UserController(IUserService userService, IMemoryCache _cache, IPostService postService, ILogger<UserController> logger, IFavoriteService favoriteService, ILikeService likeService)
         {
             this.userService = userService;
             this.cache = _cache;
             this.postService = postService;
             this.logger = logger;
+            this.favoriteService = favoriteService;
+            this.likeService = likeService;
         }
 
         /// <summary>
@@ -42,8 +48,29 @@ namespace imarket.Controllers.open
             {
                 return NotFound();
             }
+            // 缓存
+            if(cache.TryGetValue($"userPosts_{user.Username}",out var posts_cache))
+            {
+                return Ok(new { success = true, posts = posts_cache });
+            }
             var posts = await postService.GetPostsByUserIdAsync(user.Id);
-            return Ok(new{success=true ,posts});
+            var response = new List<PostsResponse>();
+            foreach (var post in posts)
+            {
+                response.Add(new PostsResponse
+                {
+                    Id = post.Id,
+                    Title = post.Title,
+                    Content = post.Content,
+                    Nickname = user.Nickname,
+                    Avatar = user.Avatar,
+                    FavoriteNums = await favoriteService.GetFavoriteNumsByPostIdAsync(post.Id),
+                    LikeNums = await likeService.GetPostLikeNumsByPostIdAsync(post.Id),
+                    CreatedAt = post.CreatedAt
+                });
+            }
+
+            return Ok(new{success=true ,posts = response});
         }
 
         /// <summary>
