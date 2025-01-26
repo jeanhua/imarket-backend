@@ -127,7 +127,7 @@ namespace imarket.Controllers.open
         [HttpGet("CategorisedPosts")] // api/Post/CategorisedPosts
         public async Task<IActionResult> GetCategorisedPosts([FromQuery][Required] string categoryId,[FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
-            if (_cache.TryGetValue($"GetCategorisedPosts_page{page}_pageSize{pageSize}", out var posts_cache))
+            if (_cache.TryGetValue($"GetCategorisedPosts{categoryId}_page{page}_pageSize{pageSize}", out var posts_cache))
             {
                 return Ok(posts_cache);
             }
@@ -153,7 +153,7 @@ namespace imarket.Controllers.open
                 success = true,
                 posts = postsResponse
             };
-            _cache.Set($"GetCategorisedPosts_page{page}_pageSize{pageSize}", response, new MemoryCacheEntryOptions
+            _cache.Set($"GetCategorisedPosts{categoryId}_page{page}_pageSize{pageSize}", response, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
