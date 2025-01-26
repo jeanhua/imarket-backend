@@ -1,10 +1,7 @@
 ﻿using imarket.service.IService;
-using imarket.service.Service;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace imarket.Controllers.open
@@ -37,7 +34,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Posts")] // api/User/Posts?username=xxx
         [Authorize]
-        public async Task<IActionResult> GetUserPosts([FromQuery][Required]string? username)
+        public async Task<IActionResult> GetUserPosts([FromQuery][Required]string? username, [FromQuery]int page = 1, [FromQuery]int pageSize = 10)
         {
             if(!ModelState.IsValid)
             {
@@ -49,11 +46,11 @@ namespace imarket.Controllers.open
                 return NotFound();
             }
             // 缓存
-            if(cache.TryGetValue($"userPosts_{user.Username}",out var posts_cache))
+            if(cache.TryGetValue($"userPosts_{user.Username}_{page}_{pageSize}",out var posts_cache))
             {
                 return Ok(new { success = true, posts = posts_cache });
             }
-            var posts = await postService.GetPostsByUserIdAsync(user.Id);
+            var posts = await postService.GetPostsByUserIdAsync(user.Id, page, pageSize);
             var response = new List<PostsResponse>();
             foreach (var post in posts)
             {
@@ -69,7 +66,7 @@ namespace imarket.Controllers.open
                     CreatedAt = post.CreatedAt
                 });
             }
-
+            cache.Set($"userPosts_{user.Username}_{page}_{pageSize}", response, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10)));
             return Ok(new{success=true ,posts = response});
         }
 

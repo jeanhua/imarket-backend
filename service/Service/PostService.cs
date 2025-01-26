@@ -30,9 +30,10 @@ namespace imarket.service.Service
         }
         public async Task<IEnumerable<PostModels>> GetAllPostsAsync(int page, int pageSize)
         {
-            if (page < 1)
+            if (page < 1 || pageSize < 1)
             {
                 page = 1;
+                pageSize = 10;
             }
             if (pageSize < 1 || pageSize > 20)
             {
@@ -60,13 +61,24 @@ namespace imarket.service.Service
             }
             return posts;
         }
-        public async Task<IEnumerable<PostModels>> GetPostsByUserIdAsync(string userId)
+        public async Task<IEnumerable<PostModels>> GetPostsByUserIdAsync(string userId, int page, int pageSize)
         {
+            if (page < 1 || pageSize < 1)
+            {
+                page = 1;
+                pageSize = 10;
+            }
+            if (pageSize < 1 || pageSize > 20)
+            {
+                pageSize = 10;
+            }
             var posts = new List<PostModels>();
-            var query = "SELECT * FROM Posts WHERE UserId = @UserId";
+            var query = "SELECT * FROM Posts WHERE UserId = @UserId ORDER BY CreatedAt DESC LIMIT @PageSize OFFSET @Offset";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@UserId",userId)
+                new MySqlParameter("@UserId", userId),
+                new MySqlParameter("@Offset", (page - 1) * pageSize),
+                new MySqlParameter("@PageSize", pageSize),
             };
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             foreach (DataRow row in result.Rows)
