@@ -238,7 +238,7 @@ namespace imarket.Controllers.admin
             {
                 return BadRequest("you can't delete yourself");
             }
-            var posts = await postService.GetPostsByUserIdAsync(userId);
+            var posts = await postService.GetAllPostsByUserIdAsync(userId);
             if (posts.Count() != 0)
             {
                 return BadRequest("some posts of the user have not been deleted!");
@@ -260,7 +260,7 @@ namespace imarket.Controllers.admin
         [HttpGet("DeletePosts")] // api/Admin/DeletePosts?userId=xxx
         public async Task<IActionResult> DeletePosts([FromQuery][Required] string userId)
         {
-            var posts = await postService.GetPostsByUserIdAsync(userId);
+            var posts = await postService.GetAllPostsByUserIdAsync(userId);
             if (posts != null)
             {
                 foreach (var post in posts)

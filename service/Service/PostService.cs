@@ -95,6 +95,30 @@ namespace imarket.service.Service
             }
             return posts;
         }
+
+        public async Task<IEnumerable<PostModels>> GetAllPostsByUserIdAsync(string userId)
+        {
+            var posts = new List<PostModels>();
+            var query = "SELECT * FROM Posts WHERE UserId = @UserId";
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@UserId", userId),
+            };
+            var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
+            foreach (DataRow row in result.Rows)
+            {
+                posts.Add(new PostModels
+                {
+                    Id = row["Id"].ToString()!,
+                    Title = row["Title"].ToString()!,
+                    Content = row["Content"].ToString()!,
+                    UserId = row["UserId"].ToString()!,
+                    CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
+                    Status = Convert.ToInt32(row["Status"]!),
+                });
+            }
+            return posts;
+        }
         public async Task<IEnumerable<PostModels>> GetPostsByCategoryIdAsync(string categoryId, int page, int pageSize)
         {
             if (page < 1)
@@ -226,7 +250,7 @@ namespace imarket.service.Service
 
         public async Task<int> DeletePostByUserIdAsync(string userId)
         {
-            var posts = await GetPostsByUserIdAsync(userId);
+            var posts = await GetAllPostsByUserIdAsync(userId);
             var result = 0;
             foreach(var post in posts)
             {
