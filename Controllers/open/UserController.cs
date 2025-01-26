@@ -16,8 +16,9 @@ namespace imarket.Controllers.open
         private readonly IPostService postService;
         private readonly IFavoriteService favoriteService;
         private readonly ILikeService likeService;
+        private readonly IConfiguration configuration;
 
-        public UserController(IUserService userService, IMemoryCache _cache, IPostService postService, ILogger<UserController> logger, IFavoriteService favoriteService, ILikeService likeService)
+        public UserController(IUserService userService, IMemoryCache _cache, IPostService postService, ILogger<UserController> logger, IFavoriteService favoriteService, ILikeService likeService, IConfiguration configuration)
         {
             this.userService = userService;
             this.cache = _cache;
@@ -25,6 +26,7 @@ namespace imarket.Controllers.open
             this.logger = logger;
             this.favoriteService = favoriteService;
             this.likeService = likeService;
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -66,7 +68,10 @@ namespace imarket.Controllers.open
                     CreatedAt = post.CreatedAt
                 });
             }
-            cache.Set($"userPosts_{user.Username}_{page}_{pageSize}", response, new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(10)));
+            cache.Set($"userPosts_{user.Username}_{page}_{pageSize}", response, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
+            });
             return Ok(new{success=true ,posts = response});
         }
 

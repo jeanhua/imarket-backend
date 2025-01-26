@@ -1,6 +1,4 @@
 ﻿using imarket.service.IService;
-using imarket.service.Service;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
