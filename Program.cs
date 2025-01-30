@@ -1,4 +1,5 @@
 using imarket.middleware;
+using imarket.plugin;
 using imarket.service.IService;
 using imarket.service.Service;
 using imarket.utils;
@@ -103,6 +104,8 @@ namespace imarket
                 var logger = provider.GetRequiredService<ILogger<Database>>();
                 return new Database(configuration, logger);
             });
+            // 注入插件管理器
+            builder.Services.AddSingleton<PluginManager>();
             // 注入token生成器
             builder.Services.AddSingleton<JwtTokenGenerator>(provider =>
             {
