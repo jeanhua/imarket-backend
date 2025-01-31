@@ -275,7 +275,7 @@ namespace imarket.Controllers.open
             await postCategoriesService.CreatePostCategoryAsync(new PostCategoryModels()
             {
                 CategoryId = postReq.CategoryId,
-                PostId = result1.postId,
+                PostId = result1,
             });
             if (postReq.Images != null)
             {
@@ -284,7 +284,7 @@ namespace imarket.Controllers.open
                     var resut2 = await imageService.SaveImageAsync(new ImageModels
                     {
                         Url = image,
-                        PostId = result1.postId,
+                        PostId = result1,
                         CreatedAt = DateTime.Now
                     });
                     if (resut2 == 0)
@@ -292,10 +292,6 @@ namespace imarket.Controllers.open
                         return StatusCode(500, $"{image}upload failed.");
                     }
                 }
-            }
-            if (result1.result == 0)
-            {
-                return StatusCode(500, "create post failed.");
             }
             return Ok(new { success = true });
         }

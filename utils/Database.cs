@@ -125,7 +125,7 @@ namespace imarket.utils
         }
 
         // 执行非查询命令
-        public async Task<(int result,ulong)> ExecuteNonQueryWithId(string query, CommandType commandType, MySqlParameter[] parameters = null)
+        public async Task<ulong> ExecuteNonQueryWithId(string query, CommandType commandType, MySqlParameter[] parameters = null)
         {
             using (var connection = GetConnection())
             {
@@ -136,8 +136,16 @@ namespace imarket.utils
                     {
                         command.Parameters.AddRange(parameters);
                     }
-                    ulong id = Convert.ToUInt64(await command.ExecuteScalarAsync());
-                    return (await command.ExecuteNonQueryAsync(),id);
+                    // 执行查询并获取插入的 ID
+                    var result = await command.ExecuteScalarAsync();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        return Convert.ToUInt64(result);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("No ID was returned from the query.");
+                    }
                 }
             }
         }

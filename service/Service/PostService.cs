@@ -218,7 +218,7 @@ namespace imarket.service.Service
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
             };
         }
-        public async Task<(int result, ulong postId)> CreatePostAsync(PostModels post)
+        public async Task<ulong> CreatePostAsync(PostModels post)
         {
             var query = "INSERT INTO Posts (Id, Title, Content, UserId, CreatedAt, Status) VALUES (@Id, @Title, @Content, @UserId, @CreatedAt, @Status)";
             var parameters = new MySqlParameter[]
