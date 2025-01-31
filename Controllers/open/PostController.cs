@@ -101,7 +101,7 @@ namespace imarket.Controllers.open
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("Categories/{id}")] // api/Post/Categories/{id}
-        public async Task<IActionResult> GetCategoryById([FromRoute][Required] string id)
+        public async Task<IActionResult> GetCategoryById([FromRoute][Required] ulong id)
         {
             var cacheKey = $"Category_{id}";
             if (_cache.TryGetValue(cacheKey, out var cachedCategory))
@@ -125,7 +125,7 @@ namespace imarket.Controllers.open
         /// <param name="pageSize"></param>
         /// <returns></returns>
         [HttpGet("CategorisedPosts")] // api/Post/CategorisedPosts
-        public async Task<IActionResult> GetCategorisedPosts([FromQuery][Required] string categoryId,[FromQuery] int page=1, [FromQuery] int pageSize=10)
+        public async Task<IActionResult> GetCategorisedPosts([FromQuery][Required] ulong categoryId,[FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
             if (_cache.TryGetValue($"GetCategorisedPosts{categoryId}_page{page}_pageSize{pageSize}", out var posts_cache))
             {
@@ -166,7 +166,7 @@ namespace imarket.Controllers.open
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")] // api/Post/{id}
-        public async Task<IActionResult> GetPost([FromRoute][Required] string id)
+        public async Task<IActionResult> GetPost([FromRoute][Required] ulong id)
         {
             // 检查用户是否已登录
             var isUserAuthenticated = User.Identity.IsAuthenticated;
@@ -262,11 +262,9 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("Invalid category.");
             }
-            var postId = Guid.NewGuid().ToString();
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             var post = new PostModels
             {
-                Id = postId,
                 Title = postReq.Title!,
                 Content = postReq.Content!,
                 UserId = user.Id,
@@ -277,7 +275,7 @@ namespace imarket.Controllers.open
             await postCategoriesService.CreatePostCategoryAsync(new PostCategoryModels()
             {
                 CategoryId = postReq.CategoryId,
-                PostId = postId,
+                PostId = result1.postId,
             });
             if (postReq.Images != null)
             {
@@ -285,9 +283,8 @@ namespace imarket.Controllers.open
                 {
                     var resut2 = await imageService.SaveImageAsync(new ImageModels
                     {
-                        Id = Guid.NewGuid().ToString(),
                         Url = image,
-                        PostId = postId,
+                        PostId = result1.postId,
                         CreatedAt = DateTime.Now
                     });
                     if (resut2 == 0)
@@ -296,7 +293,7 @@ namespace imarket.Controllers.open
                     }
                 }
             }
-            if (result1 == 0)
+            if (result1.result == 0)
             {
                 return StatusCode(500, "create post failed.");
             }
@@ -310,7 +307,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Delete")] // api/Post/Delete?postId=xxx
         [Authorize(Roles = "admin,user")]
-        public async Task<IActionResult> DeletePost([FromQuery][Required] string postId)
+        public async Task<IActionResult> DeletePost([FromQuery][Required] ulong postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -338,7 +335,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Finish")] //api/Post/Finish?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> FinishPost([FromQuery][Required] string postId)
+        public async Task<IActionResult> FinishPost([FromQuery][Required] ulong postId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
             var post = await postService.GetPostByIdAsync(postId);
@@ -366,7 +363,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Favorite")] // api/Post/Favorite?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> FavoritePost([FromQuery][Required] string postId)
+        public async Task<IActionResult> FavoritePost([FromQuery][Required] ulong postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -398,7 +395,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Unfavorite")] // api/Post/Unfavorite?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> UnFavoritePost([FromQuery][Required] string postId)
+        public async Task<IActionResult> UnFavoritePost([FromQuery][Required] ulong postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -426,7 +423,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Like")] // api/Post/Like?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> LikePost([FromQuery][Required] string postId)
+        public async Task<IActionResult> LikePost([FromQuery][Required] ulong postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -445,7 +442,6 @@ namespace imarket.Controllers.open
             }
             var like = new LikeModels
             {
-                Id = Guid.NewGuid().ToString(),
                 PostId = postId,
                 CommentId = null,
                 UserId = user.Id,
@@ -467,7 +463,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Unlike")] // api/Post/Unlike?postId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> UnLikePost([FromQuery][Required] string postId)
+        public async Task<IActionResult> UnLikePost([FromQuery][Required] ulong postId)
         {
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -486,7 +482,6 @@ namespace imarket.Controllers.open
             }
             var result = await likeService.DeleteLikeAsync(new LikeModels
             {
-                Id = Guid.NewGuid().ToString(),
                 PostId = postId,
                 UserId = user.Id,
                 CommentId = null,
@@ -536,13 +531,13 @@ namespace imarket.Controllers.open
         [Required]
         public string? Content { get; set; }
         [Required]
-        public string? CategoryId { get; set; }
+        public ulong CategoryId { get; set; }
         public string[]? Images { get; set; }
     }
 
     public class PostsResponse
     {
-        public string Id { get; set; }
+        public ulong Id { get; set; }
         public string Title { get; set; }
         public string Nickname { get; set; }
         public string Avatar { get; set; }

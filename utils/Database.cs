@@ -126,6 +126,23 @@ namespace imarket.utils
         }
 
         // 执行非查询命令
+        public async Task<(int result,ulong)> ExecuteNonQueryWithId(string query, CommandType commandType, MySqlParameter[] parameters = null)
+        {
+            using (var connection = GetConnection())
+            {
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.CommandType = commandType;
+                    if (parameters != null)
+                    {
+                        command.Parameters.AddRange(parameters);
+                    }
+                    ulong id = Convert.ToUInt64(await command.ExecuteScalarAsync());
+                    return (await command.ExecuteNonQueryAsync(),id);
+                }
+            }
+        }
+        // 执行非查询命令
         public async Task<int> ExecuteNonQuery(string query, CommandType commandType, MySqlParameter[] parameters = null)
         {
             using (var connection = GetConnection())

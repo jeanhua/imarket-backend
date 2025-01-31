@@ -47,7 +47,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new UserModels
             {
-                Id = row["Id"].ToString()!,
+                Id = ulong.Parse(row["Id"].ToString()!),
                 Username = row["Username"].ToString()!,
                 Nickname = row["Nickname"].ToString()!,
                 PasswordHash = row["PasswordHash"].ToString()!,
@@ -73,7 +73,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new UserModels
             {
-                Id = row["Id"].ToString()!,
+                Id = ulong.Parse(row["Id"].ToString()!),
                 Username = row["Username"].ToString()!,
                 Nickname = row["Nickname"].ToString()!,
                 PasswordHash = row["PasswordHash"].ToString()!,
@@ -106,7 +106,7 @@ namespace imarket.service.Service
             {
                 users.Add(new UserModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Username = row["Username"].ToString()!,
                     Nickname = row["Nickname"].ToString()!,
                     PasswordHash = row["PasswordHash"].ToString()!,
@@ -120,7 +120,7 @@ namespace imarket.service.Service
             return users;
         }
 
-        public async Task<UserModels?> GetUserByIdAsync(string id)
+        public async Task<UserModels?> GetUserByIdAsync(ulong id)
         {
             var query = "SELECT * FROM Users WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -135,7 +135,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new UserModels
             {
-                Id = row["Id"].ToString()!,
+                Id = ulong.Parse(row["Id"].ToString()!),
                 Username = row["Username"].ToString()!,
                 Nickname = row["Nickname"].ToString()!,
                 PasswordHash = row["PasswordHash"].ToString()!,
@@ -148,10 +148,9 @@ namespace imarket.service.Service
         }
         public async Task<int> CreateUserAsync(UserModels user)
         {
-            var query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
+            var query = "INSERT INTO Users (Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", user.Id),
                 new MySqlParameter("@Username", user.Username),
                 new MySqlParameter("@Nickname", user.Nickname),
                 new MySqlParameter("@PasswordHash", user.PasswordHash),
@@ -164,7 +163,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteUserAsync(string id)
+        public async Task<int> DeleteUserAsync(ulong id)
         {
             await _postService.DeletePostByUserIdAsync(id);
             await _messageService.DeleteMessageByReceiverIdAsync(id);
@@ -180,7 +179,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> UpdateUserAsync(string userId, UserModels user)
+        public async Task<int> UpdateUserAsync(ulong userId, UserModels user)
         {
             var query = "UPDATE Users SET Username = @Username, Nickname = @Nickname, PasswordHash = @PasswordHash, Avatar = @Avatar, Email = @Email, Role = @Role, CreatedAt = @CreatedAt, Status = @Status WHERE Id = @Id";
             var parameters = new MySqlParameter[]

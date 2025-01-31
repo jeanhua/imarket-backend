@@ -2,9 +2,9 @@
 {
     public class FavoriteModels
     {
-        public string Id { get; set; }
-        public string PostId { get; set; }
-        public string UserId { get; set; }
+        public ulong Id { get; set; }
+        public ulong PostId { get; set; }
+        public ulong UserId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

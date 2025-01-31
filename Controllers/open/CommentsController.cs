@@ -35,12 +35,15 @@ namespace imarket.Controllers.open
         /// <param name="postid"></param>
         /// <returns></returns>
         [HttpGet("{postid}")] // api/Comments/{postid}
-        public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute][Required] string postid)
+        public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute][Required] ulong postid)
         {
-            cache.TryGetValue(postid, out var comments);
-            if (comments != null)
+            if (!User.Identity!.IsAuthenticated)
             {
-                return Ok(new { success = true, comments });
+                cache.TryGetValue(postid, out var comments);
+                if (comments != null)
+                {
+                    return Ok(new { success = true, comments });
+                }
             }
             var Comments = await commentService.GetCommentsByPostIdAsync(postid);
             var response = new List<CommentResponse>();
@@ -53,7 +56,10 @@ namespace imarket.Controllers.open
                 {
                     avatar = (await userService.GetUserByIdAsync(comment.UserId))?.Avatar;
                     likeNum = await likeService.GetCommentLikeNumsByCommentIdAsync(comment.Id);
-                    isLike = await likeService.CheckUserLikeCommentAsync(comment.Id, User.Identity!.Name!);
+                    if(User.Identity!.IsAuthenticated)
+                    {
+                        isLike = await likeService.CheckUserLikeCommentAsync((await userService.GetUserByUsernameAsync(User.Identity!.Name!)).Id, comment.Id);
+                    }
                 }
                 catch
                 {
@@ -71,10 +77,13 @@ namespace imarket.Controllers.open
                     CreatedAt = comment.CreatedAt
                 });
             }
-            cache.Set(postid, response, new MemoryCacheEntryOptions
+            if (!User.Identity.IsAuthenticated)
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]!))
-            });
+                cache.Set(postid, response, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]!))
+                });
+            }
             return Ok(new { success = true, comments = response });
         }
 
@@ -123,7 +132,6 @@ namespace imarket.Controllers.open
             }
             var comment_new = new CommentModels
             {
-                Id = Guid.NewGuid().ToString(),
                 PostId = comment.PostId!,
                 Content = comment.Content,
                 UserId = user.Id,
@@ -145,14 +153,14 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Delete")] // api/Comments/Delete?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> DeleteCommentAsync([FromQuery][Required] string commentId)
+        public async Task<IActionResult> DeleteCommentAsync([FromQuery][Required] ulong commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
                 return Unauthorized("Invalid user.");
             }
-            var comment = await commentService.GetCommentByIdAsync(commentId!);
+            var comment = await commentService.GetCommentByIdAsync(commentId);
             if (comment == null)
             {
                 return NotFound("Comment not found.");
@@ -161,7 +169,7 @@ namespace imarket.Controllers.open
             {
                 return Unauthorized("You are not the author of this comment.");
             }
-            var result = await commentService.DeleteCommentAsync(commentId!);
+            var result = await commentService.DeleteCommentAsync(commentId);
             if (result == 0)
             {
                 return StatusCode(500);
@@ -176,14 +184,14 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Like")] // api/Comments/Like?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> LikeCommentAsync([FromQuery][Required] string commentId)
+        public async Task<IActionResult> LikeCommentAsync([FromQuery][Required] ulong commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
                 return Unauthorized("Invalid user.");
             }
-            var comment = await commentService.GetCommentByIdAsync(commentId!);
+            var comment = await commentService.GetCommentByIdAsync(commentId);
             if (comment == null)
             {
                 return NotFound("Comment not found.");
@@ -195,7 +203,6 @@ namespace imarket.Controllers.open
             }
             var result = await likeService.CreateLikeAsync(new LikeModels
             {
-                Id = Guid.NewGuid().ToString(),
                 PostId = null,
                 CommentId = commentId!,
                 UserId = user.Id,
@@ -215,7 +222,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("UnLike")] // api/Comments/UnLike?commentId=xxx
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> UnLikeCommentAsync([FromQuery][Required] string commentId)
+        public async Task<IActionResult> UnLikeCommentAsync([FromQuery][Required] ulong commentId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
@@ -234,7 +241,6 @@ namespace imarket.Controllers.open
             }
             var result = await likeService.DeleteLikeAsync(new LikeModels
             {
-                Id = comment.Id,
                 CommentId = commentId!,
                 UserId = user.Id,
                 CreatedAt = comment.CreatedAt,
@@ -251,13 +257,13 @@ namespace imarket.Controllers.open
     public class CommentPostRequest
     {
         [Required]
-        public string? PostId { get; set; }
+        public ulong PostId { get; set; }
         [Required]
         public string? Content { get; set; }
     }
     public class CommentResponse
     {
-        public string? Id { get; set; }
+        public ulong Id { get; set; }
         public string? Nickname { get; set; }
         public string? Username { get; set; }
         public string? UserAvatar { get; set; }

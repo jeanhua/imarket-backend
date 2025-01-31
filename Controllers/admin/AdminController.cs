@@ -39,7 +39,6 @@ namespace imarket.Controllers.admin
         {
             await postCategoriesService.CreateCategoryAsync(new CategoryModels
             {
-                Id = Guid.NewGuid().ToString(),
                 Name = name,
                 Description = description
             });
@@ -54,7 +53,7 @@ namespace imarket.Controllers.admin
         /// <param name="description"></param>
         /// <returns></returns>
         [HttpGet("EditCategories")] // api/Admin/EditCategories?id=xxx&name=xxx&description=xxx
-        public async Task<IActionResult> EditCatogory([FromQuery][Required] string id, [FromQuery][Required] string name, [FromQuery][Required] string description)
+        public async Task<IActionResult> EditCatogory([FromQuery][Required] ulong id, [FromQuery][Required] string name, [FromQuery][Required] string description)
         {
             var category = await postCategoriesService.GetCategoryByIdAsync(id);
             if (category == null)
@@ -73,7 +72,7 @@ namespace imarket.Controllers.admin
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("DeleteCategories")] // api/Admin/DeleteCategories?id=xxx
-        public async Task<IActionResult> DeleteCatogory([FromQuery][Required] string id)
+        public async Task<IActionResult> DeleteCatogory([FromQuery][Required] ulong id)
         {
             var category = await postCategoriesService.GetCategoryByIdAsync(id);
             if (category == null)
@@ -108,7 +107,7 @@ namespace imarket.Controllers.admin
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("BanUser")] // api/Admin/BanUser?id=xxx
-        public async Task<IActionResult> BanUser([FromQuery] string id)
+        public async Task<IActionResult> BanUser([FromQuery] ulong id)
         {
             var user = await userService.GetUserByIdAsync(id);
             if (user == null)
@@ -130,7 +129,7 @@ namespace imarket.Controllers.admin
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("UnbanUser")] // api/Admin/UnbanUser?id=xxx
-        public async Task<IActionResult> UnbanUser([FromQuery][Required] string id)
+        public async Task<IActionResult> UnbanUser([FromQuery][Required] ulong id)
         {
             var user = await userService.GetUserByIdAsync(id);
             if (user == null)
@@ -170,7 +169,6 @@ namespace imarket.Controllers.admin
             }
             var result = await userService.CreateUserAsync(new UserModels
             {
-                Id = Guid.NewGuid().ToString(),
                 Username = user.Username!,
                 Nickname = user.Nickname!,
                 PasswordHash = user.PasswordHash!,
@@ -199,7 +197,7 @@ namespace imarket.Controllers.admin
             {
                 return BadRequest(ModelState);
             }
-            var userCheck = await userService.GetUserByIdAsync(user.Id!);
+            var userCheck = await userService.GetUserByIdAsync(user.Id);
             if (userCheck == null)
             {
                 return NotFound();
@@ -223,7 +221,7 @@ namespace imarket.Controllers.admin
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet("DeleteUser")] // api/Admin/DeleteUser?userId=xxx
-        public async Task<IActionResult> DeleteUser([FromQuery][Required] string userId)
+        public async Task<IActionResult> DeleteUser([FromQuery][Required] ulong userId)
         {
             var user = await userService.GetUserByIdAsync(userId);
             if(user == null)
@@ -258,7 +256,7 @@ namespace imarket.Controllers.admin
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet("DeletePosts")] // api/Admin/DeletePosts?userId=xxx
-        public async Task<IActionResult> DeletePosts([FromQuery][Required] string userId)
+        public async Task<IActionResult> DeletePosts([FromQuery][Required] ulong userId)
         {
             var posts = await postService.GetAllPostsByUserIdAsync(userId);
             if (posts != null)
@@ -294,7 +292,7 @@ namespace imarket.Controllers.admin
     public class UserEditRequest
     {
         [Required]
-        public string? Id { get; set; }
+        public ulong Id { get; set; }
         public string? Nickname { get; set; }
         public string? Avatar { get; set; }
         public string? Email { get; set; }

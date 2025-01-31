@@ -88,9 +88,8 @@ namespace imarket.Controllers.open
             {
                 SenderId = sender.Id,
                 ReceiverId = receiver.Id,
-                Content = request.Content,
+                Content = request.Content??"",
                 CreatedAt = DateTime.Now,
-                Id = Guid.NewGuid().ToString(),
             });
             return Ok(new
             {
@@ -104,7 +103,7 @@ namespace imarket.Controllers.open
         /// <param name="messageId"></param>
         /// <returns></returns>
         [HttpGet("Delete")] // api/Message/Delete?messageId={messageId}
-        public async Task<IActionResult> DeleteMessage([FromQuery][Required] string messageId)
+        public async Task<IActionResult> DeleteMessage([FromQuery][Required] ulong messageId)
         {
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
             if (user == null)

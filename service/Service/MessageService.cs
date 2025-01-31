@@ -12,7 +12,7 @@ namespace imarket.service.Service
         {
             _database = database;
         }
-        public async Task<IEnumerable<MessageModels>> GetMessagesBySenderIdAsync(string userId, int page, int pageSize)
+        public async Task<IEnumerable<MessageModels>> GetMessagesBySenderIdAsync(ulong userId, int page, int pageSize)
         {
             if (page < 1 || pageSize < 1)
             {
@@ -36,9 +36,9 @@ namespace imarket.service.Service
             {
                 messages.Add(new MessageModels
                 {
-                    Id = row["Id"].ToString()!,
-                    SenderId = row["SenderId"].ToString()!,
-                    ReceiverId = row["ReceiverId"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
+                    SenderId = ulong.Parse(row["SenderId"].ToString()!),
+                    ReceiverId = ulong.Parse(row["ReceiverId"].ToString()!),
                     Content = row["Content"].ToString()!,
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
@@ -46,7 +46,7 @@ namespace imarket.service.Service
             return messages;
         }
 
-        public async Task<IEnumerable<MessageModels>> GetMessagesByReceiverIdAsync(string userId, int page, int pageSize)
+        public async Task<IEnumerable<MessageModels>> GetMessagesByReceiverIdAsync(ulong userId, int page, int pageSize)
         {
             if (page < 1 || pageSize < 1)
             {
@@ -69,9 +69,9 @@ namespace imarket.service.Service
             {
                 messages.Add(new MessageModels
                 {
-                    Id = row["Id"].ToString()!,
-                    SenderId = row["SenderId"].ToString()!,
-                    ReceiverId = row["ReceiverId"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
+                    SenderId = ulong.Parse(row["SenderId"].ToString()!),
+                    ReceiverId = ulong.Parse(row["ReceiverId"].ToString()!),
                     Content = row["Content"].ToString()!,
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
@@ -79,7 +79,7 @@ namespace imarket.service.Service
             return messages;
         }
 
-        public async Task<MessageModels?> GetMessageByIdAsync(string id)
+        public async Task<MessageModels?> GetMessageByIdAsync(ulong id)
         {
             var query = "SELECT * FROM Messages WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -94,9 +94,9 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new MessageModels
             {
-                Id = row["Id"].ToString()!,
-                SenderId = row["SenderId"].ToString()!,
-                ReceiverId = row["ReceiverId"].ToString()!,
+                Id = ulong.Parse(row["Id"].ToString()!),
+                SenderId = ulong.Parse(row["SenderId"].ToString()!),
+                ReceiverId = ulong.Parse(row["ReceiverId"].ToString()!),
                 Content = row["Content"].ToString()!,
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
             };
@@ -104,10 +104,9 @@ namespace imarket.service.Service
 
         public async Task<int> CreateMessageAsync(MessageModels message)
         {
-            var query = "INSERT INTO Messages (Id, SenderId, ReceiverId, Content, CreatedAt) VALUES (@Id, @SenderId, @ReceiverId, @Content, @CreatedAt)";
+            var query = "INSERT INTO Messages (SenderId, ReceiverId, Content, CreatedAt) VALUES (@SenderId, @ReceiverId, @Content, @CreatedAt)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", message.Id),
                 new MySqlParameter("@SenderId", message.SenderId),
                 new MySqlParameter("@ReceiverId", message.ReceiverId),
                 new MySqlParameter("@Content", message.Content),
@@ -116,7 +115,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteMessageByIdAsync(string id)
+        public async Task<int> DeleteMessageByIdAsync(ulong id)
         {
             var query = "DELETE FROM Messages WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -126,7 +125,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteMessageByReceiverIdAsync(string receiverId)
+        public async Task<int> DeleteMessageByReceiverIdAsync(ulong receiverId)
         {
             var query = "DELETE FROM Messages WHERE ReceiverId = @ReceiverId";
             var parameters = new MySqlParameter[]
@@ -136,7 +135,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteMessageBySenderIdAsync(string senderId)
+        public async Task<int> DeleteMessageBySenderIdAsync(ulong senderId)
         {
             var query = "DELETE FROM Messages WHERE SenderId = @SenderId";
             var parameters = new MySqlParameter[]
@@ -146,7 +145,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteMessageBySenderToReceiverIdAsync(string senderId, string receiverid)
+        public async Task<int> DeleteMessageBySenderToReceiverIdAsync(ulong senderId, ulong receiverid)
         {
             var query = "DELETE FROM Messages WHERE SenderId = @SenderId AND ReceiverId = @ReceiverId";
             var parameters = new MySqlParameter[]

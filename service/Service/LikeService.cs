@@ -12,7 +12,7 @@ namespace imarket.service.Service
         {
             _database = database;
         }
-        public async Task<IEnumerable<LikeModels>> GetPostLikesByPostIdAsync(string postId)
+        public async Task<IEnumerable<LikeModels>> GetPostLikesByPostIdAsync(ulong postId)
         {
             var likes = new List<LikeModels>();
             var query = "SELECT * FROM Likes WHERE PostId = @PostId";
@@ -25,16 +25,16 @@ namespace imarket.service.Service
             {
                 likes.Add(new LikeModels
                 {
-                    Id = row["Id"].ToString()!,
-                    PostId = row["PostId"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
-                    CommentId = row["CommentId"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
+                    PostId = ulong.Parse(row["PostId"].ToString()!),
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
+                    CommentId = ulong.Parse(row["CommentId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
             }
             return likes;
         }
-        public async Task<IEnumerable<LikeModels>> GetCommentLikesByCommentIdAsync(string commentId)
+        public async Task<IEnumerable<LikeModels>> GetCommentLikesByCommentIdAsync(ulong commentId)
         {
             var likes = new List<LikeModels>();
             var query = "SELECT * FROM Likes WHERE CommentId = @CommentId";
@@ -47,10 +47,10 @@ namespace imarket.service.Service
             {
                 likes.Add(new LikeModels
                 {
-                    Id = row["Id"].ToString()!,
-                    PostId = row["PostId"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
-                    CommentId = row["CommentId"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
+                    PostId = ulong.Parse(row["PostId"].ToString()!),
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
+                    CommentId = ulong.Parse(row["CommentId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
             }
@@ -87,10 +87,10 @@ namespace imarket.service.Service
             {
                 posts.Add(new HotRankingModels.Post
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Title = row["Title"].ToString()!,
                     Content = row["Content"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                     LikeCount = Convert.ToInt32(row["LikeCount"]!)
                 });
@@ -98,7 +98,7 @@ namespace imarket.service.Service
             return posts;
         }
 
-        public async Task<int> GetPostLikeNumsByPostIdAsync(string postId)
+        public async Task<int> GetPostLikeNumsByPostIdAsync(ulong postId)
         {
             var query = "SELECT COUNT(*) FROM Likes WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]
@@ -108,7 +108,7 @@ namespace imarket.service.Service
             var result = await _database.ExecuteQuery(query, CommandType.Text, parameters);
             return Convert.ToInt32(result.Rows[0][0]!);
         }
-        public async Task<int> GetCommentLikeNumsByCommentIdAsync(string commentId)
+        public async Task<int> GetCommentLikeNumsByCommentIdAsync(ulong commentId)
         {
             var query = "SELECT COUNT(*) FROM Likes WHERE CommentId = @CommentId";
             var parameters = new MySqlParameter[]
@@ -152,15 +152,14 @@ namespace imarket.service.Service
             }
             if (like.CommentId == null)
             {
-                query = "INSERT INTO Likes (Id, PostId, UserId, CommentId, CreatedAt) VALUES (@Id, @PostId, @UserId, NULL, @CreatedAt)";
+                query = "INSERT INTO Likes (PostId, UserId, CommentId, CreatedAt) VALUES (@PostId, @UserId, NULL, @CreatedAt)";
             }
             else
             {
-                query = "INSERT INTO Likes (Id, PostId, UserId, CommentId, CreatedAt) VALUES (@Id, NULL, @UserId, @CommentId, @CreatedAt)";
+                query = "INSERT INTO Likes (PostId, UserId, CommentId, CreatedAt) VALUES (NULL, @UserId, @CommentId, @CreatedAt)";
             }
             parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", like.Id),
                 new MySqlParameter("@PostId", like.PostId),
                 new MySqlParameter("@UserId", like.UserId),
                 new MySqlParameter("@CommentId", like.CommentId),
@@ -192,7 +191,7 @@ namespace imarket.service.Service
             }
         }
 
-        public async Task<int> DeleteLikesByPostIdAsync(string postId)
+        public async Task<int> DeleteLikesByPostIdAsync(ulong postId)
         {
             var query = "DELETE FROM Likes WHERE PostId = @PostId AND CommentId IS NULL";
             var parameters = new MySqlParameter[]
@@ -202,7 +201,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteLikesByUserIdAsync(string userId)
+        public async Task<int> DeleteLikesByUserIdAsync(ulong userId)
         {
             var query = "DELETE FROM Likes WHERE UserId = @UserId";
             var parameters = new MySqlParameter[]
@@ -212,7 +211,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteLikesByCommentIdAsync(string commentId)
+        public async Task<int> DeleteLikesByCommentIdAsync(ulong commentId)
         {
             var query = "DELETE FROM Likes WHERE PostId IS NULL AND CommentId = @CommentId";
             var parameters = new MySqlParameter[]
@@ -222,7 +221,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<bool> CheckUserLikeCommentAsync(string userId, string commentId)
+        public async Task<bool> CheckUserLikeCommentAsync(ulong userId, ulong commentId)
         {
             var query = "SELECT * FROM Likes WHERE UserId = @UserId AND CommentId = @CommentId";
             var parameters = new MySqlParameter[]
@@ -237,7 +236,7 @@ namespace imarket.service.Service
             }
             return true;
         }
-        public async Task<bool> CheckUserLikePostAsync(string userId, string postId)
+        public async Task<bool> CheckUserLikePostAsync(ulong userId, ulong postId)
         {
             var query = "SELECT * FROM Likes WHERE UserId = @UserId AND PostId = @PostId";
             var parameters = new MySqlParameter[]

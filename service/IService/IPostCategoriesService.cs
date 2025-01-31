@@ -6,15 +6,15 @@ namespace imarket.service.IService
     {
         // 帖子分类相关
         Task<IEnumerable<CategoryModels>> GetAllCategoriesAsync();
-        Task<CategoryModels?> GetCategoryByIdAsync(string id);
+        Task<CategoryModels?> GetCategoryByIdAsync(ulong id);
         Task<int> CreateCategoryAsync(CategoryModels category);
-        Task<int> UpdateCategoryAsync(string categoryId, CategoryModels category);
-        Task<int> DeleteCategoryAsync(string id);
+        Task<int> UpdateCategoryAsync(ulong categoryId, CategoryModels category);
+        Task<int> DeleteCategoryAsync(ulong id);
 
         // 帖子分类关联相关
-        Task<string?> GetPostCategoriesByPostIdAsync(string postId);
+        Task<string?> GetPostCategoriesByPostIdAsync(ulong postId);
         Task<int> CreatePostCategoryAsync(PostCategoryModels postCategory);
         Task<int> DeletePostCategoryAsync(PostCategoryModels postCategory);
-        Task<int> DeletePostCategoryByPostIdAsync(string postId);
+        Task<int> DeletePostCategoryByPostIdAsync(ulong postId);
     }
 }

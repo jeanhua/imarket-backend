@@ -80,15 +80,15 @@ namespace imarket.Controllers.open
             TokenModels _token;
             if (userCheck.Status == 0)
             {
-                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "unverified")!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id.ToString(), "unverified")!;
             }
             else if (userCheck.Status == 1)
             {
-                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, userCheck.Role)!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id.ToString(), userCheck.Role)!;
             }
             else if (userCheck.Status == 2)
             {
-                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "banned")!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id.ToString(), "banned")!;
             }
             else
             {
@@ -156,7 +156,6 @@ namespace imarket.Controllers.open
             // 添加用户
             var newUser = new UserModels
             {
-                Id = Guid.NewGuid().ToString(),
                 Username = registerRequest.Username!,
                 PasswordHash = registerRequest.Password,
                 Email = registerRequest.Email!,
@@ -213,15 +212,15 @@ namespace imarket.Controllers.open
             TokenModels _token;
             if (userCheck.Status == 0)
             {
-                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "unverified")!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id.ToString(), "unverified")!;
             }
             else if (userCheck.Status == 1)
             {
-                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, userCheck.Role)!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id.ToString(), userCheck.Role)!;
             }
             else if (userCheck.Status == 2)
             {
-                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id, "banned")!;
+                _token = tokenGenerator.GenerateToken(userCheck.Username, userCheck.Id.ToString(), "banned")!;
             }
             else
             {
@@ -249,7 +248,6 @@ namespace imarket.Controllers.open
             var admin = await userService.GetUserByUsernameAsync(_configuration["admin:Username"]);
             await messageService.CreateMessageAsync(new MessageModels
             {
-                Id = Guid.NewGuid().ToString(),
                 Content = $"User：[{user.Username}][{user.Nickname}] requests to reset password.",
                 SenderId = user.Id,
                 ReceiverId = admin.Id,

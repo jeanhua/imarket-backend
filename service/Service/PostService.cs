@@ -51,17 +51,17 @@ namespace imarket.service.Service
             {
                 posts.Add(new PostModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Title = row["Title"].ToString()!,
                     Content = row["Content"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                     Status = Convert.ToInt32(row["Status"]!),
                 });
             }
             return posts;
         }
-        public async Task<IEnumerable<PostModels>> GetPostsByUserIdAsync(string userId, int page, int pageSize)
+        public async Task<IEnumerable<PostModels>> GetPostsByUserIdAsync(ulong userId, int page, int pageSize)
         {
             if (page < 1 || pageSize < 1)
             {
@@ -85,10 +85,10 @@ namespace imarket.service.Service
             {
                 posts.Add(new PostModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Title = row["Title"].ToString()!,
                     Content = row["Content"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                     Status = Convert.ToInt32(row["Status"]!),
                 });
@@ -96,7 +96,7 @@ namespace imarket.service.Service
             return posts;
         }
 
-        public async Task<IEnumerable<PostModels>> GetAllPostsByUserIdAsync(string userId)
+        public async Task<IEnumerable<PostModels>> GetAllPostsByUserIdAsync(ulong userId)
         {
             var posts = new List<PostModels>();
             var query = "SELECT * FROM Posts WHERE UserId = @UserId";
@@ -109,17 +109,17 @@ namespace imarket.service.Service
             {
                 posts.Add(new PostModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Title = row["Title"].ToString()!,
                     Content = row["Content"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                     Status = Convert.ToInt32(row["Status"]!),
                 });
             }
             return posts;
         }
-        public async Task<IEnumerable<PostModels>> GetPostsByCategoryIdAsync(string categoryId, int page, int pageSize)
+        public async Task<IEnumerable<PostModels>> GetPostsByCategoryIdAsync(ulong categoryId, int page, int pageSize)
         {
             if (page < 1)
             {
@@ -146,10 +146,10 @@ namespace imarket.service.Service
             {
                 posts.Add(new PostModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Title = row["Title"].ToString()!,
                     Content = row["Content"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                     Status = Convert.ToInt32(row["Status"]!),
                 });
@@ -184,10 +184,10 @@ namespace imarket.service.Service
             {
                 posts.Add(new PostModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Title = row["Title"].ToString()!,
                     Content = row["Content"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                     Status = Convert.ToInt32(row["Status"]!),
                 });
@@ -196,7 +196,7 @@ namespace imarket.service.Service
         }
 
 
-        public async Task<PostModels?> GetPostByIdAsync(string id)
+        public async Task<PostModels?> GetPostByIdAsync(ulong id)
         {
             var query = "SELECT * FROM Posts WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -211,14 +211,14 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new PostModels
             {
-                Id = row["Id"].ToString()!,
+                Id = ulong.Parse(row["Id"].ToString()!),
                 Title = row["Title"].ToString()!,
                 Content = row["Content"].ToString()!,
-                UserId = row["UserId"].ToString()!,
+                UserId = ulong.Parse(row["UserId"].ToString()!),
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
             };
         }
-        public async Task<int> CreatePostAsync(PostModels post)
+        public async Task<(int result, ulong postId)> CreatePostAsync(PostModels post)
         {
             var query = "INSERT INTO Posts (Id, Title, Content, UserId, CreatedAt, Status) VALUES (@Id, @Title, @Content, @UserId, @CreatedAt, @Status)";
             var parameters = new MySqlParameter[]
@@ -230,10 +230,10 @@ namespace imarket.service.Service
                 new MySqlParameter("@CreatedAt", post.CreatedAt),
                 new MySqlParameter("@Status", post.Status),
             };
-            return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
+            return await _database.ExecuteNonQueryWithId(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeletePostAsync(string id)
+        public async Task<int> DeletePostAsync(ulong id)
         {
             await _likeService.DeleteLikesByPostIdAsync(id);
             await _commentService.DeleteCommentsByPostIdAsync(id);
@@ -248,7 +248,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeletePostByUserIdAsync(string userId)
+        public async Task<int> DeletePostByUserIdAsync(ulong userId)
         {
             var posts = await GetAllPostsByUserIdAsync(userId);
             var result = 0;

@@ -41,15 +41,15 @@ namespace imarket.service.Service
             {
                 images.Add(new ImageModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Url = row["Url"].ToString()!,
-                    PostId = row["PostId"].ToString()!,
+                    PostId = ulong.Parse(row["PostId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
             }
             return images;
         }
-        public async Task<ImageModels?> GetImageByIdAsync(string id)
+        public async Task<ImageModels?> GetImageByIdAsync(ulong id)
         {
             var query = "SELECT * FROM Images WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -64,13 +64,13 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new ImageModels
             {
-                Id = row["Id"].ToString()!,
+                Id = ulong.Parse(row["Id"].ToString()!),
                 Url = row["Url"].ToString()!,
-                PostId = row["PostId"].ToString()!,
+                PostId = ulong.Parse(row["PostId"].ToString()!),
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
             };
         }
-        public async Task<IEnumerable<ImageModels>> GetImagesByPostId(string postId)
+        public async Task<IEnumerable<ImageModels>> GetImagesByPostId(ulong postId)
         {
             var images = new List<ImageModels>();
             var query = "SELECT * FROM Images WHERE PostId = @PostId";
@@ -83,9 +83,9 @@ namespace imarket.service.Service
             {
                 images.Add(new ImageModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Url = row["Url"].ToString()!,
-                    PostId = row["PostId"].ToString()!,
+                    PostId = ulong.Parse(row["PostId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
             }
@@ -114,10 +114,9 @@ namespace imarket.service.Service
 
         public async Task<int> SaveImageAsync(ImageModels image)
         {
-            var query = "INSERT INTO Images (Id, Url, PostId, CreatedAt) VALUES (@Id, @Url, @PostId, @CreatedAt)";
+            var query = "INSERT INTO Images (Url, PostId, CreatedAt) VALUES (@Url, @PostId, @CreatedAt)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", image.Id),
                 new MySqlParameter("@Url", image.Url),
                 new MySqlParameter("@PostId", image.PostId),
                 new MySqlParameter("@CreatedAt", image.CreatedAt),
@@ -125,7 +124,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteImageByIdAsync(string id)
+        public async Task<int> DeleteImageByIdAsync(ulong id)
         {
             var query = "DELETE FROM Images WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -144,7 +143,7 @@ namespace imarket.service.Service
             }
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
-        public async Task<int> DeleteImagesByPostIdAsync(string postId)
+        public async Task<int> DeleteImagesByPostIdAsync(ulong postId)
         {
             var images = await GetImagesByPostId(postId);
             foreach (var image in images)

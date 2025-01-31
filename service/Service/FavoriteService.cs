@@ -12,7 +12,7 @@ namespace imarket.service.Service
         {
             _database = database;
         }
-        public async Task<IEnumerable<FavoriteModels>> GetPostFavoriteByUserId(string userId, int page, int pagesize)
+        public async Task<IEnumerable<FavoriteModels>> GetPostFavoriteByUserId(ulong userId, int page, int pagesize)
         {
             var favorites = new List<FavoriteModels>();
             int offset = (page - 1) * pagesize;
@@ -33,9 +33,9 @@ namespace imarket.service.Service
             {
                 favorites.Add(new FavoriteModels
                 {
-                    Id = row["Id"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
-                    PostId = row["PostId"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
+                    PostId = ulong.Parse(row["PostId"].ToString()!),
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
             }
@@ -71,10 +71,10 @@ namespace imarket.service.Service
             {
                 posts.Add(new HotRankingModels.Favorite
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Title = row["Title"].ToString()!,
                     Content = row["Content"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                     FavoriteCount = Convert.ToInt32(row["FavoriteCount"]!)
                 });
@@ -82,7 +82,7 @@ namespace imarket.service.Service
 
             return posts;
         }
-        public async Task<int> CreatePostFavoriteAsync(string postId, string userId)
+        public async Task<int> CreatePostFavoriteAsync(ulong postId, ulong userId)
         {
             // 检查是否已经收藏
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
@@ -97,10 +97,9 @@ namespace imarket.service.Service
                 return 0;
             }
             // 创建收藏
-            query = "INSERT INTO Favorites (Id, UserId, PostId, CreatedAt) VALUES (@Id, @UserId, @PostId, @CreatedAt)";
+            query = "INSERT INTO Favorites (UserId, PostId, CreatedAt) VALUES (@UserId, @PostId, @CreatedAt)";
             parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", Guid.NewGuid().ToString()),
                 new MySqlParameter("@UserId", userId),
                 new MySqlParameter("@PostId", postId),
                 new MySqlParameter("@CreatedAt", DateTime.Now),
@@ -108,7 +107,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeletePostFavoriteAsync(string postId, string userId)
+        public async Task<int> DeletePostFavoriteAsync(ulong postId, ulong userId)
         {
             var query = "DELETE FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
             var parameters = new MySqlParameter[]
@@ -119,7 +118,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeletePostFavoriteByUserIdAsyc(string userId)
+        public async Task<int> DeletePostFavoriteByUserIdAsyc(ulong userId)
         {
             var query = "DELETE FROM Favorites WHERE UserId = @UserId";
             var parameters = new MySqlParameter[]
@@ -129,7 +128,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeletePostFavoriteByPostIdAsyc(string postId)
+        public async Task<int> DeletePostFavoriteByPostIdAsyc(ulong postId)
         {
             var query = "DELETE FROM Favorites WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]
@@ -139,7 +138,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> GetFavoriteNumsByPostIdAsync(string postId)
+        public async Task<int> GetFavoriteNumsByPostIdAsync(ulong postId)
         {
             var query = "SELECT COUNT(*) FROM Favorites WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]
@@ -150,7 +149,7 @@ namespace imarket.service.Service
             return Convert.ToInt32(result.Rows[0][0]);
         }
 
-        public async Task<bool> CheckIsFavorite(string userId, string postId)
+        public async Task<bool> CheckIsFavorite(ulong userId, ulong postId)
         {
             var query = "SELECT * FROM Favorites WHERE UserId = @UserId AND PostId = @PostId";
             var parameters = new MySqlParameter[]

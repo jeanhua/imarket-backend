@@ -4,17 +4,17 @@ namespace imarket.service.IService
 {
     public interface ILikeService
     {
-        Task<IEnumerable<LikeModels>> GetPostLikesByPostIdAsync(string like);
-        Task<IEnumerable<LikeModels>> GetCommentLikesByCommentIdAsync(string like);
+        Task<IEnumerable<LikeModels>> GetPostLikesByPostIdAsync(ulong postId);
+        Task<IEnumerable<LikeModels>> GetCommentLikesByCommentIdAsync(ulong commentId);
         Task<IEnumerable<HotRankingModels.Post>> GetHotRankingAsync();
-        Task<int> GetPostLikeNumsByPostIdAsync(string postId);
-        Task<int> GetCommentLikeNumsByCommentIdAsync(string commentId);
+        Task<int> GetPostLikeNumsByPostIdAsync(ulong postId);
+        Task<int> GetCommentLikeNumsByCommentIdAsync(ulong commentId);
         Task<int> CreateLikeAsync(LikeModels postLike);
         Task<int> DeleteLikeAsync(LikeModels postLike);
-        Task<int> DeleteLikesByPostIdAsync(string postId);
-        Task<int> DeleteLikesByUserIdAsync(string userId);
-        Task<int> DeleteLikesByCommentIdAsync(string commentId);
-        Task<bool> CheckUserLikeCommentAsync(string userId, string comentId);
-        Task<bool> CheckUserLikePostAsync(string userId, string postId);
+        Task<int> DeleteLikesByPostIdAsync(ulong postId);
+        Task<int> DeleteLikesByUserIdAsync(ulong userId);
+        Task<int> DeleteLikesByCommentIdAsync(ulong commentId);
+        Task<bool> CheckUserLikeCommentAsync(ulong userId, ulong comentId);
+        Task<bool> CheckUserLikePostAsync(ulong userId, ulong postId);
     }
 }

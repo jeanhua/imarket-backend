@@ -14,7 +14,7 @@ namespace imarket.service.Service
             _database = database;
             _likeService = likeService;
         }
-        public async Task<IEnumerable<CommentModels>> GetCommentsByPostIdAsync(string postId)
+        public async Task<IEnumerable<CommentModels>> GetCommentsByPostIdAsync(ulong postId)
         {
             var comments = new List<CommentModels>();
             var query = "SELECT * FROM Comments WHERE PostId = @PostId";
@@ -27,9 +27,9 @@ namespace imarket.service.Service
             {
                 comments.Add(new CommentModels
                 {
-                    Id = row["Id"].ToString()!,
-                    PostId = row["PostId"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    Id = ulong.Parse(row["ID"].ToString()!),
+                    PostId = ulong.Parse(row["PostId"].ToString()!),
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     Content = row["Content"].ToString()!,
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
@@ -37,7 +37,7 @@ namespace imarket.service.Service
             return comments;
         }
 
-        public async Task<IEnumerable<CommentModels>> GetCommentsByUserIdAsync(string userId)
+        public async Task<IEnumerable<CommentModels>> GetCommentsByUserIdAsync(ulong userId)
         {
             var comments = new List<CommentModels>();
             var query = "SELECT * FROM Comments WHERE UserId = @UserId";
@@ -50,16 +50,16 @@ namespace imarket.service.Service
             {
                 comments.Add(new CommentModels
                 {
-                    Id = row["Id"].ToString()!,
-                    PostId = row["PostId"].ToString()!,
-                    UserId = row["UserId"].ToString()!,
+                    Id = ulong.Parse(row["ID"].ToString()!),
+                    PostId = ulong.Parse(row["PostId"].ToString()!),
+                    UserId = ulong.Parse(row["UserId"].ToString()!),
                     Content = row["Content"].ToString()!,
                     CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
                 });
             }
             return comments;
         }
-        public async Task<CommentModels?> GetCommentByIdAsync(string id)
+        public async Task<CommentModels?> GetCommentByIdAsync(ulong id)
         {
             var query = "SELECT * FROM Comments WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -74,19 +74,18 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new CommentModels
             {
-                Id = row["Id"].ToString()!,
-                PostId = row["PostId"].ToString()!,
-                UserId = row["UserId"].ToString()!,
+                Id = ulong.Parse(row["ID"].ToString()!),
+                PostId = ulong.Parse(row["PostId"].ToString()!),
+                UserId = ulong.Parse(row["UserId"].ToString()!),
                 Content = row["Content"].ToString()!,
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"]!),
             };
         }
         public async Task<int> CreateCommentAsync(CommentModels comment)
         {
-            var query = "INSERT INTO Comments (Id, PostId, UserId, Content, CreatedAt) VALUES (@Id, @PostId, @UserId, @Content, @CreatedAt)";
+            var query = "INSERT INTO Comments (PostId, UserId, Content, CreatedAt) VALUES (@PostId, @UserId, @Content, @CreatedAt)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", comment.Id),
                 new MySqlParameter("@PostId", comment.PostId),
                 new MySqlParameter("@UserId", comment.UserId),
                 new MySqlParameter("@Content", comment.Content),
@@ -94,7 +93,7 @@ namespace imarket.service.Service
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
-        public async Task<int> DeleteCommentAsync(string id)
+        public async Task<int> DeleteCommentAsync(ulong id)
         {
             await _likeService.DeleteLikesByCommentIdAsync(id);
             var query = "DELETE FROM Comments WHERE Id = @Id";
@@ -105,7 +104,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeleteCommentsByPostIdAsync(string postId)
+        public async Task<int> DeleteCommentsByPostIdAsync(ulong postId)
         {
             var comments = await GetCommentsByPostIdAsync(postId);
             var result = 0;
@@ -116,7 +115,7 @@ namespace imarket.service.Service
             return result;
         }
 
-        public async Task<int> DeleteCommentsByUserIdAsync(string userId)
+        public async Task<int> DeleteCommentsByUserIdAsync(ulong userId)
         {
             var comments = await GetCommentsByUserIdAsync(userId);
             var result = 0;
@@ -127,7 +126,7 @@ namespace imarket.service.Service
             return result;
         }
 
-        public async Task<int> GetCommentsNumByPostIdAsync(string postId)
+        public async Task<int> GetCommentsNumByPostIdAsync(ulong postId)
         {
             var query = "SELECT COUNT(*) FROM Comments WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]

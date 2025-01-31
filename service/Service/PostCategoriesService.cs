@@ -23,14 +23,14 @@ namespace imarket.service.Service
             {
                 categories.Add(new CategoryModels
                 {
-                    Id = row["Id"].ToString()!,
+                    Id = ulong.Parse(row["Id"].ToString()!),
                     Name = row["Name"].ToString()!,
                     Description = row["Description"].ToString()!,
                 });
             }
             return categories;
         }
-        public async Task<CategoryModels?> GetCategoryByIdAsync(string id)
+        public async Task<CategoryModels?> GetCategoryByIdAsync(ulong id)
         {
             var query = "SELECT * FROM Categories WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -45,7 +45,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new CategoryModels
             {
-                Id = row["Id"].ToString()!,
+                Id = ulong.Parse(row["Id"].ToString()!),
                 Name = row["Name"].ToString()!,
                 Description = row["Description"].ToString()!,
             };
@@ -61,7 +61,7 @@ namespace imarket.service.Service
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
-        public async Task<int> DeleteCategoryAsync(string id)
+        public async Task<int> DeleteCategoryAsync(ulong id)
         {
             var query = "DELETE FROM Categories WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -70,7 +70,7 @@ namespace imarket.service.Service
             };
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
-        public async Task<int> UpdateCategoryAsync(string categoryId, CategoryModels category)
+        public async Task<int> UpdateCategoryAsync(ulong categoryId, CategoryModels category)
         {
             var query = "UPDATE Categories SET Name = @Name, Description = @Description WHERE Id = @Id";
             var parameters = new MySqlParameter[]
@@ -83,7 +83,7 @@ namespace imarket.service.Service
         }
 
         // 帖子分类关联相关
-        public async Task<string?> GetPostCategoriesByPostIdAsync(string postId)
+        public async Task<string?> GetPostCategoriesByPostIdAsync(ulong postId)
         {
             var categories = new List<string>();
             var query = "SELECT * FROM PostCategories WHERE PostId = @PostId";
@@ -119,7 +119,7 @@ namespace imarket.service.Service
             return await _database.ExecuteNonQuery(query, CommandType.Text, parameters);
         }
 
-        public async Task<int> DeletePostCategoryByPostIdAsync(string postId)
+        public async Task<int> DeletePostCategoryByPostIdAsync(ulong postId)
         {
             var query = "DELETE FROM PostCategories WHERE PostId = @PostId";
             var parameters = new MySqlParameter[]

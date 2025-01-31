@@ -29,7 +29,7 @@ namespace imarket.service.Service
             var row = result.Rows[0];
             return new UserModels
             {
-                Id = row["Id"].ToString()!,
+                Id = ulong.Parse(row["Id"].ToString()!),
                 Username = row["Username"].ToString()!,
                 Nickname = row["Nickname"].ToString()!,
                 PasswordHash = row["PasswordHash"].ToString()!,
@@ -45,10 +45,9 @@ namespace imarket.service.Service
         }
         public async Task<int> RegisterAsync(UserModels user)
         {
-            var query = "INSERT INTO Users (Id, Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Id, @Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
+            var query = "INSERT INTO Users (Username, Nickname, PasswordHash, Avatar, Email, Role, CreatedAt, Status) VALUES (@Username, @Nickname, @PasswordHash, @Avatar, @Email, @Role, @CreatedAt, @Status)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", user.Id),
                 new MySqlParameter("@Username", user.Username),
                 new MySqlParameter("@Nickname", user.Nickname),
                 new MySqlParameter("@PasswordHash", user.PasswordHash),
