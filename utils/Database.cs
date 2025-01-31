@@ -103,7 +103,7 @@ namespace imarket.utils
         }
 
         // 查询
-        public async Task<DataTable> ExecuteQuery(string query, CommandType commandType, MySqlParameter[] parameters = null)
+        public async Task<DataTable> ExecuteQuery(string query, CommandType commandType, MySqlParameter[]? parameters = null)
         {
             using (var connection = GetConnection())
             {
@@ -125,7 +125,7 @@ namespace imarket.utils
         }
 
         // 执行非查询命令
-        public async Task<ulong> ExecuteNonQueryWithId(string query, CommandType commandType, MySqlParameter[] parameters = null)
+        public async Task<ulong> ExecuteNonQueryWithId(string query, CommandType commandType, MySqlParameter[]? parameters = null)
         {
             using (var connection = GetConnection())
             {

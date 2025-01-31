@@ -212,6 +212,7 @@ namespace imarket.service.Service
             return new PostModels
             {
                 Id = ulong.Parse(row["Id"].ToString()!),
+                Status = int.Parse(row["Status"].ToString()!),
                 Title = row["Title"].ToString()!,
                 Content = row["Content"].ToString()!,
                 UserId = ulong.Parse(row["UserId"].ToString()!),
@@ -220,10 +221,9 @@ namespace imarket.service.Service
         }
         public async Task<ulong> CreatePostAsync(PostModels post)
         {
-            var query = "INSERT INTO Posts (Id, Title, Content, UserId, CreatedAt, Status) VALUES (@Id, @Title, @Content, @UserId, @CreatedAt, @Status)";
+            var query = "INSERT INTO Posts (Title, Content, UserId, CreatedAt, Status) VALUES (@Title, @Content, @UserId, @CreatedAt, @Status);SELECT LAST_INSERT_ID();";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", post.Id),
                 new MySqlParameter("@Title", post.Title),
                 new MySqlParameter("@Content", post.Content),
                 new MySqlParameter("@UserId", post.UserId),

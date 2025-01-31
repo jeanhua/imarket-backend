@@ -52,10 +52,9 @@ namespace imarket.service.Service
         }
         public async Task<int> CreateCategoryAsync(CategoryModels category)
         {
-            var query = "INSERT INTO Categories (Id, Name, Description) VALUES (@Id, @Name, @Description)";
+            var query = "INSERT INTO Categories (Name, Description) VALUES (@Name, @Description)";
             var parameters = new MySqlParameter[]
             {
-                new MySqlParameter("@Id", category.Id),
                 new MySqlParameter("@Name", category.Name),
                 new MySqlParameter("@Description", category.Description),
             };
