@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using imarket.models;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
+using imarket.plugin;
 
 namespace imarket.Controllers.open
 {
@@ -18,7 +19,8 @@ namespace imarket.Controllers.open
         private readonly IConfiguration configuration;
         private readonly ILikeService likeService;
         private readonly ILogger<CommentsController> logger;
-        public CommentsController(IConfiguration configuration, ILikeService likeService, ICommentService commentService, IPostService postService, IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger)
+        private readonly PluginManager pluginManager;
+        public CommentsController(IConfiguration configuration, ILikeService likeService, ICommentService commentService, IPostService postService, IUserService userService, IMemoryCache cache, ILogger<CommentsController> _logger,PluginManager pluginManager)
         {
             this.configuration = configuration;
             this.commentService = commentService;
@@ -27,6 +29,7 @@ namespace imarket.Controllers.open
             this.likeService = likeService;
             this.logger = _logger;
             this.cache = cache;
+            this.pluginManager = pluginManager;
         }
 
         /// <summary>
@@ -37,6 +40,12 @@ namespace imarket.Controllers.open
         [HttpGet("{postid}")] // api/Comments/{postid}
         public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute][Required] ulong postid)
         {
+            var args = new object[] { postid };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/{postid}", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             if (!User.Identity!.IsAuthenticated)
             {
                 cache.TryGetValue(postid, out var comments);
@@ -46,7 +55,7 @@ namespace imarket.Controllers.open
                 }
             }
             var Comments = await commentService.GetCommentsByPostIdAsync(postid);
-            var response = new List<CommentResponse>();
+            var result = new List<CommentResponse>();
             foreach (var comment in Comments)
             {
                 var avatar = "/images/defaultAvatar.svg";
@@ -65,7 +74,7 @@ namespace imarket.Controllers.open
                 {
                     avatar = "/images/defaultAvatar.svg";
                 }
-                response.Add(new CommentResponse
+                result.Add(new CommentResponse
                 {
                     Id = comment.Id,
                     Nickname = (await userService.GetUserByIdAsync(comment.UserId))?.Nickname,
@@ -79,12 +88,22 @@ namespace imarket.Controllers.open
             }
             if (!User.Identity.IsAuthenticated)
             {
-                cache.Set(postid, response, new MemoryCacheEntryOptions
+                cache.Set(postid, result, new MemoryCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]!))
                 });
             }
-            return Ok(new { success = true, comments = response });
+            var response = new
+            {
+                success = true,
+                comments = result
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/{postid}", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -99,6 +118,12 @@ namespace imarket.Controllers.open
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var args = new object[] { comment };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Create", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             var post = await postService.GetPostByIdAsync(comment.PostId!);
@@ -143,7 +168,17 @@ namespace imarket.Controllers.open
                 return StatusCode(500);
             }
             cache.Remove(post.Id);
-            return Ok(new { success = true, commentId = comment_new.Id });
+            var response = new
+            {
+                success = true,
+                commentId = comment_new.Id
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Create", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -155,6 +190,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> DeleteCommentAsync([FromQuery][Required] ulong commentId)
         {
+            var args = new object[] { commentId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Delete", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
@@ -174,7 +215,16 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Delete", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -186,6 +236,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> LikeCommentAsync([FromQuery][Required] ulong commentId)
         {
+            var args = new object[] { commentId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Like", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
@@ -212,7 +268,16 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Like", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -224,6 +289,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UnLikeCommentAsync([FromQuery][Required] ulong commentId)
         {
+            var args = new object[] { commentId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/UnLike", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
@@ -250,7 +321,12 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/UnLike", response);
+            return Ok(response);
         }
     }
 

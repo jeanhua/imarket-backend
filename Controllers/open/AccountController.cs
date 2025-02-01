@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using imarket.service.IService;
 using System.ComponentModel.DataAnnotations;
+using imarket.plugin;
 
 namespace imarket.Controllers.open
 {
@@ -11,9 +12,11 @@ namespace imarket.Controllers.open
     public class AccountController : ControllerBase
     {
         private readonly IUserService userService;
-        public AccountController(IUserService userService)
+        private readonly PluginManager pluginManager;
+        public AccountController(IUserService userService,PluginManager pluginManager)
         {
             this.userService = userService;
+            this.pluginManager = pluginManager;
         }
 
         /// <summary>
@@ -32,7 +35,12 @@ namespace imarket.Controllers.open
             {
                 return Unauthorized();
             }
-            return Ok(new
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Account/Info", new object[] {user});
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
+            var response = new
             {
                 success = true,
                 account = new
@@ -43,7 +51,13 @@ namespace imarket.Controllers.open
                     email = user.Email,
                     status = user.Status
                 }
-            });
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Account/Info", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -58,6 +72,12 @@ namespace imarket.Controllers.open
             {
                 return Unauthorized();
             }
+            var args = new object[] { user };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Account/Edit", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var userCheck = await userService.GetUserByUsernameAsync(User.Identity.Name!);
             if (userCheck == null)
             {
@@ -67,7 +87,16 @@ namespace imarket.Controllers.open
             userCheck.Avatar = user.Avatar ?? userCheck.Avatar;
             userCheck.Email = user.Email ?? userCheck.Email;
             await userService.UpdateUserAsync(userCheck.Id, userCheck);
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Account/Edit", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using imarket.service.IService;
+﻿using imarket.plugin;
+using imarket.service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -11,10 +12,12 @@ namespace imarket.Controllers.open
     {
         private readonly IImageService imageService;
         private readonly ILogger<ImageController> logger;
-        public ImageController(IImageService imageService, ILogger<ImageController> logger)
+        private readonly PluginManager pluginManager;
+        public ImageController(IImageService imageService, ILogger<ImageController> logger,PluginManager pluginManager)
         {
             this.imageService = imageService;
             this.logger = logger;
+            this.pluginManager = pluginManager;
         }
 
         /// <summary>
@@ -34,6 +37,12 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("Image is required");
             }
+            var args = new object[] { request };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Image/UploadImage", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             // 图片大小限制3MB
             if (request.Base64.Length > 4 * 1024 * 1024)
             {
@@ -44,7 +53,17 @@ namespace imarket.Controllers.open
                 return BadRequest("Invalid base64 format");
             }
             var path = await imageService.UploadImageAsync(request.Base64);
-            return Ok(new { success = true, path });
+            var response = new
+            {
+                success = true,
+                path
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Image/UploadImage", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
     }
 

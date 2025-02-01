@@ -1,4 +1,5 @@
-﻿using imarket.service.IService;
+﻿using imarket.plugin;
+using imarket.service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -17,8 +18,9 @@ namespace imarket.Controllers.open
         private readonly IFavoriteService favoriteService;
         private readonly ILikeService likeService;
         private readonly IConfiguration configuration;
+        private readonly PluginManager pluginManager;
 
-        public UserController(IUserService userService, IMemoryCache _cache, IPostService postService, ILogger<UserController> logger, IFavoriteService favoriteService, ILikeService likeService, IConfiguration configuration)
+        public UserController(IUserService userService, IMemoryCache _cache, IPostService postService, ILogger<UserController> logger, IFavoriteService favoriteService, ILikeService likeService, IConfiguration configuration,PluginManager pluginManager)
         {
             this.userService = userService;
             this.cache = _cache;
@@ -27,6 +29,7 @@ namespace imarket.Controllers.open
             this.favoriteService = favoriteService;
             this.likeService = likeService;
             this.configuration = configuration;
+            this.pluginManager = pluginManager;
         }
 
         /// <summary>
@@ -36,11 +39,17 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpGet("Posts")] // api/User/Posts?username=xxx
         [Authorize]
-        public async Task<IActionResult> GetUserPosts([FromQuery][Required]string? username, [FromQuery]int page = 1, [FromQuery]int pageSize = 10)
+        public async Task<IActionResult> GetUserPosts([FromQuery][Required]string username, [FromQuery]int page = 1, [FromQuery]int pageSize = 10)
         {
             if(!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var args = new object[] { username, page, pageSize };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/User/Posts", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             var user = await userService.GetUserByUsernameAsync(username);
             if (user == null)
@@ -53,10 +62,10 @@ namespace imarket.Controllers.open
                 return Ok(new { success = true, posts = posts_cache });
             }
             var posts = await postService.GetPostsByUserIdAsync(user.Id, page, pageSize);
-            var response = new List<PostsResponse>();
+            var result = new List<PostsResponse>();
             foreach (var post in posts)
             {
-                response.Add(new PostsResponse
+                result.Add(new PostsResponse
                 {
                     Id = post.Id,
                     Title = post.Title,
@@ -68,11 +77,21 @@ namespace imarket.Controllers.open
                     CreatedAt = post.CreatedAt
                 });
             }
-            cache.Set($"userPosts_{user.Username}_{page}_{pageSize}", response, new MemoryCacheEntryOptions
+            cache.Set($"userPosts_{user.Username}_{page}_{pageSize}", result, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
-            return Ok(new{success=true ,posts = response});
+            var response = new
+            {
+                success = true,
+                posts = result
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/User/Posts", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -86,19 +105,32 @@ namespace imarket.Controllers.open
         {
             if(!ModelState.IsValid)
                 { return BadRequest(ModelState); }
+            var args = new object[] { username };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/User/Info", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByUsernameAsync(username);
             if (user == null)
             {
                 return NotFound();
             }
-            return Ok(new
+            var response = new
             {
-                Id = user.Id,
-                Username = user.Username,
-                Nickname = user.Nickname,
-                Avatar = user.Avatar,
-                Status = user.Status
-            });
+                success = true,
+                username = user.Username,
+                nickname = user.Nickname,
+                avatar = user.Avatar,
+                email = user.Email,
+                status = user.Status
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/User/Info", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
     }
 }

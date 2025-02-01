@@ -1,4 +1,5 @@
-﻿using imarket.service.IService;
+﻿using imarket.plugin;
+using imarket.service.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +17,8 @@ namespace imarket.Controllers.open
         private readonly IFavoriteService favoriteService;
         private readonly ILikeService likeService;
         private readonly IConfiguration configuration;
-        public SearchController(ILogger<SearchController> logger, IPostService postService, IUserService userService, IMemoryCache _cache, IFavoriteService favoriteService, ILikeService likeService, IConfiguration configuration)
+        private readonly PluginManager pluginManager;
+        public SearchController(ILogger<SearchController> logger, IPostService postService, IUserService userService, IMemoryCache _cache, IFavoriteService favoriteService, ILikeService likeService, IConfiguration configuration,PluginManager pluginManager)
         {
             this.logger = logger;
             this.postService = postService;
@@ -25,6 +27,7 @@ namespace imarket.Controllers.open
             this.favoriteService = favoriteService;
             this.likeService = likeService;
             this.configuration = configuration;
+            this.pluginManager = pluginManager;
         }
 
         /// <summary>
@@ -40,6 +43,12 @@ namespace imarket.Controllers.open
             if(!ModelState.IsValid)
             {
                 return BadRequest("require keyWord");
+            }
+            var args = new object[] { keyWord, page, pageSize };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Search/Posts", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             if (_cache.TryGetValue($"Posts_cache_Search{keyWord}_page{page}_pageSize{pageSize}", out var posts_cache))
             {
@@ -71,6 +80,11 @@ namespace imarket.Controllers.open
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Search/Posts", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(response);
         }
 
@@ -81,7 +95,13 @@ namespace imarket.Controllers.open
         [HttpGet("HotRanking")]
         public async Task<IActionResult> GetHotRankong()
         {
-            if(_cache.TryGetValue("hotranking",out var res))
+            var args = new object[] { };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Search/HotRanking", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
+            if (_cache.TryGetValue("hotranking",out var res))
             {
                 return Ok(res);
             }
@@ -97,6 +117,11 @@ namespace imarket.Controllers.open
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Search/HotRanking", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(response);
         }
 

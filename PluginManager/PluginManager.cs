@@ -15,6 +15,15 @@ namespace imarket.plugin
             _logger = logger;
         }
 
+        public IEnumerable<string> GetPluginDirectory()
+        {
+            var dirs = new List<string>();
+            foreach(var directory in Directory.GetDirectories("plugin"))
+            {
+                dirs.Add(directory);
+            }
+            return dirs;
+        }
         public bool LoadPlugins(string pluginDirectory)
         {
             if (!Directory.Exists(pluginDirectory))
@@ -76,6 +85,8 @@ namespace imarket.plugin
         {
             return _pluginRecords.Values;
         }
+
+        
 
         public async Task<object?> ExecuteBeforeAsync(string methodName, object?[] args)
         {

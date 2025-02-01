@@ -96,7 +96,7 @@ namespace imarket.utils
             }
             catch (Exception ex)
             {
-                _logger.LogError("Database connection failed", ex);
+                _logger.LogError(message: "Database connection failed" + ex);
                 Environment.Exit(1);
             }
             return connection;
@@ -150,7 +150,7 @@ namespace imarket.utils
             }
         }
         // 执行非查询命令
-        public async Task<int> ExecuteNonQuery(string query, CommandType commandType, MySqlParameter[] parameters = null)
+        public async Task<int> ExecuteNonQuery(string query, CommandType commandType, MySqlParameter[]? parameters = null)
         {
             using (var connection = GetConnection())
             {
@@ -188,7 +188,7 @@ namespace imarket.utils
         }
 
         // 获取单个值
-        public async Task<object?> ExecuteScalar(string query, CommandType commandType, MySqlParameter[] parameters = null)
+        public async Task<object?> ExecuteScalar(string query, CommandType commandType, MySqlParameter[]? parameters = null)
         {
             using (var connection = GetConnection())
             {

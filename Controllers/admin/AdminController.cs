@@ -1,4 +1,5 @@
 ﻿using imarket.models;
+using imarket.plugin;
 using imarket.service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,8 +18,9 @@ namespace imarket.Controllers.admin
         private readonly ILikeService likeService;
         private readonly IFavoriteService favoriteService;
         private readonly IConfiguration configuration;
+        private readonly PluginManager pluginManager;
         
-        public AdminController(IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IUserService userService,IConfiguration configuration)
+        public AdminController(IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IUserService userService,IConfiguration configuration,PluginManager pluginManager)
         {
             this.postService = postService;
             this.postCategoriesService = postCategoriesService;
@@ -26,6 +28,7 @@ namespace imarket.Controllers.admin
             this.likeService = likeService;
             this.favoriteService = favoriteService;
             this.configuration = configuration;
+            this.pluginManager = pluginManager;
         }
 
         /// <summary>
@@ -37,11 +40,22 @@ namespace imarket.Controllers.admin
         [HttpGet("CreateCategories")] // api/Admin/CreateCategories?name=xxx&description=xxx
         public async Task<IActionResult> CreateCatogory([FromQuery][Required] string name, [FromQuery][Required] string description)
         {
+            var args = new object[] { name, description };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/CreateCategories", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             await postCategoriesService.CreateCategoryAsync(new CategoryModels
             {
                 Name = name,
                 Description = description
             });
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/CreateCategories", true);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(new { success = true });
         }
 
@@ -55,6 +69,12 @@ namespace imarket.Controllers.admin
         [HttpGet("EditCategories")] // api/Admin/EditCategories?id=xxx&name=xxx&description=xxx
         public async Task<IActionResult> EditCatogory([FromQuery][Required] ulong id, [FromQuery][Required] string name, [FromQuery][Required] string description)
         {
+            var args = new object[] { id, name, description };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/EditCategories", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var category = await postCategoriesService.GetCategoryByIdAsync(id);
             if (category == null)
             {
@@ -63,6 +83,11 @@ namespace imarket.Controllers.admin
             category.Name = name;
             category.Description = description;
             await postCategoriesService.UpdateCategoryAsync(id, category);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/EditCategories", true);
+            if (result_after!=null)
+            {
+                return Ok(result_after);
+            }
             return Ok(new { success = true });
         }
 
@@ -74,6 +99,12 @@ namespace imarket.Controllers.admin
         [HttpGet("DeleteCategories")] // api/Admin/DeleteCategories?id=xxx
         public async Task<IActionResult> DeleteCatogory([FromQuery][Required] ulong id)
         {
+            var args = new object[] { id };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/DeleteCategories", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var category = await postCategoriesService.GetCategoryByIdAsync(id);
             if (category == null)
             {
@@ -85,6 +116,11 @@ namespace imarket.Controllers.admin
                 return BadRequest("some posts of the category have not been deleted!");
             }
             await postCategoriesService.DeleteCategoryAsync(id);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/DeleteCategories", true);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(new { success = true });
         }
 
@@ -97,7 +133,18 @@ namespace imarket.Controllers.admin
         [HttpGet("ListUsers")] // api/Admin/ListUsers?page=1&size=10
         public async Task<IActionResult> GetUserList([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
+            var args = new object[] { page, pageSize };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/ListUsers", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var users = await userService.GetAllUsers(page, pageSize);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/ListUsers", users);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(new { success = true, users = users });
         }
 
@@ -109,6 +156,12 @@ namespace imarket.Controllers.admin
         [HttpGet("BanUser")] // api/Admin/BanUser?id=xxx
         public async Task<IActionResult> BanUser([FromQuery] ulong id)
         {
+            var args = new object[] { id };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/BanUser", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByIdAsync(id);
             if (user == null)
             {
@@ -119,6 +172,11 @@ namespace imarket.Controllers.admin
             if (result == 0)
             {
                 return StatusCode(500);
+            }
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/BanUser", true);
+            if (result_after != null)
+            {
+                return Ok(result_after);
             }
             return Ok(new { success = true });
         }
@@ -131,6 +189,12 @@ namespace imarket.Controllers.admin
         [HttpGet("UnbanUser")] // api/Admin/UnbanUser?id=xxx
         public async Task<IActionResult> UnbanUser([FromQuery][Required] ulong id)
         {
+            var args = new object[] { id };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/UnbanUser", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByIdAsync(id);
             if (user == null)
             {
@@ -141,6 +205,11 @@ namespace imarket.Controllers.admin
             if (result == 0)
             {
                 return StatusCode(500);
+            }
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/UnbanUser", true);
+            if (result_after != null)
+            {
+                return Ok(result_after);
             }
             return Ok(new { success = true });
         }
@@ -156,6 +225,12 @@ namespace imarket.Controllers.admin
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var args = new object[] { user };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/CreateUser", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             var userCheck = await userService.GetUserByUsernameAsync(user.Username!);
             if (userCheck != null)
@@ -182,6 +257,11 @@ namespace imarket.Controllers.admin
             {
                 return StatusCode(500);
             }
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/CreateUser", true);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(new { success = true });
         }
 
@@ -196,6 +276,12 @@ namespace imarket.Controllers.admin
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var args = new object[] { user };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/EditUser", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             var userCheck = await userService.GetUserByIdAsync(user.Id);
             if (userCheck == null)
@@ -212,6 +298,11 @@ namespace imarket.Controllers.admin
             userCheck.Role = user.Role ?? userCheck.Role;
             userCheck.Status = user.Status ?? userCheck.Status;
             await userService.UpdateUserAsync(user.Id!, userCheck);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/EditUser", true);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(new { success = true });
         }
 
@@ -223,6 +314,12 @@ namespace imarket.Controllers.admin
         [HttpGet("DeleteUser")] // api/Admin/DeleteUser?userId=xxx
         public async Task<IActionResult> DeleteUser([FromQuery][Required] ulong userId)
         {
+            var args = new object[] { userId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/DeleteUser", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByIdAsync(userId);
             if(user == null)
             {
@@ -247,6 +344,11 @@ namespace imarket.Controllers.admin
             {
                 return StatusCode(500);
             }
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/DeleteUser", true);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(new { success = true });
         }
 
@@ -258,6 +360,12 @@ namespace imarket.Controllers.admin
         [HttpGet("DeletePosts")] // api/Admin/DeletePosts?userId=xxx
         public async Task<IActionResult> DeletePosts([FromQuery][Required] ulong userId)
         {
+            var args = new object[] { userId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Admin/DeletePosts", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var posts = await postService.GetAllPostsByUserIdAsync(userId);
             if (posts != null)
             {
@@ -265,6 +373,11 @@ namespace imarket.Controllers.admin
                 {
                     await postService.DeletePostAsync(post.Id);
                 }
+            }
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Admin/DeletePosts", true);
+            if (result_after != null)
+            {
+                return Ok(result_after);
             }
             return Ok(new { success = true });
         }

@@ -2,10 +2,9 @@
 {
     public interface IPluginInterceptor
     {
-        Task<object?> OnBeforeExecutionAsync(string methodName, object?[] args);
-        Task<object?> OnAfterExecutionAsync(string methodName, object? result);
+        Task<object?> OnBeforeExecutionAsync(string route, object?[] args);
+        Task<object?> OnAfterExecutionAsync(string route, object? result);
     }
-
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class PluginTag : Attribute

@@ -1,4 +1,5 @@
 ﻿using imarket.models;
+using imarket.plugin;
 using imarket.service.IService;
 using imarket.service.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -18,12 +19,14 @@ namespace imarket.Controllers.open
         private readonly IMessageService messageService;
         private readonly ILogger _logger;
         private readonly IMemoryCache _memoryCache;
-        public MessageController(IUserService userService, IMessageService messageService, ILogger logger,IMemoryCache memoryCache)
+        private readonly PluginManager pluginManager;
+        public MessageController(IUserService userService, IMessageService messageService, ILogger logger,IMemoryCache memoryCache,PluginManager pluginManager)
         {
             this.userService = userService;
             this.messageService = messageService;
             _logger = logger;
             _memoryCache = memoryCache;
+            this.pluginManager = pluginManager;
         }
 
         /// <summary>
@@ -33,6 +36,12 @@ namespace imarket.Controllers.open
         [HttpGet("List")] // api/Message/List
         public async Task<IActionResult> GetMessage([FromQuery]int page=1, [FromQuery]int pageSize=10)
         {
+            var args = new object[] { page, pageSize };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Message/List", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
             if (user == null)
             {
@@ -40,7 +49,7 @@ namespace imarket.Controllers.open
             }
             var messages_send = await messageService.GetMessagesBySenderIdAsync(user.Id, page, pageSize);
             var messages_receive = await messageService.GetMessagesByReceiverIdAsync(user.Id, page, pageSize);
-            return Ok(new
+            var response = new
             {
                 success = true,
                 messages = new
@@ -48,7 +57,13 @@ namespace imarket.Controllers.open
                     send = messages_send,
                     receive = messages_receive
                 }
-            });
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Message/List", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -62,6 +77,12 @@ namespace imarket.Controllers.open
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var args = new object[] { request };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Message/Send", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             var sender = await userService.GetUserByUsernameAsync(User.Identity?.Name);
             if (sender == null)
@@ -91,10 +112,16 @@ namespace imarket.Controllers.open
                 Content = request.Content??"",
                 CreatedAt = DateTime.Now,
             });
-            return Ok(new
+            var response = new
             {
-                success = true,
-            });
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Message/Send", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -105,6 +132,12 @@ namespace imarket.Controllers.open
         [HttpGet("Delete")] // api/Message/Delete?messageId={messageId}
         public async Task<IActionResult> DeleteMessage([FromQuery][Required] ulong messageId)
         {
+            var args = new object[] { messageId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Message/Delete", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
             if (user == null)
             {
@@ -120,10 +153,16 @@ namespace imarket.Controllers.open
                 return BadRequest("permission denied");
             }
             await messageService.DeleteMessageByIdAsync(messageId);
-            return Ok(new
+            var response = new
             {
-                success = true,
-            });
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Message/Delete", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
     }
 

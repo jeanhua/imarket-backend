@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using imarket.service.IService;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Caching.Memory;
+using imarket.plugin;
 
 namespace imarket.Controllers.open
 {
@@ -20,7 +21,8 @@ namespace imarket.Controllers.open
         private readonly IMailService mailService;
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
-        public AuthController(JwtTokenGenerator tokenGenerator, IMessageService messageService, IUserService userService, ILoginService loginService, ILogger<AuthController> _logger, IMemoryCache _cache,IConfiguration configuration,IMailService mailService)
+        private readonly PluginManager pluginManager;
+        public AuthController(JwtTokenGenerator tokenGenerator, IMessageService messageService, IUserService userService, ILoginService loginService, ILogger<AuthController> _logger, IMemoryCache _cache,IConfiguration configuration,IMailService mailService,PluginManager pluginManager)
         {
             this.tokenGenerator = tokenGenerator;
             this.userService = userService;
@@ -30,6 +32,7 @@ namespace imarket.Controllers.open
             this.messageService = messageService;
             this._configuration = configuration;
             this.mailService = mailService;
+            this.pluginManager = pluginManager;
         }
 
         [HttpPost("Login")] // api/Auth/Login
@@ -38,6 +41,12 @@ namespace imarket.Controllers.open
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var args = new object[] { loginRequest };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/Login", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             // 登录认证：查找用户
             _cache.TryGetValue($"login:{loginRequest.Username}", out var login_cache);
@@ -98,12 +107,26 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            return Ok(new { success = true, token = _token });
+            var response = new
+            {
+                success = true,
+                token = _token
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/Login", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         [HttpPost("Logout")] // api/Auth/Logout
         public IActionResult Logout()
         {
+            if (User.Identity!.IsAuthenticated == false)
+            {
+                return Unauthorized();
+            }
             return Ok();
         }
 
@@ -113,6 +136,12 @@ namespace imarket.Controllers.open
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var args = new object[] { registerRequest };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/Register", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             var ip = IPtool.GetClientIP(HttpContext);
             _cache.TryGetValue("ip:" + ip, out var ip_cache);
@@ -166,7 +195,16 @@ namespace imarket.Controllers.open
                 CreatedAt = DateTime.Now,
             };
             await loginService.RegisterAsync(newUser);
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/Register", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
 
@@ -181,6 +219,12 @@ namespace imarket.Controllers.open
             if (User.Identity!.IsAuthenticated == false)
             {
                 return Unauthorized();
+            }
+            var args = new object[] { changePasswordRequest };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/ChangePassword", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name!);
             if (user == null)
@@ -197,7 +241,16 @@ namespace imarket.Controllers.open
             }
             user.PasswordHash = changePasswordRequest.NewPassword;
             await userService.UpdateUserAsync(user.Id, user);
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/ChangePassword", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         [HttpGet("Refresh")] // api/Auth/Refresh
@@ -208,6 +261,12 @@ namespace imarket.Controllers.open
             if (userCheck == null)
             {
                 return Unauthorized();
+            }
+            var args = new object[] { userCheck };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/Refresh", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             TokenModels _token;
             if (userCheck.Status == 0)
@@ -230,7 +289,17 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            return Ok(new { success = true, token = _token });
+            var response = new
+            {
+                success = true,
+                token = _token
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/Refresh", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         [HttpPost("ForgotPassword")] // api/Auth/ForgotPassword
@@ -244,6 +313,12 @@ namespace imarket.Controllers.open
             if (user == null)
             {
                 return BadRequest("User not found.");
+            }
+            var args = new object[] { forgotPasswordRequest };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/ForgotPassword", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             var admin = await userService.GetUserByUsernameAsync(_configuration["admin:Username"]);
             await messageService.CreateMessageAsync(new MessageModels
@@ -269,10 +344,16 @@ namespace imarket.Controllers.open
                 }
                 return Ok(new {success = true});
             }
-            return Ok(new
+            var response = new
             {
                 success = true
-            });
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/ForgotPassword", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         [HttpGet("Certificate")] // api/Auth/Certificate?token=xxx

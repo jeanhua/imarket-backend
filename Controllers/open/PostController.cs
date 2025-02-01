@@ -1,4 +1,5 @@
 ﻿using imarket.models;
+using imarket.plugin;
 using imarket.service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,9 +21,10 @@ namespace imarket.Controllers.open
         private readonly ILikeService likeService;
         private readonly IConfiguration configuration;
         private readonly ILogger<PostController> logger;
+        private readonly PluginManager pluginManager;
         // 缓存
         private readonly IMemoryCache _cache;
-        public PostController(IUserService userService, IConfiguration configuration, IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger)
+        public PostController(IUserService userService, IConfiguration configuration, IFavoriteService favoriteService, ILikeService likeService, IPostService postService, IPostCategoriesService postCategoriesService, IImageService imageService, ICommentService commentService, IMemoryCache cache, ILogger<PostController> logger,PluginManager pluginManager)
         {
             this.userService = userService;
             this.postService = postService;
@@ -34,6 +36,7 @@ namespace imarket.Controllers.open
             this.favoriteService = favoriteService;
             this.logger = logger;
             _cache = cache;
+            this.pluginManager = pluginManager;
         }
 
         /// <summary>
@@ -45,7 +48,13 @@ namespace imarket.Controllers.open
         [HttpGet("Posts")] // api/Post/Posts?page=1&pageSize=10
         public async Task<IActionResult> GetPosts([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
-            if(_cache.TryGetValue($"Posts_cache_page{page}_pageSize{pageSize}", out var posts_cache))
+            var args = new object[] { page, pageSize };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Posts", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
+            if (_cache.TryGetValue($"Posts_cache_page{page}_pageSize{pageSize}", out var posts_cache))
             {
                 return Ok(posts_cache);
             }
@@ -75,6 +84,11 @@ namespace imarket.Controllers.open
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
+            var result_after = pluginManager.ExecuteAfterAsync("api/Post/Posts", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(response);
         }
 
@@ -85,14 +99,30 @@ namespace imarket.Controllers.open
         [HttpGet("Categories")] // api/Post/Categories
         public async Task<IActionResult> GetCategories()
         {
-            const string cacheKey = "AllCategories";
+            var args = new object[] { };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Categories", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
+            string cacheKey = "AllCategories";
             if (_cache.TryGetValue(cacheKey, out var cachedCategories))
             {
                 return Ok(new { success = true, categories = cachedCategories });
             }
             var categories = await postCategoriesService.GetAllCategoriesAsync();
             _cache.Set(cacheKey, categories, TimeSpan.FromMinutes(10));
-            return Ok(new { success = true, categories });
+            var response = new
+            {
+                success = true,
+                categories
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Categories", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -103,6 +133,12 @@ namespace imarket.Controllers.open
         [HttpGet("Categories/{id}")] // api/Post/Categories/{id}
         public async Task<IActionResult> GetCategoryById([FromRoute][Required] ulong id)
         {
+            var args = new object[] { id };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Categories/{id}", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var cacheKey = $"Category_{id}";
             if (_cache.TryGetValue(cacheKey, out var cachedCategory))
             {
@@ -114,7 +150,17 @@ namespace imarket.Controllers.open
                 return NotFound(new { success = false, message = "Category not found." });
             }
             _cache.Set(cacheKey, category, TimeSpan.FromMinutes(10)); // 缓存 10 分钟
-            return Ok(new { success = true, category });
+            var response = new
+            {
+                success = true,
+                category
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Categories/{id}", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -127,6 +173,12 @@ namespace imarket.Controllers.open
         [HttpGet("CategorisedPosts")] // api/Post/CategorisedPosts
         public async Task<IActionResult> GetCategorisedPosts([FromQuery][Required] ulong categoryId,[FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
+            var args = new object[] { categoryId, page, pageSize };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/CategorisedPosts", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             if (_cache.TryGetValue($"GetCategorisedPosts{categoryId}_page{page}_pageSize{pageSize}", out var posts_cache))
             {
                 return Ok(posts_cache);
@@ -157,6 +209,11 @@ namespace imarket.Controllers.open
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/CategorisedPosts", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(response);
         }
 
@@ -168,6 +225,12 @@ namespace imarket.Controllers.open
         [HttpGet("{id}")] // api/Post/{id}
         public async Task<IActionResult> GetPost([FromRoute][Required] ulong id)
         {
+            var args = new object[] { id };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/{id}", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             // 检查用户是否已登录
             var isUserAuthenticated = User.Identity.IsAuthenticated;
             // 如果用户未登录，尝试从缓存中获取数据
@@ -224,6 +287,11 @@ namespace imarket.Controllers.open
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]))
                 });
             }
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/{id}", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
             return Ok(response);
         }
 
@@ -239,6 +307,12 @@ namespace imarket.Controllers.open
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            var args = new object[] { postReq };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Create", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
             }
             if (postReq.Title == "" || postReq.Content == "")
             {
@@ -293,7 +367,17 @@ namespace imarket.Controllers.open
                     }
                 }
             }
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true,
+                postId = result1
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Create", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -305,6 +389,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "admin,user")]
         public async Task<IActionResult> DeletePost([FromQuery][Required] ulong postId)
         {
+            var args = new object[] { postId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Delete", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
             {
@@ -321,7 +411,16 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Delete", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -333,6 +432,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> FinishPost([FromQuery][Required] ulong postId)
         {
+            var args = new object[] { postId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Finish", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByUsernameAsync(User.Identity.Name);
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
@@ -348,8 +453,17 @@ namespace imarket.Controllers.open
             if (result == 0)
             {
                 return StatusCode(500);
-            } 
-            return Ok(new { success = true });
+            }
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Finish", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -361,6 +475,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> FavoritePost([FromQuery][Required] ulong postId)
         {
+            var args = new object[] { postId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Favorite", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
             {
@@ -381,7 +501,16 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Favorite", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -393,6 +522,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UnFavoritePost([FromQuery][Required] ulong postId)
         {
+            var args = new object[] { postId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Unfavorite", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
             {
@@ -408,8 +543,12 @@ namespace imarket.Controllers.open
             {
                 var result = await favoriteService.DeletePostFavoriteAsync(postId, user.Id);
             }
-            _cache.Remove($"Post_cache{postId}");
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Unfavorite", response);
+            return Ok(response);
         }
 
         /// <summary>
@@ -421,6 +560,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> LikePost([FromQuery][Required] ulong postId)
         {
+            var args = new object[] { postId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Like", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
             {
@@ -448,8 +593,16 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            _cache.Remove($"Post_cache{postId}");
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Like", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
 
         /// <summary>
@@ -461,6 +614,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> UnLikePost([FromQuery][Required] ulong postId)
         {
+            var args = new object[] { postId };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Unlike", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var post = await postService.GetPostByIdAsync(postId);
             if (post == null)
             {
@@ -487,8 +646,16 @@ namespace imarket.Controllers.open
             {
                 return StatusCode(500);
             }
-            _cache.Remove($"Post_cache{postId}");
-            return Ok(new { success = true });
+            var response = new
+            {
+                success = true
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Unlike", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
         
         /// <summary>
@@ -501,6 +668,12 @@ namespace imarket.Controllers.open
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> GetFavorites([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
+            var args = new object[] { page, pageSize };
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/GetFavorites", args);
+            if (result_before != null)
+            {
+                return Ok(result_before);
+            }
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
             if (user == null)
             {
@@ -516,7 +689,17 @@ namespace imarket.Controllers.open
                     CreatedAt = fav.CreatedAt
                 });
             }
-            return Ok(new { success = true, favorite });
+            var response = new
+            {
+                success = true,
+                favorite
+            };
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/GetFavorites", response);
+            if (result_after != null)
+            {
+                return Ok(result_after);
+            }
+            return Ok(response);
         }
     }
 
