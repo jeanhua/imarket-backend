@@ -15,21 +15,26 @@ namespace plugin_test
         public async Task<(bool op, object? result)> OnBeforeExecutionAsync(string route, object?[] args, string? username = null)
         {
             // 如果请求的路由是获取用户信息的路由
-            if (route == "/api/Account/Info1" && !string.IsNullOrEmpty(username))
+            if (route == "/api/Account/Info" && !string.IsNullOrEmpty(username))
             {
                 var user = await service.GetUserByUsernameAsync(username);
+                var response = new
+                {
+                    success = true,
+                    account = new
+                    {
+                        username = user.Username,
+                        nickname = user.Nickname,
+                        avatar = user.Avatar,
+                        email = user.Email,
+                        status = user.Status,
+                        from = "plugin_test"
+                    }
+                };
                 return (true,new
                 {
                     success = true,
-                    info = new
-                    {
-                        username = user?.Username,
-                        nickname = user?.Nickname,
-                        avatar = user?.Avatar,
-                        email = user?.Email,
-                        status = user?.Status,
-                        from = "plugin_test"
-                    }
+                    info = response
                 });
             }
             return (false,null);

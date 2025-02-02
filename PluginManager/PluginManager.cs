@@ -93,7 +93,7 @@ namespace imarket.plugin
             {
                 if (interceptor == null) { continue; }
                 var result = await interceptor.OnBeforeExecutionAsync(route, args, username);
-                if (result.op == true) return result;
+                if (result.op == true) return result.result;
             }
             return null;
         }
@@ -104,7 +104,7 @@ namespace imarket.plugin
             {
                 if (interceptor == null) { continue; }
                 var modifiedResult = await interceptor.OnAfterExecutionAsync(route, result, username);
-                if (modifiedResult.op == true) return modifiedResult;
+                if (modifiedResult.op == true) return modifiedResult.result;
             }
             return null;
         }
