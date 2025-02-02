@@ -88,21 +88,21 @@ namespace imarket.plugin
 
         
 
-        public async Task<object?> ExecuteBeforeAsync(string methodName, object?[] args)
+        public async Task<object?> ExecuteBeforeAsync(string route, object?[] args,string? username = null)
         {
             foreach (var interceptor in _interceptors)
             {
-                var result = await interceptor.OnBeforeExecutionAsync(methodName, args);
+                var result = await interceptor.OnBeforeExecutionAsync(route, args,username);
                 if (result != null) return result;
             }
             return null;
         }
 
-        public async Task<object?> ExecuteAfterAsync(string methodName, object? result)
+        public async Task<object?> ExecuteAfterAsync(string route, object? result,string? username = null)
         {
             foreach (var interceptor in _interceptors)
             {
-                var modifiedResult = await interceptor.OnAfterExecutionAsync(methodName, result);
+                var modifiedResult = await interceptor.OnAfterExecutionAsync(route, result,username);
                 if (modifiedResult != null) return modifiedResult;
             }
             return result;

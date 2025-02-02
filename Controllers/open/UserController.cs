@@ -46,7 +46,7 @@ namespace imarket.Controllers.open
                 return BadRequest(ModelState);
             }
             var args = new object[] { username, page, pageSize };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/User/Posts", args);
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/User/Posts", args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -86,7 +86,7 @@ namespace imarket.Controllers.open
                 success = true,
                 posts = result
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/User/Posts", response);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/User/Posts", response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -106,7 +106,7 @@ namespace imarket.Controllers.open
             if(!ModelState.IsValid)
                 { return BadRequest(ModelState); }
             var args = new object[] { username };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/User/Info", args);
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/User/Info", args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -125,7 +125,7 @@ namespace imarket.Controllers.open
                 email = user.Email,
                 status = user.Status
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/User/Info", response);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/User/Info", response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);

@@ -41,7 +41,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute][Required] ulong postid)
         {
             var args = new object[] { postid };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/{postid}", args);
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/{postid}", args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -98,7 +98,7 @@ namespace imarket.Controllers.open
                 success = true,
                 comments = result
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/{postid}", response);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/{postid}", response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -120,7 +120,7 @@ namespace imarket.Controllers.open
                 return BadRequest(ModelState);
             }
             var args = new object[] { comment };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Create", args);
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Create", args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -173,7 +173,7 @@ namespace imarket.Controllers.open
                 success = true,
                 commentId = comment_new.Id
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Create", response);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Create", response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -191,7 +191,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> DeleteCommentAsync([FromQuery][Required] ulong commentId)
         {
             var args = new object[] { commentId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Delete", args);
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Delete", args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -219,7 +219,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Delete", response);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Delete", response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -237,7 +237,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> LikeCommentAsync([FromQuery][Required] ulong commentId)
         {
             var args = new object[] { commentId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Like", args);
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Like", args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -272,7 +272,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Like", response);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/Like", response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -290,7 +290,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> UnLikeCommentAsync([FromQuery][Required] ulong commentId)
         {
             var args = new object[] { commentId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/UnLike", args);
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/UnLike", args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -325,7 +325,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/UnLike", response);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Comments/UnLike", response, User?.Identity?.Name);
             return Ok(response);
         }
     }

@@ -2,8 +2,8 @@
 {
     public interface IPluginInterceptor
     {
-        Task<object?> OnBeforeExecutionAsync(string route, object?[] args);
-        Task<object?> OnAfterExecutionAsync(string route, object? result);
+        Task<object?> OnBeforeExecutionAsync(string route, object?[] args, string? username = null);
+        Task<object?> OnAfterExecutionAsync(string route, object? result, string? username = null);
     }
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false)]

@@ -38,7 +38,7 @@ namespace imarket.Controllers.open
                 return BadRequest("Image is required");
             }
             var args = new object[] { request };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Image/UploadImage", args);
+            var result_before = await pluginManager.ExecuteBeforeAsync("api/Image/UploadImage", args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -58,7 +58,7 @@ namespace imarket.Controllers.open
                 success = true,
                 path
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Image/UploadImage", response);
+            var result_after = await pluginManager.ExecuteAfterAsync("api/Image/UploadImage", response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
