@@ -43,7 +43,7 @@ namespace imarket.Controllers.open
                 return BadRequest(ModelState);
             }
             var args = new object[] { loginRequest };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/Login", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -112,7 +112,7 @@ namespace imarket.Controllers.open
                 success = true,
                 token = _token
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/Login", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -138,7 +138,7 @@ namespace imarket.Controllers.open
                 return BadRequest(ModelState);
             }
             var args = new object[] { registerRequest };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/Register", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -199,7 +199,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/Register", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -221,7 +221,7 @@ namespace imarket.Controllers.open
                 return Unauthorized();
             }
             var args = new object[] { changePasswordRequest };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/ChangePassword", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -245,7 +245,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/ChangePassword", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -263,7 +263,7 @@ namespace imarket.Controllers.open
                 return Unauthorized();
             }
             var args = new object[] { userCheck };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/Refresh", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -294,7 +294,7 @@ namespace imarket.Controllers.open
                 success = true,
                 token = _token
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/Refresh", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -315,7 +315,7 @@ namespace imarket.Controllers.open
                 return BadRequest("User not found.");
             }
             var args = new object[] { forgotPasswordRequest };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Auth/ForgotPassword", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -348,7 +348,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Auth/ForgotPassword", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);

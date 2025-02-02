@@ -116,6 +116,9 @@ namespace imarket
             // 数据库初始化
             var database = builder.Services.BuildServiceProvider().GetService<Database>();
             database.InitDatabase();
+            // 插件初始化
+            var pluginManager = builder.Services.BuildServiceProvider().GetService<PluginManager>();
+            pluginManager.LoadPlugins(builder.Services);
             // 添加日志服务
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();

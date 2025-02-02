@@ -45,7 +45,7 @@ namespace imarket.Controllers.open
                 return BadRequest("require keyWord");
             }
             var args = new object[] { keyWord, page, pageSize };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Search/Posts", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -80,7 +80,7 @@ namespace imarket.Controllers.open
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Search/Posts", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -96,7 +96,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetHotRankong()
         {
             var args = new object[] { };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Search/HotRanking", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -117,7 +117,7 @@ namespace imarket.Controllers.open
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Search/HotRanking", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);

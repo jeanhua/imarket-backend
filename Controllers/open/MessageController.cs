@@ -37,7 +37,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetMessage([FromQuery]int page=1, [FromQuery]int pageSize=10)
         {
             var args = new object[] { page, pageSize };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Message/List", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -79,7 +79,7 @@ namespace imarket.Controllers.open
                 return BadRequest(ModelState);
             }
             var args = new object[] { request };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Message/Send", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -133,7 +133,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> DeleteMessage([FromQuery][Required] ulong messageId)
         {
             var args = new object[] { messageId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Message/Delete", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);

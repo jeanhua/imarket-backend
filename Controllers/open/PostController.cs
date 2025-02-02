@@ -49,7 +49,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetPosts([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
             var args = new object[] { page, pageSize };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Posts", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -84,7 +84,7 @@ namespace imarket.Controllers.open
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
-            var result_after = pluginManager.ExecuteAfterAsync("api/Post/Posts", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -100,7 +100,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetCategories()
         {
             var args = new object[] { };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Categories", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -117,7 +117,7 @@ namespace imarket.Controllers.open
                 success = true,
                 categories
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Categories", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -134,7 +134,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetCategoryById([FromRoute][Required] ulong id)
         {
             var args = new object[] { id };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Categories/{id}", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -155,7 +155,7 @@ namespace imarket.Controllers.open
                 success = true,
                 category
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Categories/{id}", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -174,7 +174,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetCategorisedPosts([FromQuery][Required] ulong categoryId,[FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
             var args = new object[] { categoryId, page, pageSize };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/CategorisedPosts", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -209,7 +209,7 @@ namespace imarket.Controllers.open
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:Posts"]))
             });
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/CategorisedPosts", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -226,7 +226,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetPost([FromRoute][Required] ulong id)
         {
             var args = new object[] { id };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/{id}", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -287,7 +287,7 @@ namespace imarket.Controllers.open
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(configuration["Cache:SinglePost"]))
                 });
             }
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/{id}", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -309,7 +309,7 @@ namespace imarket.Controllers.open
                 return BadRequest(ModelState);
             }
             var args = new object[] { postReq };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Create", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -372,7 +372,7 @@ namespace imarket.Controllers.open
                 success = true,
                 postId = result1
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Create", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -390,7 +390,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> DeletePost([FromQuery][Required] ulong postId)
         {
             var args = new object[] { postId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Delete", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -415,7 +415,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Delete", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -433,7 +433,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> FinishPost([FromQuery][Required] ulong postId)
         {
             var args = new object[] { postId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Finish", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -458,7 +458,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Finish", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -476,7 +476,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> FavoritePost([FromQuery][Required] ulong postId)
         {
             var args = new object[] { postId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Favorite", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -505,7 +505,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Favorite", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -523,7 +523,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> UnFavoritePost([FromQuery][Required] ulong postId)
         {
             var args = new object[] { postId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Unfavorite", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -547,7 +547,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Unfavorite", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             return Ok(response);
         }
 
@@ -561,7 +561,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> LikePost([FromQuery][Required] ulong postId)
         {
             var args = new object[] { postId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Like", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -597,7 +597,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Like", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -615,7 +615,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> UnLikePost([FromQuery][Required] ulong postId)
         {
             var args = new object[] { postId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/Unlike", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -650,7 +650,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/Unlike", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -669,7 +669,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetFavorites([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
             var args = new object[] { page, pageSize };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Post/GetFavorites", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -694,7 +694,7 @@ namespace imarket.Controllers.open
                 success = true,
                 favorite
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Post/GetFavorites", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);

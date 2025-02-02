@@ -35,7 +35,7 @@ namespace imarket.Controllers.open
             {
                 return Unauthorized();
             }
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Account/Info", new object[] {user}, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, new object[] {user}, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -52,7 +52,7 @@ namespace imarket.Controllers.open
                     status = user.Status
                 }
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Account/Info", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -73,7 +73,7 @@ namespace imarket.Controllers.open
                 return Unauthorized();
             }
             var args = new object[] { user };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Account/Edit", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -91,7 +91,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Account/Edit", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);

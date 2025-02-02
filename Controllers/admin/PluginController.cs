@@ -39,35 +39,5 @@ namespace imarket.Controllers.admin
             };
             return Ok(response);
         }
-
-        [HttpGet("Enable")] // api/Plugin/Enable?path=xxx
-        public IActionResult EnablePlugin([FromQuery] string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return BadRequest("Path is required");
-            }
-            var result = pluginManager.LoadPlugins(path);
-            var response = new
-            {
-                success = result,
-            };
-            return Ok(response);
-        }
-
-        [HttpGet("Disable")] // api/Plugin/Disable?path=xxx
-        public IActionResult DisablePlugin([FromQuery] string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return BadRequest("Path is required");
-            }
-            var result = pluginManager.UnloadPlugin(path);
-            var response = new
-            {
-                success = result,
-            };
-            return Ok(response);
-        }
     }
 }

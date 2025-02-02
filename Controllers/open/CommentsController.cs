@@ -41,7 +41,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> GetCommentsByPostIdAsync([FromRoute][Required] ulong postid)
         {
             var args = new object[] { postid };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/{postid}", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -120,7 +120,7 @@ namespace imarket.Controllers.open
                 return BadRequest(ModelState);
             }
             var args = new object[] { comment };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Create", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -191,7 +191,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> DeleteCommentAsync([FromQuery][Required] ulong commentId)
         {
             var args = new object[] { commentId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Delete", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -237,7 +237,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> LikeCommentAsync([FromQuery][Required] ulong commentId)
         {
             var args = new object[] { commentId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/Like", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);
@@ -290,7 +290,7 @@ namespace imarket.Controllers.open
         public async Task<IActionResult> UnLikeCommentAsync([FromQuery][Required] ulong commentId)
         {
             var args = new object[] { commentId };
-            var result_before = await pluginManager.ExecuteBeforeAsync("api/Comments/UnLike", args, User?.Identity?.Name);
+            var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
             {
                 return Ok(result_before);

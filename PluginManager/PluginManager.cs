@@ -1,84 +1,85 @@
 ﻿using System.Reflection;
 
-
 namespace imarket.plugin
 {
     public class PluginManager
     {
-        private readonly List<IPluginInterceptor> _interceptors = new();
-        private readonly Dictionary<string, Assembly> _loadedAssemblies = new();
-        private readonly Dictionary<string, PluginRecord> _pluginRecords = new();
+        private static List<IPluginInterceptor> _interceptors = new();
+        private static Dictionary<string, PluginRecord> _pluginRecords = new();
         private readonly ILogger<PluginManager> _logger;
+        private readonly IServiceProvider _serviceProvider;
 
-        public PluginManager(ILogger<PluginManager> logger)
+        public PluginManager(ILogger<PluginManager> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
         public IEnumerable<string> GetPluginDirectory()
         {
             var dirs = new List<string>();
-            foreach(var directory in Directory.GetDirectories("plugin"))
+            foreach (var directory in Directory.GetDirectories("plugin"))
             {
                 dirs.Add(directory);
             }
             return dirs;
         }
-        public bool LoadPlugins(string pluginDirectory)
-        {
-            if (!Directory.Exists(pluginDirectory))
-                return false;
 
-            foreach (var dllPath in Directory.GetFiles(pluginDirectory, "*.dll"))
+        public void LoadPlugins(IServiceCollection services)
+        {
+            try
             {
-                try
+                var assembly = Assembly.GetAssembly(typeof(IPluginInterceptor));
+                var allTypes = assembly?.GetTypes();
+                if (allTypes == null)
                 {
-                    var assembly = Assembly.LoadFrom(dllPath);
-                    var pluginTypes = assembly.GetTypes()
-                        .Where(t => typeof(IPluginInterceptor).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
-                    foreach (var type in pluginTypes)
+                    return;
+                }
+                int count = 0;
+                foreach (var type in allTypes)
+                {
+                    if (typeof(IPluginInterceptor).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
                     {
-                        if (Activator.CreateInstance(type) is IPluginInterceptor plugin)
+                        services.AddScoped(type);
+                        var instance = services.BuildServiceProvider().GetService(type) as IPluginInterceptor;
+                        if (instance != null)
                         {
-                            _interceptors.Add(plugin);
-                            _loadedAssemblies[dllPath] = assembly;
+                            count++;
+                            _interceptors.Add(instance);
 
                             var tag = type.GetCustomAttribute<PluginTag>();
-                            if (tag != null)
+                            if (tag == null)
                             {
-                                var pluginRecord = new PluginRecord
-                                {
-                                    Name = tag.Name,
-                                    Description = tag.Description,
-                                    Author = tag.Author
-                                };
-                                _pluginRecords[dllPath] = pluginRecord;
+                                tag = new PluginTag();
+                                tag.Author = "Unknown";
+                                tag.Description = "No description";
+                                tag.Name = "Unknown";
                             }
+
+                            var pluginRecord = new PluginRecord
+                            {
+                                Name = tag.Name,
+                                Description = tag.Description,
+                                Author = tag.Author
+                            };
+                            _pluginRecords[type.FullName] = pluginRecord;
                         }
                     }
-                    _logger.LogInformation($"插件加载成功: {dllPath}");
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"插件加载失败: {dllPath}");
-                    return false;
-                }
-            }
-            return true;
-        }
 
-        public bool UnloadPlugin(string pluginPath)
-        {
-            if (_loadedAssemblies.ContainsKey(pluginPath))
-            {
-                var assembly = _loadedAssemblies[pluginPath];
-                _interceptors.RemoveAll(p => p.GetType().Assembly == assembly);
-                _loadedAssemblies.Remove(pluginPath);
-                _pluginRecords.Remove(pluginPath);
-                _logger.LogInformation($"插件卸载成功: {pluginPath}");
-                return true;
+                if (count > 0)
+                {
+                    _logger.LogInformation($"插件加载成功,加载类 {count}个");
+                }
+                else
+                {
+                    _logger.LogWarning($"插件加载失败,没有找到合适的类");
+                }
             }
-            return false;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"插件加载失败");
+            }
         }
 
         public IEnumerable<PluginRecord> GetLoadedPlugins()
@@ -86,26 +87,26 @@ namespace imarket.plugin
             return _pluginRecords.Values;
         }
 
-        
-
-        public async Task<object?> ExecuteBeforeAsync(string route, object?[] args,string? username = null)
+        public async Task<object?> ExecuteBeforeAsync(string route, object?[] args, string? username = null)
         {
             foreach (var interceptor in _interceptors)
             {
-                var result = await interceptor.OnBeforeExecutionAsync(route, args,username);
-                if (result != null) return result;
+                if (interceptor == null) { continue; }
+                var result = await interceptor.OnBeforeExecutionAsync(route, args, username);
+                if (result.op == true) return result;
             }
             return null;
         }
 
-        public async Task<object?> ExecuteAfterAsync(string route, object? result,string? username = null)
+        public async Task<object?> ExecuteAfterAsync(string route, object? result, string? username = null)
         {
             foreach (var interceptor in _interceptors)
             {
-                var modifiedResult = await interceptor.OnAfterExecutionAsync(route, result,username);
-                if (modifiedResult != null) return modifiedResult;
+                if (interceptor == null) { continue; }
+                var modifiedResult = await interceptor.OnAfterExecutionAsync(route, result, username);
+                if (modifiedResult.op == true) return modifiedResult;
             }
-            return result;
+            return null;
         }
     }
 }
