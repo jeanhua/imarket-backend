@@ -3,7 +3,7 @@
 using imarket.service.IService;
 namespace plugin_test
 {
-    [PluginTag(Name = "plugin_test", Description = "A plugin for testing", Author = "Your Name")]
+    [PluginTag(Name = "plugin_test", Description = "A plugin for testing", Author = "Your Name",Enable = true)]
     public class plugin_test: IPluginInterceptor
     {
         private readonly IUserService service;

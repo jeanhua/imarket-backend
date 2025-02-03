@@ -40,29 +40,21 @@ namespace imarket.plugin
                 {
                     if (typeof(IPluginInterceptor).IsAssignableFrom(type) && !type.IsAbstract && !type.IsInterface)
                     {
+                        var tag = type.GetCustomAttribute<PluginTag>();
+                        if (tag == null|| tag?.Enable == false) continue;
                         services.AddScoped(type);
                         var instance = services.BuildServiceProvider().GetService(type) as IPluginInterceptor;
                         if (instance != null)
                         {
                             count++;
                             _interceptors.Add(instance);
-
-                            var tag = type.GetCustomAttribute<PluginTag>();
-                            if (tag == null)
-                            {
-                                tag = new PluginTag();
-                                tag.Author = "Unknown";
-                                tag.Description = "No description";
-                                tag.Name = "Unknown";
-                            }
-
                             var pluginRecord = new PluginRecord
                             {
-                                Name = tag.Name,
+                                Name = tag!.Name,
                                 Description = tag.Description,
                                 Author = tag.Author
                             };
-                            _pluginRecords[type.FullName] = pluginRecord;
+                            _pluginRecords[type.FullName!] = pluginRecord;
                         }
                     }
                 }

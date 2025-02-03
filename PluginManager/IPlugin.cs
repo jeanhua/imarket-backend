@@ -12,6 +12,14 @@
         public string Name { get; set; }
         public string Description { get; set; }
         public string Author { get; set; }
+        public bool Enable { get; set; }
+        public PluginTag()
+        {
+            Name = "Unknown";
+            Description = "No description";
+            Author = "Unknown";
+            Enable = true;
+        }
     }
 
     public record PluginRecord
