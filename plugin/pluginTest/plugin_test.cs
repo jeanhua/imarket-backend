@@ -31,11 +31,7 @@ namespace plugin_test
                         from = "plugin_test"
                     }
                 };
-                return (true,new
-                {
-                    success = true,
-                    info = response
-                });
+                return (true,response);
             }
             return (false,null);
         }
