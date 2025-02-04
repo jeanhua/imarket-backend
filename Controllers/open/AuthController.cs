@@ -320,6 +320,12 @@ namespace imarket.Controllers.open
             {
                 return Ok(result_before);
             }
+            _cache.TryGetValue("forgot:" + user.Id, out var forgot_cache);
+            var forgotNums = forgot_cache as int? ?? 0;
+            if (forgotNums >= 1)
+            {
+                return StatusCode(403, new { message = "Too many reset password attempts. Try 30 minutes later !" });
+            }
             var admin = await userService.GetUserByUsernameAsync(_configuration["admin:Username"]);
             await messageService.CreateMessageAsync(new MessageModels
             {
@@ -342,8 +348,11 @@ namespace imarket.Controllers.open
                 {
                     return StatusCode(500, "Send Email Fail.");
                 }
-                return Ok(new {success = true});
             }
+            _cache.Set("forgot:" + user.Id, forgotNums + 1, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+            });
             var response = new
             {
                 success = true
