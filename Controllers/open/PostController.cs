@@ -302,7 +302,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpPost("Create")] // api/Post/Create
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> CreatePost([FromBody][Required] CreatePostRequest postReq)
+        public async Task<IActionResult> CreatePost([FromBody][Required] CreatePostRequest postReq, [FromQuery]string? author=null)
         {
             if (!ModelState.IsValid)
             {
@@ -337,6 +337,14 @@ namespace imarket.Controllers.open
                 return BadRequest("Invalid category.");
             }
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if (User.IsInRole("admin") && author != null)
+            {
+                user = await userService.GetUserByUsernameAsync(author);
+            }
+            if(user == null)
+            {
+                return BadRequest("Invalid user.");
+            }
             var post = new PostModels
             {
                 Title = postReq.Title!,
