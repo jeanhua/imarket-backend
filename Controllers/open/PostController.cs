@@ -299,6 +299,7 @@ namespace imarket.Controllers.open
         /// 创建帖子
         /// </summary>
         /// <param name="postReq"></param>
+        /// <param name="author"></param>
         /// <returns></returns>
         [HttpPost("Create")] // api/Post/Create
         [Authorize(Roles = "user,admin")]
