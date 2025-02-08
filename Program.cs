@@ -139,6 +139,8 @@ namespace imarket
             app.UseAuthorization();
             app.UseDefaultFiles();
             app.UseStaticFiles();
+            // ×¢²á²å¼þÂ·ÓÉ
+            pluginManager.RegisterPluginRoutes(app);
             app.MapControllers();
             app.Run();
         }

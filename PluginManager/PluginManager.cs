@@ -58,7 +58,6 @@ namespace imarket.plugin
                         }
                     }
                 }
-
                 if (count > 0)
                 {
                     _logger.LogInformation($"插件加载成功,加载类 {count}个");
@@ -99,6 +98,15 @@ namespace imarket.plugin
                 if (modifiedResult.op == true) return modifiedResult.result;
             }
             return null;
+        }
+
+        // 注册插件路由
+        public void RegisterPluginRoutes(IEndpointRouteBuilder endpoints)
+        {
+            foreach (var interceptor in _interceptors)
+            {
+                interceptor?.RegisterRoutes(endpoints);
+            }
         }
     }
 }

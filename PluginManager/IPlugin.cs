@@ -4,6 +4,7 @@
     {
         Task<(bool op,object? result)> OnBeforeExecutionAsync(string route, object?[] args, string? username = null);
         Task<(bool op, object? result)> OnAfterExecutionAsync(string route, object? result, string? username = null);
+        void RegisterRoutes(IEndpointRouteBuilder endpoints);
     }
 
     [System.AttributeUsage(AttributeTargets.Class, Inherited = false)]

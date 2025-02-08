@@ -39,5 +39,18 @@ namespace plugin_test
         {
             return (false, null);
         }
+
+        public void RegisterRoutes(IEndpointRouteBuilder endpoints)
+        {
+            // 注册路由
+            endpoints.MapGet("/api/plugin_test", async context =>
+            {
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    success = true,
+                    message = "Hello from plugin_test"
+                });
+            });
+        }
     }
 }
