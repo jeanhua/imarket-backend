@@ -116,13 +116,14 @@ namespace imarket.Controllers.open
             {
                 return NotFound();
             }
+            var isAdmin = User?.IsInRole("admin") ?? false;
             var response = new
             {
                 success = true,
                 username = user.Username,
                 nickname = user.Nickname,
                 avatar = user.Avatar,
-                email = user.Email,
+                email = isAdmin?user.Email:"[admin only]",
                 status = user.Status
             };
             var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
