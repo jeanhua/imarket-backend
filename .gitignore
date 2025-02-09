@@ -482,3 +482,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# 忽略 images 文件夹下的所有文件 除了defaultAvatar.svg
+/wwwroot/images/* 
+!/wwwroot/images/defaultAvatar.svg
