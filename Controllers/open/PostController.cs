@@ -673,7 +673,7 @@ namespace imarket.Controllers.open
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
-        [HttpGet("GetFavorites")] // api/post/GetFavorites
+        [HttpGet("GetFavorites")] // api/Post/GetFavorites
         [Authorize(Roles = "user,admin")]
         public async Task<IActionResult> GetFavorites([FromQuery] int page=1, [FromQuery] int pageSize=10)
         {
