@@ -48,7 +48,7 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("Image size should be less than 3MB");
             }
-            if (!request.Base64.StartsWith("data:image/"))
+            if (request.Base64.StartsWith("data:image/"))
             {
                 return BadRequest("Invalid base64 format");
             }
