@@ -4,12 +4,12 @@
 | 字段名       | 数据类型        | 是否为空 | 主键 | 外键 | 默认值   | 说明                                           |
 | ------------ | --------------- | -------- | ---- | ---- | -------- | ---------------------------------------------- |
 | Id           | BIGINT UNSIGNED | 否       | 是   | 否   | 无       | 自增                                           |
-| Username     | NVARCHAR(50)    | 否       | 否   | 否   | 无       | 用户名，只能设置一次                           |
-| Nickname     | NVARCHAR(50)    | 否       | 否   | 否   | 无       | 用户昵称                                       |
-| Avatar       | NVARCHAR(255)   | 是       | 否   | 否   | 无       | 用户头像                                       |
-| Email        | NVARCHAR(100)   | 否       | 否   | 否   | 无       | 用户邮箱                                       |
-| PasswordHash | NVARCHAR(255)   | 否       | 否   | 否   | 无       | 用户密码的哈希值，使用sha256加密，结果为16进制 |
-| Role         | NVARCHAR(20)    | 否       | 否   | 否   | 'user'   | 用户角色（admin/user）                         |
+| Username     | TEXT            | 否       | 否   | 否   | 无       | 用户名，只能设置一次                           |
+| Nickname     | TEXT            | 否       | 否   | 否   | 无       | 用户昵称                                       |
+| Avatar       | TEXT            | 是       | 否   | 否   | 无       | 用户头像                                       |
+| Email        | TEXT            | 否       | 否   | 否   | 无       | 用户邮箱                                       |
+| PasswordHash | TEXT            | 否       | 否   | 否   | 无       | 用户密码的哈希值，使用sha256加密，结果为16进制 |
+| Role         | TEXT            | 否       | 否   | 否   | 'user'   | 用户角色（admin/user）                         |
 | CreatedAt    | DATETIME        | 否       | 否   | 否   | 当前时间 | 创建时间                                       |
 | Status       | INT             | 否       | 否   | 否   | 0        | 0：未认证，1：已认证，2：封禁                  |
 
@@ -20,7 +20,7 @@
 | --------- | --------------- | -------- | ---- | ----------- | -------- | ---------------- |
 | Id        | BIGINT UNSIGNED | 否       | 是   | 否          | 无       | 自增             |
 | UserId    | BIGINT UNSIGNED | 否       | 否   | 外键(Users) | 无       | 发帖用户 ID      |
-| Title     | NVARCHAR(100)   | 否       | 否   | 否          | 无       | 帖子标题         |
+| Title     | TEXT            | 否       | 否   | 否          | 无       | 帖子标题         |
 | Content   | TEXT            | 否       | 否   | 否          | 无       | 帖子内容         |
 | CreatedAt | DATETIME        | 否       | 否   | 否          | 当前时间 | 创建时间         |
 | Status    | INT             | 否       | 否   | 否          | 0        | 0：正常，1：结束 |
@@ -57,7 +57,7 @@
 | --------- | --------------- | -------- | ---- | ----------- | -------- | -------------- |
 | Id        | BIGINT UNSIGNED | 否       | 是   | 否          | 无       | 自增           |
 | PostId    | BIGINT UNSIGNED | 否       | 否   | 外键(Posts) | 无       | 所属帖子 ID    |
-| Url       | NVARCHAR(255)   | 否       | 否   | 否          | 无       | 图片的存储路径 |
+| Url       | TEXT            | 否       | 否   | 否          | 无       | 图片的存储路径 |
 | CreatedAt | DATETIME        | 否       | 否   | 否          | 当前时间 | 创建时间       |
 
 ---
@@ -66,8 +66,8 @@
 | 字段名      | 数据类型        | 是否为空 | 主键 | 外键 | 默认值 | 说明         |
 | ----------- | --------------- | -------- | ---- | ---- | ------ | ------------ |
 | Id          | BIGINT UNSIGNED | 否       | 是   | 否   | 自增   | 分类唯一标识 |
-| Name        | NVARCHAR(50)    | 否       | 否   | 否   | 无     | 分类名称     |
-| Description | NVARCHAR(255)   | 是       | 否   | 否   | 无     | 分类描述     |
+| Name        | TEXT            | 否       | 否   | 否   | 无     | 分类名称     |
+| Description | TEXT            | 是       | 否   | 否   | 无     | 分类描述     |
 
 ---
 
