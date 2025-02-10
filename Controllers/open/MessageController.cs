@@ -34,7 +34,7 @@ namespace imarket.Controllers.open
         /// </summary>
         /// <returns></returns>
         [HttpGet("List")] // api/Message/List
-        public async Task<IActionResult> GetMessage([FromQuery]int page=1, [FromQuery]int pageSize=10)
+        public async Task<IActionResult> GetMessage([FromQuery]bool isSender = false,[FromQuery]int page=1, [FromQuery]int pageSize=10)
         {
             var args = new object[] { page, pageSize };
             var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
@@ -47,16 +47,19 @@ namespace imarket.Controllers.open
             {
                 return NotFound();
             }
-            var messages_send = await messageService.GetMessagesBySenderIdAsync(user.Id, page, pageSize);
-            var messages_receive = await messageService.GetMessagesByReceiverIdAsync(user.Id, page, pageSize);
+            var messages = new List<MessageModels>();
+            if (isSender)
+            {
+                messages = (await messageService.GetMessagesBySenderIdAsync(user.Id, page, pageSize)).ToList();
+            }
+            else
+            {
+                messages = (await messageService.GetMessagesByReceiverIdAsync(user.Id, page, pageSize)).ToList();
+            }
             var response = new
             {
                 success = true,
-                messages = new
-                {
-                    send = messages_send,
-                    receive = messages_receive
-                }
+                messages
             };
             var result_after = await pluginManager.ExecuteAfterAsync("api/Message/List", response, User?.Identity?.Name);
             if (result_after != null)
@@ -77,6 +80,10 @@ namespace imarket.Controllers.open
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+            if(User.IsInRole("banned") || User.IsInRole("unverified"))
+            {
+                return BadRequest("permission denied");
             }
             var args = new object[] { request };
             var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
@@ -132,6 +139,10 @@ namespace imarket.Controllers.open
         [HttpGet("Delete")] // api/Message/Delete?messageId={messageId}
         public async Task<IActionResult> DeleteMessage([FromQuery][Required] ulong messageId)
         {
+            if (User.IsInRole("banned") || User.IsInRole("unverified"))
+            {
+                return BadRequest("permission denied");
+            }
             var args = new object[] { messageId };
             var result_before = await pluginManager.ExecuteBeforeAsync(HttpContext.Request.Path.Value!, args, User?.Identity?.Name);
             if (result_before != null)
