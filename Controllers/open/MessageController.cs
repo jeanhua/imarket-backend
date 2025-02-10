@@ -159,7 +159,7 @@ namespace imarket.Controllers.open
             {
                 return NotFound("message not found");
             }
-            if (message.SenderId != user.Id || message.ReceiverId != user.Id)
+            if (message.SenderId != user.Id && message.ReceiverId != user.Id)
             {
                 return BadRequest("permission denied");
             }
