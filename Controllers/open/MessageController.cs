@@ -17,10 +17,10 @@ namespace imarket.Controllers.open
     {
         private readonly IUserService userService;
         private readonly IMessageService messageService;
-        private readonly ILogger _logger;
+        private readonly ILogger<MessageController> _logger;
         private readonly IMemoryCache _memoryCache;
         private readonly PluginManager pluginManager;
-        public MessageController(IUserService userService, IMessageService messageService, ILogger logger,IMemoryCache memoryCache,PluginManager pluginManager)
+        public MessageController(IUserService userService, IMessageService messageService, ILogger<MessageController> logger,IMemoryCache memoryCache,PluginManager pluginManager)
         {
             this.userService = userService;
             this.messageService = messageService;
@@ -89,7 +89,7 @@ namespace imarket.Controllers.open
             {
                 return NotFound("user not found");
             }
-            var receiver = await userService.GetUserByUsernameAsync(request.ReceiverId);
+            var receiver = await userService.GetUserByUsernameAsync(request.Username);
             if (receiver == null)
             {
                 return NotFound("receiver not found");
@@ -169,7 +169,7 @@ namespace imarket.Controllers.open
     public class SendMessageRequest
     {
         [Required]
-        public string? ReceiverId { get; set; }
+        public string? Username { get; set; }
         [Required]
         public string? Content { get; set; }
     }
