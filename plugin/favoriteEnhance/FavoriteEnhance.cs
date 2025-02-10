@@ -5,6 +5,9 @@ using imarket.service.Service;
 
 namespace imarket.plugin.favoriteEnhance
 {
+    /// <summary>
+    /// 用于增强用户获取收藏的帖子
+    /// </summary>
     [PluginTag(Name ="favoriteEnhance plugin",Description ="用于增强用户获取收藏的帖子",Enable = true,Author ="jeanhua")]
     public class FavoriteEnhance:IPluginInterceptor
     {

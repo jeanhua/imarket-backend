@@ -61,7 +61,7 @@ namespace imarket.Controllers.open
                 success = true,
                 messages
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Message/List", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -123,7 +123,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Message/Send", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
@@ -168,7 +168,7 @@ namespace imarket.Controllers.open
             {
                 success = true
             };
-            var result_after = await pluginManager.ExecuteAfterAsync("api/Message/Delete", response, User?.Identity?.Name);
+            var result_after = await pluginManager.ExecuteAfterAsync(HttpContext.Request.Path.Value!, response, User?.Identity?.Name);
             if (result_after != null)
             {
                 return Ok(result_after);
