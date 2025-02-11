@@ -136,8 +136,8 @@ namespace imarket.Controllers.open
         /// </summary>
         /// <param name="messageId"></param>
         /// <returns></returns>
-        [HttpGet("Delete")] // api/Message/Delete?messageId={messageId}
-        public async Task<IActionResult> DeleteMessage([FromQuery][Required] ulong messageId)
+        [HttpPost("Delete")] // api/Message/Delete?messageId={messageId}
+        public async Task<IActionResult> DeleteMessage([FromBody][Required] ulong[] messageId)
         {
             if (User.IsInRole("banned") || User.IsInRole("unverified"))
             {
@@ -154,16 +154,19 @@ namespace imarket.Controllers.open
             {
                 return NotFound("user not found");
             }
-            var message = await messageService.GetMessageByIdAsync(messageId);
-            if (message == null)
+            foreach(var msgId in messageId)
             {
-                return NotFound("message not found");
+                var message = await messageService.GetMessageByIdAsync(msgId);
+                if (message == null)
+                {
+                    return NotFound("message not found");
+                }
+                if (message.SenderId != user.Id && message.ReceiverId != user.Id)
+                {
+                    return BadRequest("permission denied");
+                }
+                await messageService.DeleteMessageByIdAsync(msgId);
             }
-            if (message.SenderId != user.Id && message.ReceiverId != user.Id)
-            {
-                return BadRequest("permission denied");
-            }
-            await messageService.DeleteMessageByIdAsync(messageId);
             var response = new
             {
                 success = true
