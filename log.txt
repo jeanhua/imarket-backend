@@ -1,1 +1,0 @@
-DeleteImageByIdAsync https://os.xiaouni.com/uploads/image/2025/01-16/ffa8b0ef06d380f8.jpg error

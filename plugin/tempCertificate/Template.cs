@@ -26,19 +26,65 @@ namespace imarket.plugin.tempCertificate
             endpoints.MapGet("Certificate", (context) =>
             {
                 // 返回简单html页面
-                return context.Response.WriteAsync(@"<html>
+                return context.Response.WriteAsync(@"<!DOCTYPE html>
+<html lang=""zh-CN"">
 <head>
     <meta charset=""UTF-8"">
-    <title>认证</title>
+    <title>用户认证</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input[type='text'] {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type='submit'] {
+            padding: 10px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        input[type='submit']:hover {
+            background-color: #4cae4c;
+        }
+    </style>
 </head>
 <body>
-    <form action='/api/Certificate' method='get'>
-        <input type='text' name='username' placeholder='用户名'>
-        <input type='text' name='code' placeholder='认证码'>
-        <input type='submit' value='提交'>
-    </form>
+    <div class=""container"">
+        <h2>用户认证</h2>
+        <form action='/api/Certificate' method='get'>
+            <input type='text' name='username' placeholder='请输入用户名' required>
+            <input type='text' name='code' placeholder='请输入认证码' required>
+            <input type='submit' value='提交认证'>
+        </form>
+    </div>
 </body>
-</html>");
+</html>
+");
 
             });
             endpoints.MapGet("/api/Certificate", async (context) =>
@@ -48,7 +94,7 @@ namespace imarket.plugin.tempCertificate
                 var user = await userService.GetUserByUsernameAsync(username);
                 if (user == null)
                 {
-                    await context.Response.WriteAsync("user not found");
+                    await context.Response.WriteAsync("<h1>user not found,please register!</h1>");
                     return;
                 }
                 if (code == "imarket114514")
@@ -56,6 +102,10 @@ namespace imarket.plugin.tempCertificate
                     user.Status = 1;
                     await userService.UpdateUserAsync(user.Id, user);
                     await context.Response.WriteAsync("success");
+                }
+                else
+                {
+                    await context.Response.WriteAsync("<h1>error code</h1>");
                 }
             });
         }
