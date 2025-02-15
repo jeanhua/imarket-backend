@@ -337,7 +337,7 @@ namespace imarket.Controllers.open
             {
                 return BadRequest("Invalid category.");
             }
-            var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            var user = await userService.GetUserByUsernameAsync(User!.Identity!.Name!);
             if (User.IsInRole("admin") && author != null)
             {
                 user = await userService.GetUserByUsernameAsync(author);

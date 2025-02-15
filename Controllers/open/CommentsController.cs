@@ -113,7 +113,7 @@ namespace imarket.Controllers.open
         /// <returns></returns>
         [HttpPost("Create")] // api/Comments/Create
         [Authorize(Roles = "user,admin")]
-        public async Task<IActionResult> CreateCommentAsync([FromBody][Required] CommentPostRequest comment)
+        public async Task<IActionResult> CreateCommentAsync([FromBody][Required] CommentPostRequest comment, [FromQuery]string? author=null)
         {
             if (!ModelState.IsValid)
             {
@@ -126,6 +126,14 @@ namespace imarket.Controllers.open
                 return Ok(result_before);
             }
             var user = await userService.GetUserByUsernameAsync(User.Identity!.Name!);
+            if(User.IsInRole("admin") && author != null)
+            {
+                user = await userService.GetUserByUsernameAsync(author);
+            }
+            if (user == null) 
+            {
+                return BadRequest("Invalid user.");
+            }
             var post = await postService.GetPostByIdAsync(comment.PostId!);
             if (post == null)
             {
