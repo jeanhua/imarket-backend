@@ -151,5 +151,5 @@ dotnet run
 ---
 
 <div align="center">
-  📜 基于 Apache2 协议开源 · Copyright © Since 2023 Jeanhua
+  📜 基于 Apache2 协议开源 · Copyright © Since 2025 Jeanhua
 </div>
