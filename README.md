@@ -1,39 +1,155 @@
-<p align="center">
-
+<center>
 
 ![logo](./LOGO.png)
 
-# iMarket 校园集市后端
+# iMarket 校园集市后端  
 
-![GitHub Created At](https://img.shields.io/github/created-at/jeanhua/imarket-backend)![Static Badge](https://img.shields.io/badge/Language-C%23-blue)![Static Badge](https://img.shields.io/badge/Framework-ASP.NET-purple)![GitHub License](https://img.shields.io/github/license/jeanhua/imarket-backend)
+<div align="center">
+  <img src="https://img.shields.io/github/created-at/jeanhua/imarket-backend?color=00CC99&style=flat-square" alt="创建时间">
+  <img src="https://img.shields.io/badge/.NET%208-512BD4?logo=.net&logoColor=white&style=flat-square" alt=".NET版本">
+  <img src="https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white&style=flat-square" alt="MySQL">
+  <img src="https://img.shields.io/github/license/jeanhua/imarket-backend?color=blue&style=flat-square" alt="许可证">
+</div>
 
-[在线体验](https://imarket.jeanhua.cn)|[前端仓库](https://github.com/jeanhua/imarket-page)
-
-</p>
-
-
-## 🔍 介绍
-
-iMarket 是一个为校园环境设计的开源在线**校园集市后端系统**，旨在提供一个方便、快捷、安全的发帖平台，帮助学生发布、浏览、收藏和管理信息。该后端基于 .NET Web API 构建，配合 MySQL 数据库进行数据存储。项目采用模块化设计，支持**高扩展性**和**可维护性**，具有**插件系统**，可添加自定义插件进行拓展。
-
-## 📃接口文档
-
-**https://jeanhuas-organization.gitbook.io/imarket**
-
-## 📝 贡献指南
-
-1. Fork 本仓库。
-2. 创建一个新分支：`git checkout -b feature/your-feature-name`。
-3. 提交更改：`git commit -m 'Add your message here'`。
-4. 推送到远程分支：`git push origin feature/your-feature-name`。
-5. 提交 Pull Request。
-
-## 📞 联系方式
-
-如有问题或建议，请通过以下方式联系我：
-
-- 邮箱：jeanhua_official@outlook.com
-- 项目主页：https://github.com/jeanhua/imarket-backend
+</center>
 
 ---
-感谢您的支持和贡献！
+
+## 🌟 项目亮点
+
+🚀 **全栈解决方案** · 📱 **移动优先设计** · 🛡️ **JWT安全认证**  · 🔌 **插件式扩展** 
+
+<div align="center">
+  <img src="https://img.shields.io/badge/🚀_在线体验-00B4D8?style=for-the-badge)](https://imarket.jeanhua.cn" alt="在线体验">
+  <img src="https://img.shields.io/badge/💻_前端仓库-6E5494?style=for-the-badge)](https://github.com/jeanhua/imarket-page" alt="前端仓库">
+</div>
+
+---
+
+## 🛠️ 技术栈全景
+
+<table>
+  <tr>
+    <td width="33%">
+      <div align="center">
+        <img src="https://cdn.worldvectorlogo.com/logos/c--4.svg" width="60" alt="C#">
+        <br><strong>C# 12</strong>
+        <br>现代化语法特性
+      </div>
+    </td>
+    <td width="33%">
+      <div align="center">
+        <img src="https://avatars.githubusercontent.com/u/9141961?s=200&v=4" width="60" alt="ASP.NET Core">
+        <br><strong>ASP.NET Core 8</strong>
+        <br>高性能Web框架
+      </div>
+    </td>
+    <td width="33%">
+      <div align="center">
+        <img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" width="60" alt="Docker">
+        <br><strong>Docker</strong>
+        <br>容器化部署方案
+      </div>
+    </td>
+  </tr>
+</table>
+
+
+
+---
+
+## 📚 核心功能
+
+<details>
+<summary><strong>📦 核心模块</strong></summary>
+• **用户系统** 👥  
+  ✅ 实名认证 · ✅ 角色权限管理
+
+• **内容管理** 📝  
+  🔍 帖子搜索 · 🏷️ 帖子分类 · 🔞 敏感词过滤
+
+• **用户模块** 💰  
+  🛒 收藏夹 · 💬 私信系统
+
+</details>
+
+---
+
+## 🚀 快速开始
+
+```bash
+# 克隆项目
+git clone https://github.com/jeanhua/imarket-backend.git
+
+# 安装依赖
+dotnet restore
+
+# 配置数据库（修改appsettings.json）
+{
+    "ConnectionStrings": {
+        "DefaultConnection": "Server=localhost;Database=imarket;User Id=imarket_root;Password=your_password;"
+    }
+}
+
+# 运行项目
+dotnet run
+```
+
+---
+
+## 📄 文档体系
+
+| 文档类型   | 访问方式                                                     |
+| ---------- | ------------------------------------------------------------ |
+| 📘 API 文档 | [在线浏览](https://jeanhuas-organization.gitbook.io/imarket) |
+| 📗 部署指南 | [快速开始](https://jeanhuas-organization.gitbook.io/imarket/getting-started/quickstart) |
+| 📙 架构设计 | [简介](https://jeanhuas-organization.gitbook.io/imarket/introduce-jian-jie) |
+| 📒 插件开发 | [快速上手](https://jeanhuas-organization.gitbook.io/imarket/plugin/start-kuai-su-shang-shou) |
+
+---
+
+## 🤝 贡献之路
+
+欢迎通过以下方式参与贡献：  
+🔧 **代码开发** · 📝 **文档完善** · 🐛 **问题反馈**  
+🎨 **UI设计** · 🌍 **多语言支持** · 🧪 **测试优化**
+
+**贡献流程**：
+1. Fork 仓库并创建分支 `git checkout -b feat/amazing-feature`
+2. 提交代码 `git commit -m '添加炫酷功能'`
+3. 推送分支 `git push origin feat/amazing-feature`
+4. 发起 Pull Request
+
+---
+
+## 📬 联系我们
+
+<table>
+  <tr>
+    <td width="50%">
+      <div align="center">
+        <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" width="30">
+        <br>
+        <strong>项目邮箱</strong>
+        <br>
+        <a href="mailto:jeanhua_official@outlook.com">jeanhua_official@outlook.com</a>
+      </div>
+    </td>
+    <td width="50%">
+      <div align="center">
+        <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" width="30">
+        <br>
+        <strong>GitHub仓库</strong>
+        <br>
+        <a href="https://github.com/jeanhua/imarket-backend">imarket-backend</a>
+      </div>
+    </td>
+  </tr>
+</table>
+
+---
+
+<div align="center">
+  📜 基于 Apache2 协议开源 · Copyright © Since 2023 Jeanhua
+</div>
+
