@@ -1,6 +1,16 @@
+<p align="center">
+
+
 ![logo](./LOGO.png)
 
 # iMarket 校园集市后端
+
+![GitHub Created At](https://img.shields.io/github/created-at/jeanhua/imarket-backend)![Static Badge](https://img.shields.io/badge/Language-C%23-blue)![Static Badge](https://img.shields.io/badge/Framework-ASP.NET-purple)![GitHub License](https://img.shields.io/github/license/jeanhua/imarket-backend)
+
+》》[在线体验](https://imarket.jeanhua.cn/)|[前端仓库]([jeanhua/imarket-page: imarket校园集市前端](https://github.com/jeanhua/imarket-page))《《
+
+</p>
+
 
 ## 🔍 介绍
 
