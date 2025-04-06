@@ -65,11 +65,12 @@
 
 <details>
 <summary><strong>📦 核心模块</strong></summary>
+
 • **用户系统** 👥  
   ✅ 实名认证 · ✅ 角色权限管理
 
 • **内容管理** 📝  
-  🔍 帖子搜索 · 🏷️ 帖子分类 · 🔞 敏感词过滤
+  🔍 帖子搜索 · 🏷️ 帖子分类 🚀热度排行
 
 • **用户模块** 💰  
   🛒 收藏夹 · 💬 私信系统
@@ -154,5 +155,5 @@ dotnet run
 ---
 
 <div align="center">
-  📜 基于 Apache2 协议开源 · Copyright © Since 2025 Jeanhua
+  📜 基于 Apache2 协议开源 · Copyright © Since 2025 jeanhua
 </div>
